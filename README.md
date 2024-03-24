@@ -60,3 +60,6 @@ MVPリリース
 
 バックエンド処理
 ActiveJob,Sidekiq
+
+■ ER図
+https://drive.google.com/file/d/1hb1IYn9tWRfa1KvFrTQfbF6_4oeQld69/view?usp=sharing
