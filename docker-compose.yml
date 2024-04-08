@@ -1,0 +1,34 @@
+services:
+  db:
+    image: postgres:latest
+    platform: linux/amd64
+    environment:
+      TZ: Asia/Tokyo
+      POSTGRES_PASSWORD: password
+    # コンテナ内のデータをホストマシンのデータと永続化するためのボリュームをマウント
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+  web:
+    build: .
+    # コンテナが起動された際に実行されるコマンドを指定
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    # ttyとstdin_openはコンテナが起動するときに標準入力を開いた状態にし、TTY（端末）を割り当てる
+    tty: true
+    stdin_open: true
+    volumes:
+      - .:/GoGym
+      - bundle_data:/usr/local/bundle:cached
+      - node_modules:/GoGym/node_modules
+    environment:
+      TZ: Asia/Tokyo
+    ports:
+      - "3000:3000"
+    # web サービスは db サービスに依存する。これにより、db サービスが起動されるまで web サービスは起動されない
+    depends_on:
+      - db
+volumes:
+  postgres_data:
+  bundle_data:
+  node_modules:

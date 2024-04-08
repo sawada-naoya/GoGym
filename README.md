@@ -1,6 +1,31 @@
+<!-- # README
+
+This README would normally document whatever steps are necessary to get the
+application up and running.
+
+Things you may want to cover:
+
+* Ruby version
+
+* System dependencies
+
+* Configuration
+
+* Database creation
+
+* Database initialization
+
+* How to run the test suite
+
+* Services (job queues, cache servers, search engines, etc.)
+
+* Deployment instructions
+
+* ... -->
+
 # GoGym
 
-■ サービス概要  
+■ サービス概要
 トレーニングをしている人、始めたい人、パーソナルトレーニングを受けてみたい人など、そのような人たちに最適のジムを見つけることができるサービスです。
 
 ■ このサービスへの思い・作りたい理由  
@@ -16,6 +41,7 @@
 → 住む場所や職場が変わり今まで行っていたジムに行けなくなった。今より金額の安いジムを探している。設備のいいジムに変えたい。などそのような人のためにも自分に合うジムを見つける事が出来るようになるから
 
 ■ サービスの利用イメージ
+
 1. ジムに行きたい、ジムを探している人が web ブラウザから利用
 1. ジムに行き、そのジムの情報についてのレビューをする
 1. 1,2 を繰り返してジムの情報が増える
@@ -23,12 +49,14 @@
 ■ ユーザーの獲得について  
 X、SEO など
 
-■ サービスの差別化ポイント・推しポイント  
+■ サービスの差別化ポイント・推しポイント
+
 - 地図上からの検索機能があること
 - 協調フィルタリングによるレコメンデーション機能で自分に合うジムを見つけられるようにサポートできる
 
 ■ 機能候補  
-MVP リリース  
+MVP リリース
+
 - トップページ
 - 検索
 - タグ
@@ -37,7 +65,8 @@ MVP リリース
 - 会員登録・ログイン
 - 位置情報
 
-本リリース  
+本リリース
+
 - レーティング
 - レコメンド
 - ソーシャルログイン
@@ -45,7 +74,8 @@ MVP リリース
 - お気に入り
 
 ■ 機能の実装方針予定  
-MVP リリース  
+MVP リリース
+
 - トップページ
 - 検索：ransack,kaminari,stimulus-autocomplete
 - タグ
@@ -54,15 +84,32 @@ MVP リリース
 - 会員登録・ログイン：device
 - 位置情報：Google Maps Platform,Geocoder
 
-本リリース  
+本リリース
+
 - レーティング：ratyrate
 - レコメンド：Amazon Personalize
 - ソーシャルログイン：Facebook Login API,Google Sign-In API,Twitter API
 - パスワード変更
 - お気に入り
 
-バックエンド処理  
+バックエンド処理
+
 - ActiveJob,Sidekiq
 
-■ ER図
+■ ER 図
 https://i.gyazo.com/52f5cdbf4b70a102134574b023ce4001.png
+
+■ 技術選定案
+- 開発環境: Docker
+- サーバサイド: Ruby on Rails 7系、Ruby、Rails 7.0.4.3
+- フロントエンド: HotWire
+- CSSフレームワーク: bootstrap5系、Silicon（Bootstrapテンプレート）
+- WebAPI: Google MapAPI（GoogleマップのジオロケーションAPI）、Geocoder、Amazon Personalize、Facebook Login API、Google Sign-In API、Twitter API
+- インフラ:
+  - Webアプリケーションサーバ: Fly.io
+  - ファイルサーバ: AWS S3
+  - セッションサーバ: Redis（Redis by Upstash）
+  - データベースサーバ: PostgreSQL（Fly Postgres）
+- その他：
+  - VCS: GitHub
+  - CI/CD: GitHubActions
