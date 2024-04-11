@@ -107,8 +107,8 @@ https://i.gyazo.com/52f5cdbf4b70a102134574b023ce4001.png
 - WebAPI: Google MapAPI（GoogleマップのジオロケーションAPI）、Geocoder、Amazon Personalize、Facebook Login API、Google Sign-In API、Twitter API
 - インフラ:
   - Webアプリケーションサーバ: Fly.io
-  - ファイルサーバ: AWS S3
-  - セッションサーバ: Redis（Redis by Upstash）
+  - ファイルサーバ: Fly.io
+  - セッションサーバ: Fly.io
   - データベースサーバ: PostgreSQL（Fly Postgres）
 - その他：
   - VCS: GitHub
