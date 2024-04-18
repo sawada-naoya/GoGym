@@ -47,10 +47,10 @@ gem "bootsnap", require: false
 
 # Use Sass to process CSS
 gem "sassc-rails"
-# gem "dartsass-rails", "~> 0.4.0"
+gem "dartsass-rails", "~> 0.4.0"
 
-# gem 'bootstrap', '~> 5.0'
-gem 'bootstrap-sass'
+gem 'bootstrap', '~> 5.0'
+# gem 'bootstrap-sass'
 
 gem 'jquery-rails'
 
@@ -88,18 +88,22 @@ group :test do
 
 end
 
-gem 'sorcery'
+gem 'sorcery', "0.16.3"
 
-gem 'rails-i18n'
+gem 'rails-i18n', '~> 7.0.0'
 
-gem 'draper'
+gem 'draper', '4.0.2'
 
-gem 'carrierwave'
+gem 'carrierwave', '2.2.2'
+
+gem 'kaminari', "1.2.2"
+
+gem 'bootstrap5-kaminari-views'
+
+gem 'ransack', "3.2.1"
+
+gem 'letter_opener_web'
 
 gem 'hotwire-rails'
 
 gem 'geocoder'
-
-gem 'kaminari'
-
-gem 'ransack'
