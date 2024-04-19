@@ -1,0 +1,27 @@
+<main class="px-3">
+  <div class="background-image-container">
+    <div class="row justify-content-center ms-5">
+      <h2 class="col-md-12 text-center mb-3" style="font-weight: 900;">ジムを探す</h2>
+      <div class="col-md-3">
+        <input type="text" class="form-control" placeholder="エリア・駅">
+      </div>
+      <div class="col-md-3">
+        <input type="text" class="form-control" placeholder="キーワード">
+      </div>
+      <div class="col-md-2">
+        <button type="button" class="btn btn-primary btn-success">検索</button>
+      </div>
+    </div>
+    <%= render "shared/footer" %>
+  </div>
+</main>
+
+<style>
+.background-image-container {
+  background-image: url('<%= asset_path('fitness_center.jpg') %>');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed; /* 画像をスクロールに追随させるために固定 */
+  padding-top: 80px; /* ヘッダーの下に余白を追加 */
+  height: calc(100vh - 80px); /* ビューポートの高さから80pxを差し引いて、画像を表示 */
+</style>
