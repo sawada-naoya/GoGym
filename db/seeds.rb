@@ -9,3 +9,11 @@
     website: Faker::Internet.url
   )
 end
+
+10.times do |n|
+  User.create!(
+    name: Faker::Name.unique.name,
+    email: Faker::Internet.unique.email,
+    password: "test"
+  )
+end
