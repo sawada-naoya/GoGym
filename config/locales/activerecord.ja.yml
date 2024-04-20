@@ -1,0 +1,22 @@
+en:
+  activerecord:
+    models:
+      gym: ジム
+      user: ユーザー
+      location: 位置情報
+    attributes:
+      user:
+        email: メールアドレス
+        name: 名前
+        password: パスワード
+        id: "ID"
+        created_at: "作成日時"
+      gym:
+        name: "店舗"
+        id: "ID"
+        membership_fee: "料金"
+        business_hours: "営業時間"
+        access: "住所"
+        remarks: "交通手段"
+        website: "HP"
+        created_at: "作成日時"

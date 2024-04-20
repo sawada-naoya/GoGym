@@ -35,3 +35,5 @@ RUN yarn install
 
 # ローカルのGoGym配下のファイルをコンテナ内のGoGym配下にコピー
 COPY . /GoGym
+
+CMD ["rails", "server", "-b", "0.0.0.0", "-p", "3001"]

@@ -6,8 +6,8 @@
           <span style="color: #227D51; font-size: 30px; font-weight: 900; font-family: Arial; ">GoGym</span>
         <% end %>
         <div class="d-flex">
-          <button class="btn btn-outline-light me-2" style="font-size: 15px;">ログイン</button>
-          <button class="btn btn-outline-success" style="font-size: 15px;">会員登録</button>
+          <%= link_to t('.login'), root_path, class: "btn btn-outline-light me-2", style: "font-size: 15px;" %>
+          <%= link_to t('.member_registration'), new_user_path, class: "btn btn-outline-success", style: "font-size: 15px;" %>
         </div>
       </div>
     </nav>

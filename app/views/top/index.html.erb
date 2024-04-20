@@ -1,7 +1,7 @@
 <main class="px-3">
   <div class="background-image-container">
     <div class="row justify-content-center ms-5">
-      <h2 class="col-md-12 text-center mb-3" style="font-weight: 900;">ジムを探す</h2>
+      <h2 class="col-md-12 text-center mb-3" style="font-weight: 900;"><%= t('top.index.text')%></h2>
       <div class="col-md-3">
         <input type="text" class="form-control" placeholder="エリア・駅">
       </div>
@@ -9,7 +9,7 @@
         <input type="text" class="form-control" placeholder="キーワード">
       </div>
       <div class="col-md-2">
-        <button type="button" class="btn btn-primary btn-success">検索</button>
+        <button type="button" class="btn btn-primary btn-success"><%= t('top.index.search')%></button>
       </div>
     </div>
     <%= render "shared/footer" %>

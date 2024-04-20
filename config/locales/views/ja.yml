@@ -1,0 +1,14 @@
+en:
+  top:
+    index:
+      title: 'トップページ'
+      text: 'ジムを探す'
+      search: '検索'
+  shared:
+    header:
+      login: ログイン
+      logout: ログアウト
+      member_registration: 会員登録
+  users:
+    new:
+      member_registration: 会員登録
