@@ -1,22 +1,27 @@
-<div class="row position-relative position-absolute top-50 start-50 translate-middle">
-  <h1 class="d-flex justify-content-center"><%= t('.member_registration') %></h1>
-  <form>
-    <div class="mb-3">
-      <label for="exampleInputEmail1" class="form-label">アカウント名</label>
-      <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+<div class="container">
+  <div class="row position-relative position-absolute top-50 start-50 translate-middle">
+    <h1 class="d-flex justify-content-center"><%= t('.member_registration') %></h1>
+    <div class="col-md-12 mx-auto">
+      <%= render "shared/flash_message" %>
+      <%= render "shared/error_message", model: @user %>
+      <%= form_with model: @user do |f| %>
+        <div class="mb-3">
+          <%= f.label :name, t('.account'), class: "form-label" %>
+          <%= f.text_field :name, class: "form-control" %>
+        </div>
+        <div class="mb-3">
+          <%= f.label :email, t('.email'), class: "form-label" %>
+          <%= f.text_field :email, class: "form-control" %>
+        </div>
+        <div class="mb-3">
+          <%= f.label :password, t('.password'), class: "form-label" %>
+          <%= f.password_field :password, class: "form-control" %>
+        </div>
+        <div class="d-grid gap-2 col-4 mx-auto">
+          <%= f.submit t('.registration'), class: "btn btn-success",data: { disable_with: t('.registration') } %>
+        </div>
+      <% end %>
     </div>
-    <div class="mb-3">
-      <label for="exampleInputEmail1" class="form-label">メールアドレス</label>
-      <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
-    </div>
-    <div class="mb-3">
-      <label for="exampleInputPassword1" class="form-label">パスワード</label>
-      <input type="password" class="form-control" id="exampleInputPassword1">
-    </div>
-
-    <div class="d-grid gap-2 col-4 mx-auto">
-      <button type="submit" class="btn btn-success">登録</button>
-    </div>
-  </form>
+  </div>
 </div>
 <%= render "shared/footer" %>

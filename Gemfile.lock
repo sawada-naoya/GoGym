@@ -426,7 +426,7 @@ DEPENDENCIES
   pry-byebug
   puma (~> 5.0)
   rails (~> 7.0.8, >= 7.0.8.1)
-  rails-i18n (~> 7.0.0)
+  rails-i18n
   ransack (= 3.2.1)
   rspec-rails
   rspec_junit_formatter

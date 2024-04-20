@@ -1,4 +1,4 @@
-en:
+ja:
   activerecord:
     models:
       gym: ジム
@@ -7,7 +7,7 @@ en:
     attributes:
       user:
         email: メールアドレス
-        name: 名前
+        name: アカウント名
         password: パスワード
         id: "ID"
         created_at: "作成日時"

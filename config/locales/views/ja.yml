@@ -1,4 +1,4 @@
-en:
+ja:
   top:
     index:
       title: 'トップページ'
@@ -12,3 +12,33 @@ en:
   users:
     new:
       member_registration: 会員登録
+      account: アカウント名
+      email: メールアドレス
+      password: パスワード
+      registration: 登録
+  flash:
+    login_success: "ログインしました"
+    login_failure: "ログインに失敗しました"
+    logout: "ログアウトしました"
+    user_registration_success: "会員登録が完了しました"
+    user_registration_failure: "会員登録に失敗しました"
+    edit_profile: "ユーザーを更新しました"
+    edit_profile_failure: "ユーザーを更新出来ませんでした"
+    user_delete_success: "ユーザーを削除しました"
+    no_result: "掲示板がありません"
+    no_search_result: "1件もありません"
+    require_login: "ログインしてください"
+    board_create_success: "掲示板を作成しました"
+    board_create_failure: "掲示板を作成出来ませんでした"
+    board_update_success: "掲示板を更新しました"
+    board_update_failure: "掲示板を更新出来ませんでした"
+    board_delete_success: "掲示板を削除しました"
+    comment_create_success: "コメントを作成しました"
+    comment_create_failure: "コメントを作成出来ませんでした"
+    no_comment: "コメントを入力してください"
+    bookmark_create: "ブックマークしました"
+    bookmark_delete: "ブックマークを外しました"
+    no_bookmark: "ブックマーク中の掲示板がありません"
+    password_update_success: 'パスワードを変更しました'
+    password_update_failure: 'パスワード変更出来ませんでした'
+    not_authorized: '権限がありません'
