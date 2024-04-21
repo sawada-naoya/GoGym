@@ -16,6 +16,12 @@ ja:
       email: メールアドレス
       password: パスワード
       registration: 登録
+  user_sessions:
+    new:
+      login: ログイン
+      email: メールアドレス
+      password: パスワード
+      forgot_password: パスワードを忘れた方はこちら
   flash:
     login_success: "ログインしました"
     login_failure: "ログインに失敗しました"
