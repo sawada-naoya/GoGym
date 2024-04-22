@@ -1,4 +1,4 @@
-<header>
+<<header>
   <div class='fixed-top'>
     <nav class='navbar navbar-dark bg-dark' style='height: flex; '>
       <div class="container-fluid">
@@ -6,7 +6,8 @@
           <span style="color: #227D51; font-size: 30px; font-weight: 900; font-family: Arial; ">GoGym</span>
         <% end %>
         <div class="d-flex">
-          <%= link_to t('.logout'), logout_path, class: "btn btn-outline-light me-2", style: "font-size: 15px;" %>
+          <%= link_to t('.login'), login_path, class: "btn btn-outline-light me-2", style: "font-size: 15px;" %>
+          <%= link_to t('.member_registration'), new_user_path, class: "btn btn-outline-success", style: "font-size: 15px;" %>
         </div>
       </div>
     </nav>
