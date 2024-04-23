@@ -1,4 +1,5 @@
 class User < ApplicationRecord
+  authenticates_with_sorcery!
 
   validates :name, presence: { message: 'を入力してください' }, length: { maximum: 255 }
   validates :email, presence: { message: 'を入力してください' }, uniqueness: true

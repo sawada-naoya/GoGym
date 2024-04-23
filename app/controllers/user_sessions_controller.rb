@@ -1,5 +1,8 @@
 class UserSessionsController < ApplicationController
+  # require_loginフィルターを new と create アクションに適用しないように指示
+  # 新しいユーザーを作成するための new アクションと create アクションでは、ログインが必要ないことを示す
   # skip_before_action :require_login, only: %i[new create]
+
   def new; end
 
   def create
