@@ -13,9 +13,9 @@ RSpec.describe "user_sessions/new.html.erb", type: :view do
       context '認証情報が正しい場合' do
         it 'ログインできること' do
           visit '/login'
-          fill_in 'メールアドレス', with: user.email
-          fill_in 'パスワード', with: '12345678'
-          click_button 'ログイン'
+          fill_in 'user[email]', with: user.email
+          fill_in 'user[password]', with: '12345678'
+          click_button 'commit'
           Capybara.assert_current_path("/", ignore_query: true)
           expect(current_path).to eq '/'
           expect(page).to have_content('ログインしました'), 'フラッシュメッセージ「ログインしました」が表示されていません'
@@ -25,9 +25,9 @@ RSpec.describe "user_sessions/new.html.erb", type: :view do
       context 'PWに誤りがある場合' do
         it 'ログインできないこと' do
           visit '/login'
-          fill_in 'メールアドレス', with: user.email
-          fill_in 'パスワード', with: '1234'
-          click_button 'ログイン'
+          fill_in 'user[email]', with: user.email
+          fill_in 'user[password]', with: '1234'
+          click_button 'commit'
           Capybara.assert_current_path("/login", ignore_query: true)
           expect(current_path).to eq('/login'), 'ログイン失敗時にログイン画面に戻ってきていません'
           expect(page).to have_content('ログインに失敗しました'), 'フラッシュメッセージ「ログインに失敗しました」が表示されていません'

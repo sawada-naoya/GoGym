@@ -16,6 +16,7 @@ ja:
       account: アカウント名
       email: メールアドレス
       password: パスワード
+      password_confirmation: パスワード確認
       registration: 登録
   user_sessions:
     new:

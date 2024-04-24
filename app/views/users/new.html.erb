@@ -18,6 +18,10 @@
           <%= f.label :password, t('.password'), class: "form-label" %>
           <%= f.password_field :password, class: "form-control" %>
         </div>
+        <div class="mb-3">
+          <%= f.label :password_confirmation, t('.password_confirmation'), class: "form-label" %>
+          <%= f.password_field :password_confirmation, class: "form-control" %>
+        </div>
         <div class="d-grid gap-2 col-4 mx-auto">
           <%= f.submit t('.registration'), class: "btn btn-success",data: { disable_with: t('.registration') } %>
         </div>
@@ -25,4 +29,3 @@
     </div>
   </div>
 </div>
-<%= render "shared/footer" %>
