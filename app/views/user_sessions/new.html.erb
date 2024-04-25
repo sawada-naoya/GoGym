@@ -1,15 +1,10 @@
-<% content_for(:title, t(".title")) %>
+<% content_for(:title, t(".login")) %>
 <div class="container">
   <div class="row position-relative position-absolute top-50 start-50 translate-middle">
-    <h1 class="d-flex justify-content-center"><%= t('.member_registration') %></h1>
+    <h1 class="d-flex justify-content-center"><%= t('.login') %></h1>
     <div class="col-md-12 mx-auto">
       <%= render "shared/flash_message" %>
-      <%= render "shared/error_message", model: @user %>
       <%= form_with model: @user do |f| %>
-        <div class="mb-3">
-          <%= f.label :name, t('.account'), class: "form-label" %>
-          <%= f.text_field :name, class: "form-control" %>
-        </div>
         <div class="mb-3">
           <%= f.label :email, t('.email'), class: "form-label" %>
           <%= f.text_field :email, class: "form-control" %>
@@ -18,14 +13,14 @@
           <%= f.label :password, t('.password'), class: "form-label" %>
           <%= f.password_field :password, class: "form-control" %>
         </div>
-        <div class="mb-3">
-          <%= f.label :password_confirmation, t('.password_confirmation'), class: "form-label" %>
-          <%= f.password_field :password_confirmation, class: "form-control" %>
-        </div>
         <div class="d-grid gap-2 col-4 mx-auto">
-          <%= f.submit t('.registration'), class: "btn btn-success",data: { disable_with: t('.registration') } %>
+          <%= f.submit t('.login'), class: "btn btn-success",data: { disable_with: t('.login') } %>
         </div>
       <% end %>
+      <div class="text-center mt-3">
+        <%= link_to t('.forgot_password'), root_path %>
+      </div>
     </div>
   </div>
 </div>
+<%= render "shared/footer" %>

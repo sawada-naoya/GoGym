@@ -8,6 +8,7 @@ RSpec.describe "新規登録", type: :view do
         fill_in 'user[name]', with: '田中 太郎'
         fill_in 'user[email]', with: 'example@example.com'
         fill_in 'user[password]', with: '12345678'
+        fill_in 'user[password_confirmation]', with: '12345678'
         click_button 'commit'
         Capybara.assert_current_path("/", ignore_query: true)
       }.to change { User.count }.by(1)

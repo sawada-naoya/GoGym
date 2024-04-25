@@ -9,6 +9,7 @@ ja:
         email: メールアドレス
         name: アカウント名
         password: パスワード
+        password_confirmation: パスワード確認
         id: "ID"
         created_at: "作成日時"
       gym:
