@@ -49,8 +49,8 @@ gem "bootsnap", require: false
 gem "sassc-rails"
 gem "dartsass-rails", "~> 0.4.0"
 
-gem 'bootstrap', '~> 5.0'
-# gem 'bootstrap-sass'
+# gem 'bootstrap', '~> 5.0'
+gem 'bootstrap-sass'
 
 gem 'jquery-rails'
 

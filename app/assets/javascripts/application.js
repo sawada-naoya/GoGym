@@ -1,5 +1,4 @@
-//= require jquery３
+//= require jquery
 //= require activestorage
 //= require rails-ujs
-//= require jquery_ujs
 //= require bootstrap-sprockets

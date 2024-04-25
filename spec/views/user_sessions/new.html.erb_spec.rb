@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe "user_sessions/new.html.erb", type: :view do
-  let(:user) { create(:user) }
+  let(:user) { create(:user, password: 'password', password_confirmation: 'password') }
 
   describe '通常画面' do
     describe 'ログイン' do
@@ -13,20 +13,19 @@ RSpec.describe "user_sessions/new.html.erb", type: :view do
       context '認証情報が正しい場合' do
         it 'ログインできること' do
           visit '/login'
-          fill_in 'user[email]', with: user.email
-          fill_in 'user[password]', with: '12345678'
-          click_button 'commit'
-          Capybara.assert_current_path("/", ignore_query: true)
-          expect(current_path).to eq '/'
-          expect(page).to have_content('ログインしました'), 'フラッシュメッセージ「ログインしました」が表示されていません'
+          fill_in 'email', with: user.email
+          fill_in 'password', with: 'password'
+          click_button 'ログイン'
+          expect(current_path).to eq root_path
+          expect(page).to have_content('ログインしました')
         end
       end
 
       context 'PWに誤りがある場合' do
         it 'ログインできないこと' do
           visit '/login'
-          fill_in 'user[email]', with: user.email
-          fill_in 'user[password]', with: '1234'
+          fill_in 'email', with: user.email
+          fill_in 'password', with: '1234'
           click_button 'commit'
           Capybara.assert_current_path("/login", ignore_query: true)
           expect(current_path).to eq('/login'), 'ログイン失敗時にログイン画面に戻ってきていません'
@@ -37,12 +36,11 @@ RSpec.describe "user_sessions/new.html.erb", type: :view do
 
     describe 'ログアウト' do
       before do
-        login_as(general_user)
+        login_as(user)
       end
       it 'ログアウトできること' do
-        find('#header-profile').click
-        click_on('ログアウト')
-        Capybara.assert_current_path("/", ignore_query: true)
+        click_link 'ログアウト'
+        # Capybara.assert_current_path(root_path, ignore_query: true)
         expect(current_path).to eq root_path
         expect(page).to have_content('ログアウトしました'), 'フラッシュメッセージ「ログアウトしました」が表示されていません'
       end
