@@ -47,7 +47,7 @@ gem "bootsnap", require: false
 
 # Use Sass to process CSS
 gem "sassc-rails"
-gem "dartsass-rails", "~> 0.4.0"
+# gem "dartsass-rails", "~> 0.4.0"
 
 # gem 'bootstrap', '~> 5.0'
 gem 'bootstrap-sass'
