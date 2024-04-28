@@ -1,9 +1,17 @@
-// .background-image-container {
-//   background-image: image-url("fitness_center.jpg");
-//   background-size: cover;
-//   background-position: center top;
-//   width: 100%
-// }
+// Entry point for your Sass build
+@import "bootstrap-sprockets";
+@import "application.bootstrap";
+
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+}
+
+.wrapper {
+  margin-top: 80px;
+}
 
 .top-wrapper {
   background-image: image-url("fitness_center.jpg");

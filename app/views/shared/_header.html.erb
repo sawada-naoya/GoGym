@@ -5,6 +5,21 @@
         <%= link_to root_path,class: 'navbar-brand' do %>
           <span style="color: #227D51; font-size: 30px; font-weight: 900; font-family: Arial; ">GoGym</span>
         <% end %>
+        <% unless current_page?(root_path) %>
+          <%= search_form_for @q, url: gyms_path do |f| %>
+            <div class="row row-cols-lg-auto g-3 justify-content-center">
+              <div class="col-12">
+                <%= f.search_field :name_cont, class: 'form-control', placeholder: 'エリア・駅' %>
+              </div>
+              <div class="col-12">
+                <%= f.search_field :name_cont, class: 'form-control', placeholder: 'キーワード' %>
+              </div>
+              <div class="col-12">
+                <%= f.submit t('top.index.search'), class: 'btn btn-primary btn-success' %>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
         <div class="d-flex">
           <%= link_to t('shared.header.logout'), logout_path, class: "btn btn-outline-light me-2", style: "font-size: 15px;", data: { turbo_method: :delete } %>
         </div>

@@ -17,7 +17,9 @@
     <% else %>
       <%= render "/shared/before_login_header" %>
     <% end %>
-    <%= yield %>
+    <main>
+      <%= yield %>
+    </main>
     <%= render "shared/footer" %>
   </body>
 </html>

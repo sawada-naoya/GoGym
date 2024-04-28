@@ -1,12 +1,13 @@
+<h1 class="d-flex justify-content-center mb-5">キーワードで見つかったジム <%= @gyms.count %>件</h1>
 <% @gyms.each do |gym| %>
-  <div class="card mb-3 mx-auto p-2" style="max-width: 540px;">
+  <div class="card mb-3 mx-auto p-2" style="width: 50%;">
     <div class="row g-0">
       <div class="col-md-4">
         <img src="..." alt="..." class="img-fluid rounded-start">
       </div>
       <div class="col-md-8">
         <div class="card-body">
-          <h5 class="card-title"><%= link_to 'ジム', '#' %></h5>
+          <h5 class="card-title"><%= link_to gym.name, gym_path(gym) %></h5>
           <p class="card-text">東京駅 500m</p>
           <p class="card-text">東京駅 500m</p>
         </div>

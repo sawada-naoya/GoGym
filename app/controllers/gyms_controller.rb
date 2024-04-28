@@ -1,7 +1,6 @@
 class GymsController < ApplicationController
 
   def index
-    @q = Gym.ransack(params[:q])
     @gyms = @q.result(distinct: true).page(params[:page])
   end
 
@@ -11,7 +10,7 @@ class GymsController < ApplicationController
 
   def show
     # URL パラメーターから受け取った ID に基づいて、指定された ID の掲示板をデータベースから検索
-    @gym = gym.find(params[:id])
+    @gym = Gym.find(params[:id])
     # ログインしているユーザーに関連付けられた新しいコメントオブジェクトを生成
     # @comment = current_user.comments.new
     # # 指定された掲示板に紐付くコメントを検索
