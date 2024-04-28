@@ -1,6 +1,12 @@
 class TopController < ApplicationController
   # skip_before_action :require_login, only: %i[index]
 
-  def index; end
+  def index
+    @gyms = @q.result(distinct: true).page(params[:page])
+  end
+
+  def search
+    @gyms = @q.result
+  end
 
 end

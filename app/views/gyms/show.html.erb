@@ -1,0 +1,81 @@
+<% content_for(:title, "#{@gym.name}") %>
+<div class="wrapper">
+  <div class="container">
+    <div class="d-flex flex-column mx-auto align-items-center">
+      <h1 class="text-left w-100" style="padding: 0 250px;"><%= @gym.name %></h1>
+      <div class="btn-group" style="max-width: 800px;">
+        <button type="button" class="btn btn-outline-success border-1" style="width: 200px;" data-url="/gyms/<%= @gym.id %>">店舗情報</button>
+        <button type="button" class="btn btn-outline-success border-1" style="width: 200px;" data-url="#">写真</button>
+        <button type="button" class="btn btn-outline-success border-1" style="width: 200px;" data-url="#">口コミ一覧</button>
+        <button type="button" class="btn btn-outline-success border-1" style="width: 200px;" data-url="#">口コミ投稿</button>
+      </div>
+      <section class="text-gray-600 body-font mx-auto" style="max-width: 1000px;">
+        <div class="flex flex-wrap -m-4">
+          <div class="p-4 lg:w-1/4 md:w-1/2">
+            <div class="h-full flex flex-col items-center text-center">
+              <%= image_tag "fake.jpg", class: "rounded-lg mr-2", width: "200", height: "200" %>
+              <%= image_tag "fake.jpg", class: "rounded-lg mr-2", width: "200", height: "200" %>
+              <%= image_tag "fake.jpg", class: "rounded-lg mr-2", width: "200", height: "200" %>
+            </div>
+          </div>
+        </div>
+      </section>
+      <table class="table mx-auto" style="max-width: 1000px;">
+        <tbody>
+          <tr class="table-secondary">
+            <th scope="row" style="text-align: center;">店名</th>
+            <td style="background-color: white;"><%= @gym.name %></td>
+          </tr>
+          <tr class="table-secondary">
+            <th scope="row" style="text-align: center;">住所</th>
+            <td style="background-color: white;"><%= @gym.access %></td>
+          </tr>
+            <tr class="table-secondary">
+            <th scope="row" style="text-align: center;">交通手段</th>
+            <td style="background-color: white;"><%= @gym.remarks %></td>
+          </tr>
+          <tr class="table-secondary">
+            <th scope="row" style="text-align: center;">会費</th>
+            <td style="background-color: white;"><%= @gym.membership_fee %></td>
+          </tr>
+          <tr class="table-secondary">
+            <th scope="row" style="text-align: center;">営業時間</th>
+            <td style="background-color: white;"><%= @gym.business_hours %></td>
+          </tr>
+          <tr class="table-secondary">
+            <th scope="row" style="text-align: center;">HP</th>
+            <td style="background-color: white;"><%= @gym.website %></td>
+          </tr>
+          <tr class="table-secondary">
+            <th scope="row" style="text-align: center;">ジャンル</th>
+            <td style="background-color: white;">タグ</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="d-flex">
+        <p>より充実した情報を共有するため、店舗情報の加筆・修正にご協力ください。</p>
+        <a href="#">編集はこちら</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .wrapper {
+    margin-top: 100px;
+    margin-bottom: 100px;
+  }
+</style>
+
+<script>
+  // ページ内のすべてのクラスが btn-outline-success である要素を選択
+  const buttons = document.querySelectorAll(".btn-outline-success");
+  // 選択された要素それぞれに対して、指定された関数を実行
+  buttons.forEach(function (button) {
+  // ボタン要素から data-url 属性を取得し、その値が現在のページのURL (window.location.pathname) と一致するかを確認
+  if (button.getAttribute("data-url") === window.location.pathname) {
+    button.classList.add("btn-success"); // `btn-success`クラスを追加
+    button.classList.remove("btn-outline-success"); // `btn-outline-success`クラスを取り除く
+    }
+  });
+</script>

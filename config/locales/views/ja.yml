@@ -24,6 +24,14 @@ ja:
       email: メールアドレス
       password: パスワード
       forgot_password: パスワードを忘れた方はこちら
+  gyms:
+    index: ジム一覧
+    name: "店舗"
+    membership_fee: "料金"
+    business_hours: "営業時間"
+    access: "住所"
+    remarks: "交通手段"
+    website: "HP"
   flash:
     login_success: "ログインしました"
     login_failure: "ログインに失敗しました"
@@ -33,14 +41,14 @@ ja:
     edit_profile: "ユーザーを更新しました"
     edit_profile_failure: "ユーザーを更新出来ませんでした"
     user_delete_success: "ユーザーを削除しました"
-    no_result: "掲示板がありません"
+    no_result: "ジムがありません"
     no_search_result: "1件もありません"
     require_login: "ログインしてください"
     board_create_success: "掲示板を作成しました"
     board_create_failure: "掲示板を作成出来ませんでした"
-    board_update_success: "掲示板を更新しました"
-    board_update_failure: "掲示板を更新出来ませんでした"
-    board_delete_success: "掲示板を削除しました"
+    gym_update_success: "店舗情報を更新しました"
+    gym_update_failure: "店舗情報を更新出来ませんでした"
+    gym_delete_success: "店舗情報を削除しました"
     comment_create_success: "コメントを作成しました"
     comment_create_failure: "コメントを作成出来ませんでした"
     no_comment: "コメントを入力してください"

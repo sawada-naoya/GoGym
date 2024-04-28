@@ -1,0 +1,16 @@
+<% content_for(:title, t('gyms.index') ) %>
+<div class="wrapper">
+  <% if @gyms.blank? %>
+    <p><%= t('flash.no_search_result') %></p>
+  <% elsif @gyms.present? %>
+    <%= render "/shared/gym" %>
+  <% else %>
+    <p><%= t('flash.no_result') %></p>
+  <% end %>
+</div>
+
+<style>
+  .wrapper {
+    margin-top: 80px;
+  }
+</style>
