@@ -1,26 +1,28 @@
 <header>
-  <div class='fixed-top'>
-    <nav class='navbar navbar-dark bg-dark' style='height: flex; '>
+  <div class='sticky-top'>
+    <nav class='navbar navbar-dark bg-dark'>
       <div class="container-fluid">
-        <%= link_to root_path,class: 'navbar-brand' do %>
-          <span style="color: #227D51; font-size: 30px; font-weight: 900; font-family: Arial; ">GoGym</span>
-        <% end %>
+        <div class="d-flex justify-content-start align-items-center">
+          <%= link_to root_path,class: 'navbar-brand' do %>
+            <span style="color: #227D51; font-size: 30px; font-weight: 900; font-family: Arial; ">GoGym</span>
+        </div>
+          <% end %>
         <% unless current_page?(root_path) %>
           <%= search_form_for @q, url: gyms_path do |f| %>
-            <div class="row row-cols-lg-auto g-3 justify-content-center">
-              <div class="col-12">
+            <div class="row row-cols-lg-auto">
+              <div class="col px-1">
                 <%= f.search_field :name_cont, class: 'form-control', placeholder: 'エリア・駅' %>
               </div>
-              <div class="col-12">
-                <%= f.search_field :name_cont, class: 'form-control', placeholder: 'キーワード' %>
+              <div class="col px-1">
+                <%= f.search_field :name_cont, class: 'form-control',placeholder: 'キーワード' %>
               </div>
-              <div class="col-12">
+              <div class="col px-1">
                 <%= f.submit t('top.index.search'), class: 'btn btn-primary btn-success' %>
               </div>
             </div>
           <% end %>
         <% end %>
-        <div class="d-flex">
+        <div class="d-flex justify-content-end align-items-center">
           <%= link_to t('shared.header.login'), login_path, class: "btn btn-outline-light me-2", style: "font-size: 15px;" %>
           <%= link_to t('shared.header.member_registration'), new_user_path, class: "btn btn-outline-success", style: "font-size: 15px;" %>
         </div>
@@ -28,3 +30,14 @@
     </nav>
   </div>
 </header>
+
+<style>
+/* スマートフォンの画面サイズに適用するスタイル */
+  @media (max-width: 768px) {
+    .navbar .container-fluid .d-flex .btn{
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 5px; /* ボタン同士の間隔 */
+    }
+  }
+</style>

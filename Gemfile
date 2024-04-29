@@ -107,3 +107,5 @@ gem 'letter_opener_web'
 gem 'hotwire-rails'
 
 gem 'geocoder'
+
+gem 'font-awesome-sass'
