@@ -1,7 +1,7 @@
 class GymsController < ApplicationController
 
   def index
-    @gyms = @q.result(distinct: true).page(params[:page])
+    @gyms = @q.result(distinct: true).page(params[:page]).per(5)
   end
 
   # def search
@@ -9,15 +9,7 @@ class GymsController < ApplicationController
   # end
 
   def show
-    # URL パラメーターから受け取った ID に基づいて、指定された ID の掲示板をデータベースから検索
     @gym = Gym.find(params[:id])
-    # ログインしているユーザーに関連付けられた新しいコメントオブジェクトを生成
-    # @comment = current_user.comments.new
-    # # 指定された掲示板に紐付くコメントを検索
-    # # @gym.comments は、関連するコメントのコレクションを取得
-    # # includes(:user) は、コメントに紐付くユーザー情報も同時に読み込むように指示
-    # # order(created_at: :desc) は、コメントを作成された日時を降順に並べ替え
-    # @comments = @gym.comments.includes(:user).order(created_at: :desc)
   end
 
   # データの編集画面を表示
@@ -43,7 +35,4 @@ class GymsController < ApplicationController
 
   private
 
-  def set_q
-    @q = Gym.ransack(params[:q])
-  end
 end

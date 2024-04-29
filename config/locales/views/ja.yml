@@ -58,3 +58,10 @@ ja:
     password_update_success: 'パスワードを変更しました'
     password_update_failure: 'パスワード変更出来ませんでした'
     not_authorized: '権限がありません'
+  views:
+    pagination:
+      first: "&laquo; 最初"
+      last: "最後 &raquo;"
+      previous: "&lsaquo; 前"
+      next: "次 &rsaquo;"
+      truncate: "..."
