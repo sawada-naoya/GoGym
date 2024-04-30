@@ -1,7 +1,7 @@
 <div class="d-flex justify-content-center mb-5">
   <h1 style="margin-right: 10px;">キーワードで見つかったジム <%= @gyms.count %>件</h1>
   <i class="fa-solid fa-location-dot fa-3x"></i>
-  <%= link_to t('top.index.location_search'), '#', class: "btn btn-success btn-lg", style: "ml-5" %>
+  <%= link_to t('top.index.location_search'), locations_path, class: "btn btn-success btn-lg", style: "font-size: 25px; ml-5" %>
 </div>
 <% @gyms.each do |gym| %>
   <div class="card mb-3 mx-auto p-2" style="width: 50%;">

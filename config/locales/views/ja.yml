@@ -5,6 +5,9 @@ ja:
       text: 'ジムを探す'
       search: '検索'
       location_search: '地図から探す'
+  locations:
+    index:
+      search: 地図検索
   shared:
     header:
       login: ログイン

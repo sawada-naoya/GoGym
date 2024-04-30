@@ -109,3 +109,7 @@ gem 'hotwire-rails'
 gem 'geocoder'
 
 gem 'font-awesome-sass'
+
+gem 'dotenv-rails'
+
+gem "geocoder"

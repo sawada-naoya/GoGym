@@ -113,6 +113,10 @@ GEM
       irb (~> 1.10)
       reline (>= 0.3.8)
     diff-lcs (1.5.1)
+    dotenv (3.1.0)
+    dotenv-rails (3.1.0)
+      dotenv (= 3.1.0)
+      railties (>= 6.1)
     draper (4.0.2)
       actionpack (>= 5.0)
       activemodel (>= 5.0)
@@ -406,6 +410,7 @@ DEPENDENCIES
   carrierwave (= 2.2.2)
   cssbundling-rails
   debug
+  dotenv-rails
   draper (= 4.0.2)
   factory_bot_rails
   faker
