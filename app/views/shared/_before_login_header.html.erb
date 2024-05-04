@@ -5,13 +5,16 @@
         <div class="d-flex justify-content-start align-items-center">
           <%= link_to root_path,class: 'navbar-brand' do %>
             <span style="color: #227D51; font-size: 30px; font-weight: 900; font-family: Arial; ">GoGym</span>
-        </div>
           <% end %>
+        </div>
         <% unless current_page?(root_path) %>
           <%= search_form_for @q, url: gyms_path do |f| %>
             <div class="row row-cols-lg-auto">
               <div class="col px-1">
-                <%= f.search_field :name_cont, class: 'form-control', placeholder: 'エリア・駅' %>
+                <%= f.search_field :location_address_cont, placeholder: "エリア・駅", id: "address", class: 'form-control' %>
+              </div>
+              <div class="col px-1">
+                <%= f.submit t('top.index.search'), onclick: "codeAddress()", class: 'btn btn-primary btn-success' %>
               </div>
               <div class="col px-1">
                 <%= f.search_field :name_cont, class: 'form-control',placeholder: 'キーワード' %>

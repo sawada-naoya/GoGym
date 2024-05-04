@@ -113,3 +113,5 @@ gem 'font-awesome-sass'
 gem 'dotenv-rails'
 
 gem "geocoder"
+
+gem 'google_places'
