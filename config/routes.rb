@@ -12,7 +12,7 @@ Rails.application.routes.draw do
 
   resources :gyms do
     collection do
-      get 'search'
+      get 'search' # キーワード検索用のルートを追加
     end
   end
 end

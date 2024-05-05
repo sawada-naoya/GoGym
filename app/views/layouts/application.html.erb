@@ -13,14 +13,22 @@
     <%= favicon_link_tag('logo_top') %>
   </head>
   <body>
-    <% if logged_in? %>
-      <%= render "/shared/header" %>
-    <% else %>
-      <%= render "/shared/before_login_header" %>
-    <% end %>
+    <header>
+      <% if logged_in? %>
+        <%= render "/shared/header" %>
+      <% else %>
+        <%= render "/shared/before_login_header" %>
+      <% end %>
+    </header>
     <main>
       <%= yield %>
     </main>
-    <%= render "shared/footer" %>
+    <footer class="bg-dark text-center" style="width: 100%; position: sticky;">
+      <%= render "shared/footer" %>
+    </footer>
   </body>
 </html>
+
+<style>
+
+</style>
