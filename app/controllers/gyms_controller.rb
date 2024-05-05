@@ -9,7 +9,8 @@ class GymsController < ApplicationController
   # end
 
   def show
-    @gym = Gym.find(params[:id])
+    @gym = Gym.includes(:location).find(params[:id])
+    @gyms = Gym.includes(:location).all
   end
 
   # データの編集画面を表示

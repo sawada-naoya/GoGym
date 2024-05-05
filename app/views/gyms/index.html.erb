@@ -8,30 +8,49 @@
     <p><%= t('flash.no_result') %></p>
   <% end %>
   <div class="pagination d-flex justify-content-center">
-    <%= paginate @gyms, theme: 'bootstrap-5', pagination_class: "flex-wrap justify-content-center", nav_class: "d-inline-block btn-success" %>
+    <%= paginate @gyms%>
   </div>
 </div>
 
 <style>
+
   .wrapper {
-    margin-top: 100px;
+    margin-top: 50px;
     margin-bottom: 100px;
   }
 
   /*ページネーション自体のデザイン*/
   .pagination>li>a {
+    display: inline-block;
     border: none;     /*枠線をなくす*/
     color: #696969;   /*文字の色を変える*/
+    font-size: 25px;  /*文字の大きさを大きくする*/
+    border-radius: 50%; /*角を完全に丸くする*/
+    width: 30px; /*幅を設定*/
+    height: 30px; /*高さを設定*/
+    line-height: 30px; /*テキストを中央に配置*/
+    text-align: center; /* 水平方向の中心配置を追加 */
+    text-decoration: none; /* 下線を消す */
+  }
+
+  .pagination>li {
+    margin-right: 20px; /*ページ間の間隔を広げる*/
   }
 
   /* 表示しているページ番号のデザイン */
   .pagination>.active>a {
     background: #227D51;     /*背景の色を変える*/
-    border-radius: 7px;     /*角を丸くする*/
+    border-radius: 50%;     /*角を丸くする*/
+    width: 30px; /*幅を設定*/
+    height: 30px; /*高さを設定*/
+    line-height: 30px; /*テキストを中央に配置*/
   }
 
   /*ホバー時のデザイン*/
   .pagination>li>a:hover {
-    border-radius: 7px;    /*角を丸くする*/
+    border-radius: 50%;    /*角を丸くする*/
+    width: 30px; /*幅を設定*/
+    height: 30px; /*高さを設定*/
+    line-height: 30px; /*テキストを中央に配置*/
   }
 </style>

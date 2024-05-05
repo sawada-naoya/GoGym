@@ -1,18 +1,18 @@
 <% content_for(:title, t(".title")) %>
 <div class="top-wrapper">
   <%= render "shared/flash_message" %>
-  <div class="row justify-content-center ms-5">
+  <div class="row justify-content-center">
     <h2 class="col-md-12 text-center mb-3" style="font-weight: 900;"><%= t('top.index.text')%></h2>
   </div>
   <%= search_form_for @q, url: gyms_path do |f| %>
-    <div class="row row-cols-lg-auto g-3 justify-content-center">
-      <div class="col-12">
+    <div class="row row-cols-lg-auto justify-content-center">
+      <div class="col px-1">
         <%= f.search_field :name_cont, class: 'form-control', placeholder: 'エリア・駅' %>
       </div>
-      <div class="col-12">
-        <%= f.search_field :name_cont, class: 'form-control', placeholder: 'キーワード' %>
+      <div class="col px-1">
+        <%= f.search_field :name_cont, class: 'form-control',placeholder: 'キーワード' %>
       </div>
-      <div class="col-12">
+      <div class="col px-1">
         <%= f.submit t('top.index.search'), class: 'btn btn-primary btn-success' %>
       </div>
     </div>
@@ -25,7 +25,7 @@
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    padding-top: 100px; /* ヘッダーの下に余白を追加 */
-    height: calc(100vh - 80px); /* 画面全体の高さから上下の余白を引く */
+    padding-top: 50px; /* ヘッダーの下に余白を追加 */
+    height: calc(100vh - 150px); /* 画面全体の高さから上下の余白を引く */
   }
 </style>

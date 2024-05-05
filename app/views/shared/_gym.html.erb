@@ -1,4 +1,8 @@
-<h1 class="d-flex justify-content-center mb-5">キーワードで見つかったジム <%= @gyms.count %>件</h1>
+<div class="d-flex justify-content-center mb-5">
+  <h1 style="margin-right: 10px;">キーワードで見つかったジム <%= @gyms.count %>件</h1>
+  <i class="fa-solid fa-location-dot fa-3x"></i>
+  <%= link_to t('top.index.location_search'), locations_path, class: "btn btn-success btn-lg", style: "font-size: 25px; ml-5" %>
+</div>
 <% @gyms.each do |gym| %>
   <div class="card mb-3 mx-auto p-2" style="width: 50%;">
     <div class="row g-0">
@@ -8,8 +12,8 @@
       <div class="col-md-8">
         <div class="card-body">
           <h5 class="card-title"><%= link_to gym.name, gym_path(gym) %></h5>
-          <p class="card-text">東京駅 500m</p>
-          <p class="card-text">東京駅 500m</p>
+          <p class="card-text"><%= gym.access %></p>
+          <p class="card-text">会費  <%= gym.membership_fee %></p>
         </div>
       </div>
     </div>

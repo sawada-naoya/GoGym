@@ -2,23 +2,3 @@
 @import "bootstrap-sprockets";
 @import "application.bootstrap";
 
-.container {
-  display: flex;
-  flex-direction: column;
-  width: 100vw;
-  height: 100vh;
-}
-
-.wrapper {
-  margin-top: 100px;
-  margin-bottom: 100px;
-}
-
-.top-wrapper {
-  background-image: image-url("fitness_center.jpg");
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  padding-top: 80px; /* ヘッダーの下に余白を追加 */
-  height: calc(100vh - 80px); /* 画面全体の高さから上下の余白を引く */
-}

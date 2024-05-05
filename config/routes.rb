@@ -5,13 +5,14 @@ Rails.application.routes.draw do
   post '/login', to: 'user_sessions#create'
   delete '/logout', to: 'user_sessions#destroy', as: :logout
 
-  resources :top, only: %i[index] 
+  resources :top, only: %i[index]
   resources :users, only: %i[new create]
+  resources :locations
 
 
   resources :gyms do
     collection do
-      get 'search'
+      get 'search' # キーワード検索用のルートを追加
     end
   end
 end

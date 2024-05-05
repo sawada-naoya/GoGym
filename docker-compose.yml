@@ -23,6 +23,7 @@ services:
       - node_modules:/GoGym/node_modules
     environment:
       TZ: Asia/Tokyo
+      ENVFILE: ${GOOGLE_MAPS_API_KEY}
     ports:
       - "3000:3000"
     # web サービスは db サービスに依存する。これにより、db サービスが起動されるまで web サービスは起動されない

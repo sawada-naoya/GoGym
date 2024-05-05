@@ -1,0 +1,58 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+}
+
+.wrapper {
+  margin-top: 100px;
+  margin-bottom: 100px;
+}
+
+  /*ページネーション自体のデザイン*/
+  .pagination>li>a {
+    border: none;     /*枠線をなくす*/
+    color: #696969;   /*文字の色を変える*/
+  }
+
+  /* 表示しているページ番号のデザイン */
+  .pagination>.active>a {
+    background: #227D51;     /*背景の色を変える*/
+    border-radius: 7px;     /*角を丸くする*/
+  }
+
+  /*ホバー時のデザイン*/
+  .pagination>li>a:hover {
+    border-radius: 7px;    /*角を丸くする*/
+  }
+
+.top-wrapper {
+  background-image: image-url("fitness_center.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  padding-top: 80px; /* ヘッダーの下に余白を追加 */
+  height: calc(100vh - 80px); /* 画面全体の高さから上下の余白を引く */
+}
+
+/* スマートフォンの画面サイズに適用するスタイル */
+@media (max-width: 768px) {
+  .navbar .container-fluid {
+    text-align: center;
+  }
+
+  .navbar .container-fluid .d-flex {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .navbar .container-fluid .row {
+    justify-content: center;
+  }
+
+  .navbar .container-fluid .btn {
+    width: 100%; /* ボタンを幅いっぱいにする場合、この行を追加 */
+    margin-top: 5px; /* ボタン同士の間隔 */
+  }
+}
