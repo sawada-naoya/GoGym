@@ -96,6 +96,8 @@ gem 'draper', '4.0.2'
 
 gem 'carrierwave', '2.2.2'
 
+gem 'mini_magick'
+
 gem 'kaminari', "1.2.2"
 
 # gem 'bootstrap5-kaminari-views'

@@ -3,18 +3,24 @@
   <div class="d-flex flex-column mx-auto align-items-center">
     <h1 class="text-center" style="padding: 0 250px;"><%= @gym.name %></h1>
     <div class="btn-group" style="max-width: 800px;">
-      <button type="button" class="btn btn-outline-success border-1" style="width: 200px;" data-url="/gyms/<%= @gym.id %>">店舗情報</button>
+      <%= link_to '店舗情報', gym_path(@gym), class: "btn btn-outline-success border-1", style: "width: 200px;" %>
       <button type="button" class="btn btn-outline-success border-1" style="width: 200px;" data-url="#">写真</button>
       <button type="button" class="btn btn-outline-success border-1" style="width: 200px;" data-url="#">口コミ一覧</button>
-      <button type="button" class="btn btn-outline-success border-1" style="width: 200px;" data-url="#">口コミ投稿</button>
+      <% if logged_in? %>
+        <%= link_to '口コミ投稿', new_gym_review_path(@gym), class: "btn btn-outline-success border-1", style: "width: 200px;" %>
+      <% end %>
     </div>
     <section class="text-gray-600 body-font mx-auto" style="max-width: 1000px;">
       <div class="flex flex-wrap -m-4">
         <div class="p-4 lg:w-1/4 md:w-1/2">
           <div class="h-full flex flex-col items-center text-center">
-            <%= image_tag "fake.jpg", class: "rounded-lg mr-2", width: "200", height: "200" %>
-            <%= image_tag "fake.jpg", class: "rounded-lg mr-2", width: "200", height: "200" %>
-            <%= image_tag "fake.jpg", class: "rounded-lg mr-2", width: "200", height: "200" %>
+            <% @gym.reviews.each do |review| %>
+              <% if review.photos.present? %>
+                <%= image_tag review.photos.url %>
+              <% else %>
+                <%= image_tag 'app/assets/images/fake.jpg' %>
+              <% end %>
+            <% end %>
           </div>
         </div>
       </div>

@@ -430,6 +430,7 @@ DEPENDENCIES
   jsbundling-rails
   kaminari (= 1.2.2)
   letter_opener_web
+  mini_magick
   pg (~> 1.1)
   pry-byebug
   puma (~> 5.0)
