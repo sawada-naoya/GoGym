@@ -1,15 +1,15 @@
-class GymsController < ApplicationController
-
+class ReviewsController < ApplicationController
   def index
-    @gyms = @q.result(distinct: true).page(params[:page]).per(5)
+    @reviews = @q.result(distinct: true).page(params[:page]).per(5)
   end
 
-  # def search
-  #   @gyms = @q.result
-  # end
+  def new
+    @gym = Gym.includes(:location).find(params[:gym_id])
+    @review = Review.new
+  end
 
   def show
-    @gym = Gym.includes(:location, :reviews).find(params[:id])
+    @gym = Gym.includes(:location).find(params[:id])
     @gyms = Gym.includes(:location).all
   end
 
@@ -36,4 +36,7 @@ class GymsController < ApplicationController
 
   private
 
+  def review_params
+    params.require(:review).permit(:title, :content, :photos)
+  end
 end

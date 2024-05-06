@@ -14,5 +14,6 @@ Rails.application.routes.draw do
     collection do
       get 'search' # キーワード検索用のルートを追加
     end
+    resources :reviews, shallow: true
   end
 end
