@@ -1,15 +1,9 @@
 <% content_for(:title, "#{@gym.name}") %>
 <div class="wrapper">
+  <%= render "shared/flash_message" %>
   <div class="d-flex flex-column mx-auto align-items-center">
     <h1 class="text-center" style="padding: 0 250px;"><%= @gym.name %></h1>
-    <div class="btn-group" style="max-width: 800px;">
-      <%= link_to '店舗情報', gym_path(@gym), class: "btn btn-outline-success border-1", style: "width: 200px;" %>
-      <button type="button" class="btn btn-outline-success border-1" style="width: 200px;" data-url="#">写真</button>
-      <button type="button" class="btn btn-outline-success border-1" style="width: 200px;" data-url="#">口コミ一覧</button>
-      <% if logged_in? %>
-        <%= link_to '口コミ投稿', new_gym_review_path(@gym), class: "btn btn-outline-success border-1", style: "width: 200px;" %>
-      <% end %>
-    </div>
+    <%= render "/shared/gym_info" %>
     <div class="card mt-4 border border-black">
       <div class="d-flex justify-content-between align-items-center mb-2 mt-2">
         <span style="margin-left: 10px;">評価</span>
@@ -26,7 +20,6 @@
           <div class="mb-2">
             <%= f.label :photos, "写真を追加してください", class: "form-label", style: "margin-left: 10px;" %>
             <%= f.file_field :photos, class: "form-control" %>
-            <%= f.hidden_field :photos_cache %>
           </div>
           <div class="d-flex justify-content-center mb-2">
             <%= f.submit "投稿", class: "btn btn-success" %>

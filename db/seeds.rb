@@ -25,3 +25,15 @@ end
     password_confirmation: "test"
   )
 end
+
+user_ids = User.pluck(:id)
+Gym.all.each do |gym|
+  20.times do
+    Review.create!(
+      title: Faker::Movies::HarryPotter.character,
+      content: Faker::JapaneseMedia::StudioGhibli.quote,
+      user_id: user_ids.sample,
+      gym_id: gym.id
+    )
+  end
+end

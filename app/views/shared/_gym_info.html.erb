@@ -1,0 +1,8 @@
+<div class="btn-group mb-5" style="max-width: 800px;">
+  <%= link_to '店舗情報', gym_path(@gym), class: "btn btn-outline-success border-1", style: "width: 200px;" %>
+  <button type="button" class="btn btn-outline-success border-1" style="width: 200px;" data-url="#">写真</button>
+  <%= link_to '口コミ一覧', gym_reviews_path(@gym), class: "btn btn-outline-success border-1", style: "width: 200px;" %>
+  <% if logged_in? %>
+    <%= link_to '口コミ投稿', new_gym_review_path(@gym), class: "btn btn-outline-success border-1", style: "width: 200px;" %>
+  <% end %>
+</div>
