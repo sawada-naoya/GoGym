@@ -18,8 +18,8 @@
             <%= f.text_area :content, class: "form-control border-0", style: "height: 200px;", placeholder: "口コミ本文を入力してください（100文字）" %>
           </div>
           <div class="mb-2">
-            <%= f.label :photos, "写真を追加してください", class: "form-label", style: "margin-left: 10px;" %>
-            <%= f.file_field :photos, class: "form-control" %>
+            <%= f.label :images, "写真を追加してください", class: "form-label", style: "margin-left: 10px;" %>
+            <%= f.file_field :images, class: "form-control", multiple: true %>
           </div>
           <div class="d-flex justify-content-center mb-2">
             <%= f.submit "投稿", class: "btn btn-success" %>

@@ -50,7 +50,7 @@ class ReviewsController < ApplicationController
   private
 
   def review_params
-    params.require(:review).permit(:title, :content, photos: []).merge(gym_id: params[:gym_id])
+    params.require(:review).permit(:title, :content, images: [])
   end
 
 end

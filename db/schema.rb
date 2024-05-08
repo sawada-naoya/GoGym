@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_05_06_134358) do
+ActiveRecord::Schema[7.0].define(version: 2024_05_08_125817) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -20,7 +20,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_06_134358) do
     t.string "business_hours"
     t.string "access"
     t.string "remarks"
-    t.string "photos"
     t.string "website"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -51,6 +50,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_06_134358) do
     t.datetime "updated_at", null: false
     t.bigint "gym_id", null: false
     t.bigint "user_id", null: false
+    t.json "images"
     t.index ["gym_id"], name: "index_reviews_on_gym_id"
     t.index ["user_id"], name: "index_reviews_on_user_id"
   end

@@ -8,9 +8,14 @@
         <div class="p-4 lg:w-1/4 md:w-1/2">
           <div class="d-flex flex-wrap">
             <% @gym.reviews.each_with_index do |review, index| %>
-              <% if index < 3 && @gym.photos.present? %>
-                <%= image_tag @gym.photos.url %>
-              <% elsif index == 0 && @gym.photos.blank? %>
+              <% if index < 3 && review.images.present? %>
+                <% review.images.each do |image| %>
+                  <% image_data = JSON.parse(image) %>
+                  <% if image_data["url"].present? %>
+                    <%= image_tag image_data["url"] %>
+                  <% end %>
+                <% end %>
+              <% elsif index == 0 && review.images.blank? %>
                 <%= image_tag 'fake.jpg' %>
               <% end %>
             <% end %>

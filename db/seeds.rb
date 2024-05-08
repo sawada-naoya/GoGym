@@ -6,7 +6,6 @@ Faker::Config.locale = 'ja'
     membership_fee: Faker::Commerce.price(range: 1000..10000),
     business_hours: '9:00 - 21:00',
     access: '東京駅から徒歩5分',
-    photos: 'app/assets/images/fake.jpg',
     website: Faker::Internet.url,
   )
   location = Location.create!(
@@ -19,7 +18,7 @@ end
 
 10.times do |n|
   User.create!(
-    name: Faker::Name.unique.name,
+    name: Faker::JapaneseMedia::StudioGhibli.character,
     email: Faker::Internet.unique.email,
     password: "test",
     password_confirmation: "test"
@@ -30,8 +29,9 @@ user_ids = User.pluck(:id)
 Gym.all.each do |gym|
   20.times do
     Review.create!(
-      title: Faker::Movies::HarryPotter.character,
+      title: Faker::JapaneseMedia::StudioGhibli.movie,
       content: Faker::JapaneseMedia::StudioGhibli.quote,
+      images: 'app/assets/images/fake.jpg',
       user_id: user_ids.sample,
       gym_id: gym.id
     )
