@@ -11,7 +11,7 @@ class ReviewsController < ApplicationController
 
   def create
     @gym = Gym.find(params[:gym_id])
-    @review = current_user.reviews.build(review_params)
+    @review = @gym.reviews.build(review_params.merge(user: current_user))
     if @review.save
       redirect_to gym_reviews_path
       flash[:success] = t('flash.review_create_success')
@@ -50,7 +50,7 @@ class ReviewsController < ApplicationController
   private
 
   def review_params
-    params.require(:review).permit(:title, :content, images: [])
+    params.require(:review).permit(:title, :content, :image)
   end
 
 end

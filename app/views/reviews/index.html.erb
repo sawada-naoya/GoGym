@@ -17,13 +17,8 @@
               <p><%= review.content %></p>
             </div>
             <div class="card-text">
-              <% if review.images.present? %>
-                <% review.images.each do |image| %>
-                  <% image_data = JSON.parse(image) %>
-                  <% if image_data["url"].present? %>
-                    <%= image_tag image_data["url"] %>
-                  <% end %>
-                <% end %>
+              <% if review.image.present? %>
+                <%= image_tag review.image.url %>
               <% end %>
             </div>
           </div>
