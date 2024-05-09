@@ -3,5 +3,4 @@ class Gym < ApplicationRecord
   has_many :reviews
   # 親モデルのフォームから子モデルの属性を直接受け取ることができるようにする
   accepts_nested_attributes_for :location
-  mount_uploader :photos, ImageUploader
 end

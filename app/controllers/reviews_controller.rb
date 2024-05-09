@@ -1,11 +1,24 @@
 class ReviewsController < ApplicationController
   def index
-    @reviews = @q.result(distinct: true).page(params[:page]).per(5)
+    @gym = Gym.find(params[:gym_id])
+    @reviews = @gym.reviews.page(params[:page]).per(5)
   end
 
   def new
     @gym = Gym.includes(:location).find(params[:gym_id])
     @review = Review.new
+  end
+
+  def create
+    @gym = Gym.find(params[:gym_id])
+    @review = @gym.reviews.build(review_params.merge(user: current_user))
+    if @review.save
+      redirect_to gym_reviews_path
+      flash[:success] = t('flash.review_create_success')
+    else
+      flash.now[:danger] = t('flash.review_create_failure')
+      render :new, status: :unprocessable_entity
+    end
   end
 
   def show
@@ -37,6 +50,7 @@ class ReviewsController < ApplicationController
   private
 
   def review_params
-    params.require(:review).permit(:title, :content, :photos)
+    params.require(:review).permit(:title, :content, :image)
   end
+
 end

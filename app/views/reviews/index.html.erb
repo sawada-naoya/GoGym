@@ -1,0 +1,80 @@
+<% content_for(:title, "#{@gym.name}") %>
+<div class="wrapper">
+  <%= render "shared/flash_message" %>
+  <div class="d-flex flex-column mx-auto align-items-center">
+    <h1 class="text-center" style="padding: 0 250px;"><%= @gym.name %></h1>
+    <%= render "/shared/gym_info" %>
+    <div class="row justify-content-center review-container">
+      <% @reviews.each do |review| %>
+        <div class="card mb-3">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span style="margin-left: 10px;"><%= review.user.name %></span>
+              <span>投稿日 <%= Time.zone.now.strftime("%Y/%m/%d") %></span>
+            </div>
+            <h4 class="card-title"><%= review.title %></h4>
+            <div class="card-text">
+              <p><%= review.content %></p>
+            </div>
+            <div class="card-text">
+              <% if review.image.present? %>
+                <%= image_tag review.image.url %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    <div class="pagination d-flex justify-content-center">
+      <%= paginate @reviews%>
+    </div>
+  </div>
+</div>
+
+<style>
+  .wrapper {
+    margin-top: 50px;
+    margin-bottom: 50px;
+  }
+
+  .review-container {
+    max-width: 700px; /* 最大幅を700pxに設定 */
+    width: 100%; /* 幅を100%に設定して、親要素に合わせて伸縮するようにする */
+    margin: auto; /* 左右のマージンを自動で調整して、中央に配置 */
+  }
+
+  /*ページネーション自体のデザイン*/
+  .pagination>li>a {
+    display: inline-block;
+    border: none;     /*枠線をなくす*/
+    color: #696969;   /*文字の色を変える*/
+    font-size: 25px;  /*文字の大きさを大きくする*/
+    border-radius: 50%; /*角を完全に丸くする*/
+    width: 30px; /*幅を設定*/
+    height: 30px; /*高さを設定*/
+    line-height: 30px; /*テキストを中央に配置*/
+    text-align: center; /* 水平方向の中心配置を追加 */
+    text-decoration: none; /* 下線を消す */
+  }
+
+  .pagination>li {
+    margin-right: 20px; /*ページ間の間隔を広げる*/
+  }
+
+  /* 表示しているページ番号のデザイン */
+  .pagination>.active>a {
+    background: #227D51;     /*背景の色を変える*/
+    border-radius: 50%;     /*角を丸くする*/
+    width: 30px; /*幅を設定*/
+    height: 30px; /*高さを設定*/
+    line-height: 30px; /*テキストを中央に配置*/
+  }
+
+  /*ホバー時のデザイン*/
+  .pagination>li>a:hover {
+    border-radius: 50%;    /*角を丸くする*/
+    width: 30px; /*幅を設定*/
+    height: 30px; /*高さを設定*/
+    line-height: 30px; /*テキストを中央に配置*/
+  }
+</style>
