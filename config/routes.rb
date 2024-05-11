@@ -11,8 +11,11 @@ Rails.application.routes.draw do
 
 
   resources :gyms do
+    member do
+      get 'images', to: 'gyms#images_index', as: 'images'
+    end
     collection do
-      get 'search' # キーワード検索用のルートを追加
+      get 'search'
     end
     resources :reviews, shallow: true
   end
