@@ -1,5 +1,6 @@
 class UsersController < ApplicationController
-  # skip_before_action :require_login, only: %i[new create show]
+    # ユーザーがログインしているかどうかをチェック
+    before_action :require_login, only: [:show]
 
   def new
     @user = User.new
@@ -16,7 +17,11 @@ class UsersController < ApplicationController
     end
   end
 
-  def show; end
+  def show
+    @user = User.find(params[:id])
+    # @favorite_gyms = @user.favorite_gyms
+    @reviews = @user.reviews
+  end
 
   private
 
