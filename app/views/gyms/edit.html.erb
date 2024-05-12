@@ -1,46 +1,50 @@
 <% content_for(:title, t(".gyms.new")) %>
-
 <div class="mt-5">
   <div class="row justify-content-center">
     <div class="col-md-8">
-      <h1 class="text-center mb-4">新しいジムを登録</h1>
+      <h1 class="text-center mb-4">ジム情報を編集</h1>
       <%= render "shared/error_message", model: @gym %>
 
-      <%= form_with(model: @gym, local: true, class: "form-horizontal") do |f| %>
+      <%= form_with(model: @gym, url: gym_path(@gym), local: true, method: :patch, class: "form-horizontal") do |f| %>
         <div class="mb-3">
           <%= f.label :name, "店名", class: "form-label" %>
-          <%= f.text_field :name, id: :gym_name, class: "form-control" %>
+          <%= f.text_field :name, id: :gym_name, class: "form-control"%>
         </div>
 
         <%= f.fields_for :location do |location_form| %>
           <div class="mb-3">
             <%= location_form.label :address, "住所", class: "form-label" %>
-            <%= location_form.text_field :address, id: :location_address, class: "form-control" %>
+            <%= location_form.text_field :address, id: :location_address, class: "form-control"%>
           </div>
         <% end %>
 
         <div class="mb-3">
           <%= f.label :access, "交通手段", class: "form-label" %>
-          <%= f.text_field :access, id: :gym_access, class: "form-control" %>
+          <%= f.text_field :access, id: :gym_access, class: "form-control"%>
         </div>
 
         <div class="mb-3">
           <%= f.label :membership_fee, "会費", class: "form-label" %>
-          <%= f.text_field :membership_fee, id: :gym_membership_fee, class: "form-control" %>
+          <%= f.text_field :membership_fee, id: :gym_membership_fee, class: "form-control"%>
         </div>
 
         <div class="mb-3">
           <%= f.label :business_hours, "営業時間", class: "form-label" %>
-          <%= f.text_field :business_hours, id: :gym_business_hours, class: "form-control" %>
+          <%= f.text_field :business_hours, id: :gym_business_hours, class: "form-control"%>
         </div>
 
         <div class="mb-3">
           <%= f.label :website, "HP", class: "form-label" %>
-          <%= f.text_field :website, id: :gym_website, class: "form-control" %>
+          <%= f.text_field :website, id: :gym_website, class: "form-control"%>
         </div>
 
-        <div class="d-grid gap-2 col-4 mx-auto mb-5">
-          <%= f.submit "登録する", class: "btn btn-success" %>
+        <div class="row mb-3 justify-content-center mb-5">
+          <div class="col-auto">
+            <%= f.submit "更新する", class: "btn btn-success" %>
+          </div>
+          <div class="col-auto">
+            <%= link_to "戻る", gym_path(@gym), class: "btn btn-secondary" %>
+          </div>
         </div>
       <% end %>
     </div>

@@ -21,3 +21,5 @@ ja:
         remarks: "備考"
         website: "HP"
         created_at: "作成日時"
+      location:
+        address: 住所

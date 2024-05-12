@@ -15,8 +15,8 @@ class GymsController < ApplicationController
       redirect_to @gym
       flash[:success] = t('flash.gym_create_success')
     else
-      render :new, status: :unprocessable_entity
       flash.now[:danger] = t('flash.gym_create_failure')
+      render :new, status: :unprocessable_entity
     end
   end
 
@@ -35,7 +35,20 @@ class GymsController < ApplicationController
   end
 
   # データの編集画面を表示
-  def edit; end
+  def edit
+    @gym = Gym.find(params[:id])
+  end
+
+  def update
+    @gym = Gym.find(params[:id])
+    if @gym.update(gym_params)
+      redirect_to @gym
+      flash[:success] = t('flash.gym_update_success')
+    else
+      render :edit, status: :unprocessable_entity
+      flash.now[:danger] = t('flash.gym_update_failure')
+    end
+  end
 
   private
 
