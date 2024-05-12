@@ -1,8 +1,9 @@
-<% if model.errors.any? %> <%# Userモデルに対するエラーの有無を検知 %>
+<% if model.errors.any? %>
   <div id="error_explanation" class="alert alert-danger">
-    <%# errors.full_messagesで全てのエラーメッセージを@userから配列で取得 %>
-    <% model.errors.full_messages.each do |message| %>
-      <li ><%= message %></li>
-    <% end %>
+    <ul>
+      <% model.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
   </div>
 <% end %>

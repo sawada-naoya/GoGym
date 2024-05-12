@@ -13,7 +13,7 @@ Rails.application.config.sorcery.configure do |config|
   # override the 'not_authenticated' method of course.
   # Default: `:not_authenticated`
   #
-  # config.not_authenticated_action =
+  config.not_authenticated_action = :not_authenticated
 
   # When a non logged-in user tries to enter a page that requires login, save
   # the URL he wants to reach, and send him there after login, using 'redirect_back_or_to'.
@@ -226,7 +226,7 @@ Rails.application.config.sorcery.configure do |config|
   # config.line.bot_prompt = "normal"
   # config.line.user_info_mapping = {name: 'displayName'}
 
-  
+
   # For information about Discord API
   # https://discordapp.com/developers/docs/topics/oauth2
   # config.discord.key = "xxxxxx"
