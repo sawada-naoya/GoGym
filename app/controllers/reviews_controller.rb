@@ -1,4 +1,6 @@
 class ReviewsController < ApplicationController
+  # before_action :require_login, only: [:my_reviews]
+
   def index
     @gym = Gym.find(params[:gym_id])
     @reviews = @gym.reviews.page(params[:page]).per(5)
@@ -41,10 +43,9 @@ class ReviewsController < ApplicationController
     end
   end
 
-  def destroy
-    @gym.destroy!
-    redirect_to gyms_path, status: :see_other
-    flash[:success] = t('flash.gym_delete_success')
+  def user_index
+    @user = User.find(params[:user_id])
+    @reviews = @user.reviews.page(params[:page]).per(5)
   end
 
   private

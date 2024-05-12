@@ -23,7 +23,8 @@
         <% end %>
       <% end %>
       <div class="d-flex justify-content-end">
-        <%= link_to t('shared.header.logout'), logout_path, class: "btn btn-outline-light me-2", style: "font-size: 15px;", data: { turbo_method: :delete } %>
+        <%= link_to 'マイページ', user_path(current_user), class: "btn btn-outline-light me-2", style: "font-size: 15px;" %>
+        <%= link_to t('shared.header.logout'), logout_path, class: "btn btn-light me-2", style: "font-size: 15px;", data: { turbo_method: :delete } %>
       </div>
     </div>
   </nav>
