@@ -1,6 +1,7 @@
 <% content_for(:title, t(".title")) %>
+<%= render "shared/flash_message" %>
+<% breadcrumb :root %>
 <div class="top-wrapper">
-  <%= render "shared/flash_message" %>
   <div class="row justify-content-center">
     <h2 class="col-md-12 text-center mb-3" style="font-weight: 900;"><%= t('top.index.text')%></h2>
   </div>

@@ -4,6 +4,7 @@
     <h1 class="d-flex justify-content-center"><%= t('.login') %></h1>
     <div class="col-md-12 mx-auto">
       <%= render "shared/flash_message" %>
+      <% breadcrumb :user_session %>
       <%= form_with model: @user do |f| %>
         <div class="mb-3">
           <%= f.label :email, t('.email'), class: "form-label" %>

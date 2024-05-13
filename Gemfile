@@ -117,3 +117,5 @@ gem 'dotenv-rails'
 gem "geocoder"
 
 gem 'google_places'
+
+gem 'gretel'
