@@ -47,3 +47,8 @@ crumb :locations do
   link "位置情報検索", locations_path
   parent :gyms
 end
+
+crumb :inquiry do
+  link "お問い合わせ", new_inquiry_path
+  parent :root
+end

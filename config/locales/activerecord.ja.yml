@@ -23,3 +23,5 @@ ja:
         created_at: "作成日時"
       location:
         address: 住所
+      inquiry:
+        inquiry: お問い合せ

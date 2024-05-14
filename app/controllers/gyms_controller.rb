@@ -1,6 +1,6 @@
 class GymsController < ApplicationController
   # ユーザーがログインしているかどうかをチェック
-  before_action :require_login, only: [:new, :create]
+  before_action :require_login, only: [:new, :create, :edit, :update]
 
   # GET /gyms/new
   def new
@@ -57,4 +57,17 @@ class GymsController < ApplicationController
     location_attributes: [:address])
   end
 
+  def require_login
+    unless logged_in?
+      message = if action_name == 'edit'
+                  "編集を行うにはログインが必要です。"
+                elsif action_name == 'new' || action_name == 'create'
+                  "登録するにはログインが必要です。"
+                else
+                  "この操作を行うにはログインが必要です。"
+                end
+      flash[:danger] = message
+      redirect_to login_path
+    end
+  end
 end

@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   delete '/logout', to: 'user_sessions#destroy', as: :logout
 
   resources :top, only: %i[index]
+  resources :inquiries, only: [:new, :create]
   resources :users do
     get 'reviews', to: 'reviews#user_index', as: 'user_reviews'
   end
