@@ -119,3 +119,5 @@ gem "geocoder"
 gem 'google_places'
 
 gem 'gretel'
+
+gem 'letter_opener_web'

@@ -25,3 +25,6 @@ ja:
         address: 住所
       inquiry:
         inquiry: お問い合せ
+        name: 名前
+        email: メール
+        content: 本文
