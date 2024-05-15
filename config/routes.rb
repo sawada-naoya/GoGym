@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  mount LetterOpenerWeb::Engine, at: '/letter_opener' if Rails.env.development?
+
   root 'top#index'
 
   get '/login', to: 'user_sessions#new', as: :login
@@ -6,6 +8,7 @@ Rails.application.routes.draw do
   delete '/logout', to: 'user_sessions#destroy', as: :logout
 
   resources :top, only: %i[index]
+  resources :inquiries, only: [:new, :create]
   resources :users do
     get 'reviews', to: 'reviews#user_index', as: 'user_reviews'
   end

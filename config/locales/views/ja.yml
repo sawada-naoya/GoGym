@@ -8,6 +8,13 @@ ja:
   locations:
     index:
       search: 地図検索
+  inquiries:
+    new:
+      inquiry: お問い合せ
+      name: 名前
+      email: メール
+      content: 本文
+      send: 送信
   shared:
     header:
       login: ログイン
@@ -63,6 +70,8 @@ ja:
     password_update_success: 'パスワードを変更しました'
     password_update_failure: 'パスワード変更出来ませんでした'
     not_authorized: '権限がありません'
+    inquiry_send_success: お問い合わせを受け付けました
+    inquiry_send_failure: お問い合わせの送信に失敗しました
   views:
     pagination:
       first: <i class="fas fa-angle-double-left"></i>

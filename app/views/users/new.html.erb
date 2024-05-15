@@ -1,9 +1,10 @@
 <% content_for(:title, t(".title")) %>
+<%= render "shared/flash_message" %>
+<% breadcrumb :user_new %>
 <div class="container">
   <div class="row position-relative position-absolute top-50 start-50 translate-middle">
     <h1 class="d-flex justify-content-center"><%= t('.member_registration') %></h1>
     <div class="col-md-12 mx-auto">
-      <%= render "shared/flash_message" %>
       <%= render "shared/error_message", model: @user %>
       <%= form_with model: @user do |f| %>
         <div class="mb-3">

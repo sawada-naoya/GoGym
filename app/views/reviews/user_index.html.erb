@@ -1,5 +1,5 @@
 <% content_for(:title, "#{@user.name}") %>
-<div class="wrapper">
+<% breadcrumb :user_show, @user %>
   <div class="d-flex flex-column mx-auto align-items-center">
     <h1 class="text-center" style="padding: 0 250px;"><%= @user.name %>のマイページ</h1>
     <%= render "/shared/mypage_info" %>

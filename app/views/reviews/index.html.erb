@@ -1,4 +1,5 @@
 <% content_for(:title, "#{@gym.name}") %>
+<% breadcrumb :gym, @gym %>
 <div class="wrapper">
   <%= render "shared/flash_message" %>
   <div class="d-flex flex-column mx-auto align-items-center">
