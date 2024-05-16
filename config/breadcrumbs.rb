@@ -52,3 +52,13 @@ crumb :inquiry do
   link "お問い合わせ", new_inquiry_path
   parent :root
 end
+
+crumb :terms do
+  link "利用規約", terms_path
+  parent :root
+end
+
+crumb :privacy do
+  link "プライバシーポリシー", privacy_path
+  parent :root
+end
