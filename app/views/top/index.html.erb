@@ -1,32 +1,19 @@
 <% content_for(:title, t(".title")) %>
-<%= render "shared/flash_message" %>
 <% breadcrumb :root %>
-<div class="top-wrapper">
-  <div class="row justify-content-center">
-    <h2 class="col-md-12 text-center mb-3" style="font-weight: 900;"><%= t('top.index.text')%></h2>
-  </div>
-  <%= search_form_for @q, url: gyms_path do |f| %>
-    <div class="row row-cols-lg-auto justify-content-center">
-      <div class="col px-1">
-        <%= f.search_field :name_cont, class: 'form-control', placeholder: 'エリア・駅' %>
-      </div>
-      <div class="col px-1">
-        <%= f.search_field :name_cont, class: 'form-control',placeholder: 'キーワード' %>
-      </div>
-      <div class="col px-1">
-        <%= f.submit t('top.index.search'), class: 'btn btn-primary btn-success' %>
-      </div>
-    </div>
-  <% end %>
+<%= render "shared/flash_message" %>
+<div class="row justify-content-center">
+  <h2 class="col-md-12 text-center mb-3" style="font-weight: 900;"><%= t('top.index.text')%></h2>
 </div>
-
-<style>
-  .top-wrapper {
-    background-image: url("<%= asset_path('fitness_center.jpg') %>");
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    padding-top: 50px; /* ヘッダーの下に余白を追加 */
-    height: calc(100vh - 150px); /* 画面全体の高さから上下の余白を引く */
-  }
-</style>
+<%= search_form_for @q, url: gyms_path do |f| %>
+  <div class="row row-cols-lg-auto justify-content-center">
+    <div class="col px-1">
+      <%= f.search_field :name_cont, class: 'form-control', placeholder: 'エリア・駅' %>
+    </div>
+    <div class="col px-1">
+      <%= f.search_field :name_cont, class: 'form-control',placeholder: 'キーワード' %>
+    </div>
+    <div class="col px-1">
+      <%= f.submit t('top.index.search'), class: 'btn btn-primary btn-success' %>
+    </div>
+  </div>
+<% end %>
