@@ -56,8 +56,8 @@ ja:
     no_result: "ジムがありません"
     no_search_result: "お探しのジムは見つかりませんでした。"
     require_login: "ログインしてください"
-    review_create_success: "口コミを作成しました"
-    review_create_failure: "口コミを作成出来ませんでした"
+    review_create_success: "口コミを投稿しました"
+    review_create_failure: "口コミを投稿出来ませんでした"
     review_update_success: 口コミを編集しました
     review_update_failure: 口コミを編集できませんでした
     review_delete_success: 口コミを削除しました
