@@ -7,12 +7,12 @@
       <% unless current_page?(root_path) %>
         <%= search_form_for @q, url: gyms_path do |f| %>
           <div class="row row-cols-lg-auto">
-            <div class="col px-1">
-              <%= f.search_field :location_address_cont, placeholder: "エリア・駅", id: "address", class: 'form-control' %>
-            </div>
-            <div class="col px-1">
-              <%= f.submit t('top.index.search'), onclick: "codeAddress()", class: 'btn btn-primary btn-success' %>
-            </div>
+            <%# <div class="col px-1"> %>
+              <%# <%= f.search_field :location_address_cont, placeholder: "エリア・駅", id: "address", class: 'form-control' %>
+            <%# </div> %>
+            <%# <div class="col px-1"> %>
+              <%# <%= f.submit t('top.index.search'), onclick: "codeAddress()", class: 'btn btn-primary btn-success' %>
+            <%# </div> %>
             <div class="col px-1">
               <%= f.search_field :name_cont, class: 'form-control',placeholder: 'キーワード' %>
             </div>

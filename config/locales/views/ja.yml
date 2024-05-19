@@ -58,6 +58,9 @@ ja:
     require_login: "ログインしてください"
     review_create_success: "口コミを作成しました"
     review_create_failure: "口コミを作成出来ませんでした"
+    review_update_success: 口コミを編集しました
+    review_update_failure: 口コミを編集できませんでした
+    review_delete_success: 口コミを削除しました
     gym_create_success: "ジムの情報を作成しました"
     gym_create_failure: "ジムの情報を作成出来ませんでした"
     gym_update_success: "ジム情報を更新しました"

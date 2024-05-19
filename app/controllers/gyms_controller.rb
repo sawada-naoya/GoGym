@@ -1,6 +1,7 @@
 class GymsController < ApplicationController
-  # ユーザーがログインしているかどうかをチェック
   before_action :require_login, only: [:new, :create, :edit, :update]
+  before_action :set_gym, only: [:show, :edit, :update, :images_index]
+  before_action :calculate_average_rating, only: [:show, :images_index]
 
   # GET /gyms/new
   def new
@@ -21,7 +22,18 @@ class GymsController < ApplicationController
   end
 
   def index
+    # if params[:q][:location_address_cont].present?
+    #   # まず、地理的な検索を行う
+    #   @gyms = Gym.near(params[:q][:location_address_cont], 10)
+    #   @q = @gyms.ransack(params[:q])
+    # else
+    #   # 地理的な検索がない場合、通常の検索を行う
+    #   @q = Gym.ransack(params[:q])
+    # end
+    # 検索結果をページネーションで区切る
     @gyms = @q.result(distinct: true).page(params[:page]).per(5)
+    @average_ratings = calculate_average_ratings_for_gyms(@gyms)
+    @gym_images = get_gym_images(@gyms)
   end
 
   def images_index
@@ -52,6 +64,22 @@ class GymsController < ApplicationController
 
   private
 
+  def set_gym
+    @gym = Gym.find(params[:id])
+  end
+
+  def calculate_average_rating
+    @average_rating = @gym.reviews.average(:rating).to_f.round(2)
+  end
+
+  def calculate_average_ratings_for_gyms(gyms)
+    # each_with_objectメソッドは、指定したオブジェクト（ここでは空のハッシュ{}）を使って各ジムを処理
+    gyms.each_with_object({}) do |gym, ratings|
+      # ratings[gym.id]にジムの平均点を設定することで、ジムのIDをキーとして、平均評価を値とするハッシュを構築
+      ratings[gym.id] = gym.reviews.average(:rating).to_f.round(2)
+    end
+  end
+
   def gym_params
     params.require(:gym).permit(:name, :membership_fee, :business_hours, :access, :remarks, :website,
     location_attributes: [:address])
@@ -69,5 +97,14 @@ class GymsController < ApplicationController
       flash[:danger] = message
       redirect_to login_path
     end
+  end
+
+  def get_gym_images(gyms)
+    images = {}
+    gyms.each do |gym|
+      review_with_image = gym.reviews.where.not(image: nil).first
+      images[gym.id] = review_with_image&.image || 'fake'
+    end
+    images
   end
 end

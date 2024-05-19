@@ -3,7 +3,6 @@
 <div class="wrapper">
   <%= render "shared/flash_message" %>
   <div class="d-flex flex-column mx-auto align-items-center">
-    <h1 class="text-center" style="padding: 0 250px;"><%= @gym.name %></h1>
     <%= render "/shared/gym_info" %>
     <div class="row justify-content-center review-container">
       <% @reviews.each_with_index do |review, index| %>

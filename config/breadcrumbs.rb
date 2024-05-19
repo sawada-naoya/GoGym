@@ -37,6 +37,21 @@ crumb :gym_reviews do |gym|
   parent :gym, gym
 end
 
+crumb :gym_reviews do |gym|
+  link "口コミ一覧", gym_reviews_path(gym_id: gym.id)
+  parent :gym, gym
+end
+
+crumb :new_review do |gym|
+  link "口コミ投稿", new_gym_review_path(gym)
+  parent :gym, gym
+end
+
+crumb :edit_review do |gym, review|
+  link "口コミ編集", edit_review_path(gym, review)
+  parent :gym, gym
+end
+
 crumb :edit_gym do |gym|
   link "ジムの編集", edit_gym_path(gym)
   parent :gym, gym

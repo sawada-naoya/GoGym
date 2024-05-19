@@ -82,3 +82,21 @@ footer {
   width: 100%; /* カードを画面幅いっぱいに広げる */
   max-height: 600px; /* カードの高さを固定 */
 }
+
+.star-rating {
+  display: inline-block;
+  margin-left: 10px;
+}
+
+.average-rating {
+  display: flex;
+  align-items: center;
+}
+
+.average-rating h3 {
+  margin-bottom: 0;
+}
+
+#average-star-rating {
+  margin-left: 10px;
+}
