@@ -1,0 +1,55 @@
+<div class="row justify-content-center review-container">
+  <% @reviews.each do |review| %>
+    <turbo-frame id="review-<%= review.id %>">
+      <div class="card mb-3">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+          <span style="margin-left: 10px;"><%= review.user.name %></span>
+          <div id="star-rating-<%= review.id %>" class="star-rating" data-score="<%= review.rating %>"></div>
+            <span>投稿日 <%= Time.zone.now.strftime("%Y/%m/%d") %></span>
+          </div>
+          <h4 class="card-title"><%= review.title %></h4>
+          <div class="card-text">
+            <p><%= review.content %></p>
+          </div>
+          <div class="card-text">
+            <% if review.image.present? %>
+              <%= image_tag review.image.url %>
+            <% end %>
+          </div>
+          <% if review.user == current_user %>
+            <div class="d-flex justify-content-end mt-2">
+              <%= link_to '編集', edit_review_path(review), class: "btn btn-success btn-sm", data: { turbo: "false" } %>
+              <%= link_to '削除', review_path(review), class: "btn btn-danger btn-sm ms-2", data: { turbo_method: "delete", turbo_confirm: '本当に削除しますか？' }, id: "delete-review-#{review.id}" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </turbo-frame>
+  <% end %>
+</div>
+
+<script>
+// Turboがロードされたときにイベントをリッスンします。
+// Turboによるページのロードやページ遷移が完了したときに、特定のHTML要素に星評価を初期化する
+document.addEventListener('turbo:load', function() {
+  // querySelectorAllメソッドを使用して、IDが"star-rating-"で始まるすべての要素を取得
+  // 取得した要素（starRating）に対して、forEachメソッドでループ処理
+  document.querySelectorAll('[id^="star-rating-"]').forEach(function(starRating) {
+    // 各starRating要素のdata-score属性の値を取得し、ratingという定数に格納
+    // このdata-score属性には、その要素に関連付けられた評価スコアが含まれている
+    const rating = starRating.getAttribute('data-score');
+     // 要素をクリアする
+    starRating.innerHTML = '';
+    // Ratyの新しいインスタンスを作成し、starRating要素を渡す
+    new Raty(starRating, {
+      size: 36,
+      starOff: '/assets/star-off.png',
+      starOn: '/assets/star-on.png',
+      starHalf: '/assets/star-half.png',
+      score: rating,
+      readOnly: true
+    }).init();
+  });
+});
+</script>

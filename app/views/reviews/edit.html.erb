@@ -1,32 +1,32 @@
 <% content_for(:title, "#{@gym.name}") %>
-<% breadcrumb :new_review, @gym %>
+<% breadcrumb :edit_review, @gym, @review %>
 <div class="wrapper">
   <%= render "shared/flash_message" %>
   <div class="d-flex flex-column mx-auto align-items-center">
-    <%= render "/shared/gym_info" %>
+    <h3 class="text-center" style="padding: 0 250px;">口コミの編集</h3>
     <div class="card mt-4 border border-black">
-      <%= form_with model: [@gym, @review], local: true, multipart: true do |f| %>
+      <%= form_with model: [@gym, @review], url: {controller: 'reviews', action: 'update' }, local: true, multipart: true do |f| %>
         <ul class="list-group list-group-flush">
           <div class="d-flex justify-content-between align-items-center" style="border-bottom: 1px solid black;">
             <div class="d-flex align-items-center" style="margin-bottom: 10px; margin-top: 10px; margin-left: 10px;" id="star">
-              <%= f.label :rating,'評価' %>
-              <%= f.hidden_field :rating, id: :review_star %>
+              <%= f.label :rating, '評価' %>
+              <%= f.hidden_field :rating, id: :review_star, value: @review.rating %>
               <div id="star-rating" style="margin-left: 10px;"></div>
             </div>
-            <span style="margin-right: 10px;">投稿日 <%= Time.zone.now.strftime("%Y/%m/%d") %></span>
+            <span style="margin-right: 10px;">投稿日 <%= @review.created_at.strftime("%Y/%m/%d") %></span>
           </div>
           <div class="mb-2" style="border-bottom: 1px solid black;">
-            <%= f.text_field :title, class: "form-control", placeholder: "タイトルを入力してください" %>
+            <%= f.text_field :title, class: "form-control", placeholder: "タイトルを入力してください", value: @review.title %>
           </div>
           <div class="mb-2" style="border-bottom: 1px solid black;">
-            <%= f.text_area :content, class: "form-control border-0", style: "height: 200px;", placeholder: "口コミ本文を入力してください（100文字）" %>
+            <%= f.text_area :content, class: "form-control border-0", style: "height: 200px;", placeholder: "口コミ本文を入力してください（100文字）", value: @review.content %>
           </div>
           <div class="mb-2">
             <%= f.label :image, "写真を追加してください", class: "form-label", style: "margin-left: 10px;" %>
             <%= f.file_field :image, class: "form-control" %>
           </div>
           <div class="d-flex justify-content-center mb-2">
-            <%= f.submit "投稿", class: "btn btn-success" %>
+            <%= f.submit "更新", class: "btn btn-success" %>
           </div>
         </ul>
       <% end %>
@@ -48,6 +48,7 @@
       starHalf: '/assets/star-half.png',
       scoreName: 'review[rating]',
       half: true,
+      score: <%= raw @review.rating || 0 %>, // 初期評価を設定
       click: function(score, element, evt) {
         document.querySelector('#review_star').value = score;
       }
