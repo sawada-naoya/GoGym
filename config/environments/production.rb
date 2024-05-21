@@ -88,15 +88,15 @@ Rails.application.configure do
     config.logger    = ActiveSupport::TaggedLogging.new(logger)
   end
 
-  config.hosts << "gogym-thrumming-pond-2666.fly.dev"
+  config.hosts << "gogym.fly.dev"
 
   # メール設定
-  config.action_mailer.default_url_options = { host: 'gogym-thrumming-pond-2666.fly.dev' }
+  config.action_mailer.default_url_options = { host: 'gogym.fly.dev' }
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
     address: 'smtp.sendgrid.net',
     port: 587,
-    domain: 'gogym-thrumming-pond-2666.fly.dev',
+    domain: 'gogym.fly.dev',
     user_name: 'apikey', # SendGridではユーザー名は 'apikey' に固定
     password: ENV['SENDGRID_API_KEY'], # 環境変数に設定したAPIキー
     authentication: :plain,
