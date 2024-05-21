@@ -100,11 +100,7 @@ gem 'mini_magick'
 
 gem 'kaminari', "1.2.2"
 
-# gem 'bootstrap5-kaminari-views'
-
 gem 'ransack', "3.2.1"
-
-gem 'letter_opener_web'
 
 gem 'hotwire-rails'
 
@@ -114,10 +110,10 @@ gem 'font-awesome-sass'
 
 gem 'dotenv-rails'
 
-gem "geocoder"
-
 gem 'google_places'
 
 gem 'gretel'
 
 gem 'letter_opener_web'
+
+gem "dockerfile-rails", ">= 1.6", :group => :development

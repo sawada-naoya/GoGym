@@ -1,13 +1,14 @@
-# fly.toml app configuration file generated for gogym-muddy-field-4658 on 2024-04-14T15:11:12+09:00
+# fly.toml app configuration file generated for gogym on 2024-05-20T23:42:38+09:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'gogym-muddy-field-4658'
+app = 'gogym'
 primary_region = 'nrt'
+console_command = '/rails/bin/rails console'
 
 [build]
-  dockerfile = "Dockerfile"
+  image = "registry.fly.io/gogym:latest"
 
 [http_service]
   internal_port = 3001
