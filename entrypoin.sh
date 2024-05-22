@@ -15,5 +15,3 @@ bundle exec rails assets:precompile
 
 # Then exec the container's main process (what's set as CMD in the Dockerfile).
 exec "$@"
-
-chmod +x entrypoint.sh
