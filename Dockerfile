@@ -13,7 +13,7 @@ RUN curl -sL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - \
 && wget --quiet -O - /tmp/pubkey.gpg https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
 && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
 && apt-get update -qq \
-&& apt-get install -y build-essential nodejs yarn libvips
+&& apt-get install -y build-essential nodejs yarn libvips libpq-dev
 
 # コンテナ内に作業ディレクトリ GoGym を作成
 RUN mkdir /GoGym
@@ -36,4 +36,12 @@ RUN yarn install
 # ローカルのGoGym配下のファイルをコンテナ内のGoGym配下にコピー
 COPY . /GoGym
 
+# プリコンパイルとマイグレーションのためのエントリポイントスクリプトを追加
+COPY entrypoint.sh /usr/bin/
+RUN chmod +x /usr/bin/entrypoint.sh
+
+# CMDをエントリーポイントスクリプトに変更
+ENTRYPOINT ["entrypoint.sh"]
+
+# ポート3001でアプリケーションを起動
 CMD ["rails", "server", "-b", "0.0.0.0", "-p", "3001"]
