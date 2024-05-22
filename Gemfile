@@ -115,5 +115,3 @@ gem 'google_places'
 gem 'gretel'
 
 gem 'letter_opener_web'
-
-gem "dockerfile-rails", ">= 1.6", :group => :development

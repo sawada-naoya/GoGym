@@ -103,7 +103,7 @@ class GymsController < ApplicationController
     images = {}
     gyms.each do |gym|
       review_with_image = gym.reviews.where.not(image: nil).first
-      images[gym.id] = review_with_image&.image || 'fake'
+      images[gym.id] = review_with_image&.image&.url || 'fake'
     end
     images
   end
