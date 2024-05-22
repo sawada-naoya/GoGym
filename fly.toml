@@ -31,7 +31,7 @@ console_command = '/rails/bin/rails console'
     handlers = ["tls", "http"]
     port = "443"
 
-  [[services.concurrency]]
+  [services.concurrency]
     type = "requests"
     hard_limit = 25
     soft_limit = 20
