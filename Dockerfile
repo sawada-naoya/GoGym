@@ -39,6 +39,9 @@ RUN yarn install
 # ローカルのGoGym配下のファイルをコンテナ内のGoGym配下にコピー
 COPY . /GoGym
 
+# アセットのプリコンパイル
+RUN bundle exec rails assets:precompile
+
 # プリコンパイルとマイグレーションのためのエントリポイントスクリプトを追加
 COPY entrypoint.sh /usr/bin/
 RUN chmod +x /usr/bin/entrypoint.sh
