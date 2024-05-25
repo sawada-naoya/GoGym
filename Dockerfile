@@ -11,6 +11,10 @@ ENV LANG C.UTF-8
 ENV TZ Asia/Tokyo
 ENV RAILS_ENV=production
 
+# 環境変数の設定
+ARG SECRET_KEY_BASE
+ENV SECRET_KEY_BASE=${SECRET_KEY_BASE}
+
 # 必要なパッケージのインストール
 RUN curl -sL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - \
 && wget --quiet -O - /tmp/pubkey.gpg https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
