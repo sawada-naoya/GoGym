@@ -38,12 +38,6 @@ Rails.application.configure do
     config.logger    = ActiveSupport::TaggedLogging.new(logger)
   end
 
-  # ファイル出力用のロガーを追加
-  file_logger = ActiveSupport::Logger.new("log/production.log")
-  file_logger.formatter = config.log_formatter
-  config.logger.extend(ActiveSupport::TaggedLogging.new(file_logger))
-
-
   config.hosts << "gogym.fly.dev"
 
   # メール設定
