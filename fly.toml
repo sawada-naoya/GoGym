@@ -26,7 +26,3 @@ console_command = '/rails/bin/rails console'
 [mounts]
   source = "assets_volume_1"
   destination = "/app/public/assets"
-
-[mounts]
-  source = "assets_volume_2"
-  destination = "/app/public/assets"
