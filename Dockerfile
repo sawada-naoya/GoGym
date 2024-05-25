@@ -42,6 +42,9 @@ COPY . /GoGym
 # アセットのプリコンパイルを実行
 RUN bundle exec rails assets:precompile RUN RAILS_ENV=production
 
+# プリコンパイル後の確認
+RUN ls -l public/assets || echo "public/assets not found"
+
 EXPOSE 3001
 
 # ポート3001でアプリケーションを起動
