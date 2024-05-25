@@ -8,7 +8,7 @@ primary_region = 'nrt'
 console_command = '/rails/bin/rails console'
 
 [build]
-  image = "registry.fly.io/gogym:latest"
+  dockerfile = "./Dockerfile"
 
 [http_service]
   internal_port = 3001
