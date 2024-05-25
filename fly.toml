@@ -19,7 +19,7 @@ console_command = '/rails/bin/rails console'
   processes = ['app']
 
 [deploy]
-  release_command = "/rails/bin/rails db:migrate"
+  release_command = "bundle exec rails db:migrate"
 
 [[vm]]
   memory = '1gb'
