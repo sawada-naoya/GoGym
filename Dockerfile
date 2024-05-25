@@ -39,14 +39,10 @@ RUN yarn install
 # ローカルのGoGym配下のファイルをコンテナ内のGoGym配下にコピー
 COPY . /GoGym
 
-# プリコンパイルとマイグレーションのためのエントリポイントスクリプトを追加
-COPY entrypoint.sh /usr/bin/
-RUN chmod +x /usr/bin/entrypoint.sh
+# アセットのプリコンパイルを実行
+RUN bundle exec rails assets:precompile
 
 EXPOSE 3001
-
-# CMDをエントリーポイントスクリプトに変更
-ENTRYPOINT ["entrypoint.sh"]
 
 # ポート3001でアプリケーションを起動
 CMD ["rails", "server", "-b", "0.0.0.0", "-p", "3001"]
