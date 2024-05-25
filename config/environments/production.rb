@@ -7,8 +7,6 @@ Rails.application.configure do
   config.consider_all_requests_local       = false
   config.action_controller.perform_caching = true
 
-  config.require_master_key = true
-
   # 静的ファイルの提供を有効化
   config.public_file_server.enabled = true
 
