@@ -4,7 +4,6 @@ Rails.application.configure do
   config.cache_classes = true
   config.eager_load = true
 
-  # Full error reports are disabled and caching is turned on.
   config.consider_all_requests_local       = false
   config.action_controller.perform_caching = true
 
@@ -13,8 +12,9 @@ Rails.application.configure do
 
   config.public_file_server.enabled = ENV["RAILS_SERVE_STATIC_FILES"].present?
 
-  config.assets.compile = false
+  config.assets.compile = true
   config.assets.digest = true
+  config.assets.precompile += %w( application.css )
   config.assets.prefix = "/assets"
 
   config.active_storage.service = :local
