@@ -31,13 +31,18 @@ Rails.application.configure do
 
   config.log_formatter = ::Logger::Formatter.new
 
+  # ログの出力先を標準出力とファイルの両方に設定する
   if ENV["RAILS_LOG_TO_STDOUT"].present?
     logger           = ActiveSupport::Logger.new(STDOUT)
     logger.formatter = config.log_formatter
     config.logger    = ActiveSupport::TaggedLogging.new(logger)
-  else
-    config.logger = ActiveSupport::Logger.new("log/production.log")
   end
+
+  # ファイル出力用のロガーを追加
+  file_logger = ActiveSupport::Logger.new("log/production.log")
+  file_logger.formatter = config.log_formatter
+  config.logger.extend(ActiveSupport::TaggedLogging.new(file_logger))
+
 
   config.hosts << "gogym.fly.dev"
 
