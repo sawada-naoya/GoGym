@@ -40,7 +40,7 @@ RUN yarn install
 COPY . /GoGym
 
 # アセットのプリコンパイルを実行
-RUN bundle exec rails assets:precompile RAILS_ENV=production
+RUN bundle exec rails assets:precompile
 
 # プリコンパイル後の確認
 RUN ls -l public/assets || echo "public/assets not found"
