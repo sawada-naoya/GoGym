@@ -43,6 +43,8 @@ COPY . /GoGym
 COPY entrypoint.sh /usr/bin/
 RUN chmod +x /usr/bin/entrypoint.sh
 
+EXPOSE 3001
+
 # CMDをエントリーポイントスクリプトに変更
 ENTRYPOINT ["entrypoint.sh"]
 
