@@ -40,7 +40,7 @@ RUN yarn install
 COPY . /GoGym
 
 # アセットのプリコンパイルを実行
-RUN bundle exec rails assets:precompile
+RUN bundle exec rails assets:precompile RUN RAILS_ENV=production
 
 EXPOSE 3001
 
