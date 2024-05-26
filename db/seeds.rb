@@ -36,8 +36,8 @@ if Rails.env.production?
     created_gym = Gym.create!(
       name: gym['name'],
       access: gym['access'] || 'アクセス情報がありません',
-      membership_fee: gym['membership_fee'] || ' ',
-      business_hours: gym['business_hours'] || ' ',
+      membership_fee: gym['membership_fee'] || '料金情報がありません',
+      business_hours: gym['business_hours'] || '営業時間情報がありません',
       website: gym['website'] || ' '
     )
 
