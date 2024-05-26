@@ -24,18 +24,18 @@ services:
     environment:
       TZ: Asia/Tokyo
       ENVFILE: ${GOOGLE_MAPS_API_KEY}
-      DATABASE_HOST: ${DATABASE_HOST}
-      DATABASE_NAME: ${DATABASE_NAME}
-      DATABASE_USER: ${DATABASE_USER}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      DATABASE_PORT: ${DATABASE_PORT}
-      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-      RAILS_ENV: production
+      # DATABASE_HOST: ${DATABASE_HOST}
+      # DATABASE_NAME: ${DATABASE_NAME}
+      # DATABASE_USER: ${DATABASE_USER}
+      # DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      # DATABASE_PORT: ${DATABASE_PORT}
+      # SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      # RAILS_ENV: production
     ports:
       - "3000:3000"
     # web サービスは db サービスに依存する。これにより、db サービスが起動されるまで web サービスは起動されない
-    # depends_on:
-    #   - db
+    depends_on:
+      - db
 volumes:
   postgres_data:
   bundle_data:
