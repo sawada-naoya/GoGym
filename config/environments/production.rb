@@ -44,11 +44,11 @@ Rails.application.configure do
   config.action_mailer.default_url_options = { host: 'gogym.fly.dev' }
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
-    address: 'smtp.sendgrid.net',
+    address: 'smtp.gmail.com',
     port: 587,
-    domain: 'gogym.fly.dev',
-    user_name: 'apikey', # SendGridではユーザー名は 'apikey' に固定
-    password: ENV['SENDGRID_API_KEY'], # 環境変数に設定したAPIキー
+    domain: 'gmail.com',
+    user_name: ENV['GMAIL_USERNAME'],
+    password: ENV['GMAIL_PASSWORD'],
     authentication: :plain,
     enable_starttls_auto: true
   }
