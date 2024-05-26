@@ -28,8 +28,8 @@ if Rails.env.production?
   # JSONファイルから読み込んだジムデータをデータベースに保存
   gyms.each do |gym|
     # 既存のジムデータを確認
-    # existing_gym = Gym.find_by(name: gym['name'], locations: { address: gym['address'] })
-    # next if existing_gym
+    existing_gym = Gym.joins(:location).find_by(name: gym['name'], locations: { address: gym['address'] })
+    next if existing_gym
 
     lat, lng = get_coordinates(gym['address'])
 
