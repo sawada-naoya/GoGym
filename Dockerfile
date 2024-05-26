@@ -13,7 +13,9 @@ ENV RAILS_ENV=production
 
 # 環境変数の設定
 ARG SECRET_KEY_BASE
+ARG RAILS_MASTER_KEY
 ENV SECRET_KEY_BASE=${SECRET_KEY_BASE}
+ENV RAILS_MASTER_KEY=${RAILS_MASTER_KEY}
 
 # 必要なパッケージのインストール
 RUN curl -sL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - \
@@ -42,9 +44,6 @@ RUN yarn install
 
 # ローカルのGoGym配下のファイルをコンテナ内のGoGym配下にコピー
 COPY . /GoGym
-
-# アセットのプリコンパイルを実行
-RUN bundle exec rails assets:precompile
 
 # プリコンパイル後の確認
 RUN ls -l public/assets || echo "public/assets not found"
