@@ -49,8 +49,18 @@
           <td style="background-color: white;"><%= @gym.website %></td>
         </tr>
         <tr class="table-secondary">
-          <th scope="row" style="text-align: center;">ジャンル</th>
-          <td style="background-color: white;">タグ</td>
+          <th scope="row" style="text-align: center;">タグ</th>
+          <td style="background-color: white;">
+            <% if @tags.any? %>
+              <% @tags.each do |tag| %>
+                <%= link_to tag_path(tag) do %>
+                  <span class="badge bg-success"><%= tag.name %></span>
+                <% end %>
+              <% end %>
+            <% else %>
+              タグがありません
+            <% end %>
+          </td>
         </tr>
       </tbody>
     </table>

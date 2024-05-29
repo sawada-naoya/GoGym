@@ -10,9 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_05_16_141843) do
+ActiveRecord::Schema[7.0].define(version: 2024_05_29_015324) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "gym_tags", force: :cascade do |t|
+    t.bigint "gym_id", null: false
+    t.bigint "tag_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["gym_id", "tag_id"], name: "index_gym_tags_on_gym_id_and_tag_id", unique: true
+    t.index ["gym_id"], name: "index_gym_tags_on_gym_id"
+    t.index ["tag_id"], name: "index_gym_tags_on_tag_id"
+  end
 
   create_table "gyms", force: :cascade do |t|
     t.string "name", null: false
@@ -77,6 +87,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_16_141843) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  add_foreign_key "gym_tags", "gyms"
+  add_foreign_key "gym_tags", "tags"
   add_foreign_key "reviews", "gyms"
   add_foreign_key "reviews", "users"
 end

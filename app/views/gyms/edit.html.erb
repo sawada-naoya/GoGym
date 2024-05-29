@@ -39,6 +39,16 @@
           <%= f.text_field :website, id: :gym_website, class: "form-control"%>
         </div>
 
+                <div class="mb-3">
+          <%= f.label :tags, "タグ", class: "form-label" %>
+          <% @tags.each do |tag| %>
+            <div class="form-check">
+              <%= check_box_tag "gym[tag_ids][]", tag.id, @gym.tags.include?(tag), class: "form-check-input", id: "gym_tag_#{tag.id}" %>
+              <%= label_tag "gym_tag_#{tag.id}", tag.name, class: "form-check-label" %>
+            </div>
+          <% end %>
+        </div>
+
         <div class="row mb-3 justify-content-center mb-5">
           <div class="col-auto">
             <%= f.submit "更新する", class: "btn btn-success" %>

@@ -16,6 +16,9 @@ Rails.application.routes.draw do
   end
   resources :locations
 
+  resources :tags, only: [:show] do
+    get 'gyms', to: 'gyms#index', as: 'gyms_by_tag'
+  end
 
   resources :gyms do
     member do
