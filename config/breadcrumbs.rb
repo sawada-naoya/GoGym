@@ -77,3 +77,9 @@ crumb :privacy do
   link "プライバシーポリシー", privacy_path
   parent :root
 end
+
+# タグの詳細ページ
+crumb :tag do |tag|
+  link tag.name, tag_path(tag)
+  parent :gyms
+end

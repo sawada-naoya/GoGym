@@ -7,6 +7,7 @@ class GymsController < ApplicationController
   def new
     @gym = Gym.new
     @gym.build_location
+    @tags = Tag.all
   end
 
   # POST /gyms
@@ -16,22 +17,19 @@ class GymsController < ApplicationController
       redirect_to @gym
       flash[:success] = t('flash.gym_create_success')
     else
+      @tags = Tag.all
       flash.now[:danger] = t('flash.gym_create_failure')
       render :new, status: :unprocessable_entity
     end
   end
 
   def index
-    # if params[:q][:location_address_cont].present?
-    #   # まず、地理的な検索を行う
-    #   @gyms = Gym.near(params[:q][:location_address_cont], 10)
-    #   @q = @gyms.ransack(params[:q])
-    # else
-    #   # 地理的な検索がない場合、通常の検索を行う
-    #   @q = Gym.ransack(params[:q])
-    # end
-    # 検索結果をページネーションで区切る
-    @gyms = @q.result(distinct: true).page(params[:page]).per(5)
+    if params[:tag_id]
+      @tag = Tag.find(params[:tag_id])
+      @gyms = @tag.gyms.page(params[:page]).per(5)
+    else
+      @gyms = @q.result(distinct: true).page(params[:page]).per(5)
+    end
     @average_ratings = calculate_average_ratings_for_gyms(@gyms)
     @gym_images = get_gym_images(@gyms)
   end
@@ -44,11 +42,13 @@ class GymsController < ApplicationController
   def show
     @gym = Gym.includes(:location, :reviews).find(params[:id])
     @gyms = Gym.includes(:location).all
+    @tags = @gym.tags
   end
 
   # データの編集画面を表示
   def edit
     @gym = Gym.find(params[:id])
+    @tags = Tag.all
   end
 
   def update
@@ -57,6 +57,7 @@ class GymsController < ApplicationController
       redirect_to @gym
       flash[:success] = t('flash.gym_update_success')
     else
+      @tags = Tag.all
       render :edit, status: :unprocessable_entity
       flash.now[:danger] = t('flash.gym_update_failure')
     end
@@ -81,7 +82,7 @@ class GymsController < ApplicationController
   end
 
   def gym_params
-    params.require(:gym).permit(:name, :membership_fee, :business_hours, :access, :remarks, :website,
+    params.require(:gym).permit(:name, :membership_fee, :business_hours, :access, :remarks, :website, tag_ids: [],
     location_attributes: [:address])
   end
 
