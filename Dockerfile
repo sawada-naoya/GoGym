@@ -39,7 +39,7 @@ RUN yarn install
 # ローカルのGoGym配下のファイルをコンテナ内のGoGym配下にコピー
 COPY . /GoGym
 
-EXPOSE 3001
+EXPOSE 3000
 
 # ポート3001でアプリケーションを起動
-CMD ["rails", "server", "-b", "0.0.0.0", "-p", "3001"]
+CMD ["rails", "server", "-b", "0.0.0.0", "-p", "3000"]
