@@ -39,6 +39,8 @@ RUN yarn install
 # ローカルのGoGym配下のファイルをコンテナ内のGoGym配下にコピー
 COPY . /GoGym
 
+ENTRYPOINT ["./entrypoints.sh"]
+
 EXPOSE 3000
 
 # ポート3001でアプリケーションを起動
