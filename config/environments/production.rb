@@ -53,9 +53,9 @@ Rails.application.configure do
   #   enable_starttls_auto: true
   # }
   # デプロイするサービスのホストを追加する(render)
-  config.hosts << 'gogym.onrender.com'
+  config.hosts << 'gogym-m40u.onrender.com'
   # メール設定
-  config.action_mailer.default_url_options = { host: 'gogym.onrender.com' }
+  config.action_mailer.default_url_options = { host: 'gogym-m40u.onrender.com' }
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
     address: 'smtp.gmail.com',

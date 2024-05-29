@@ -32,3 +32,11 @@ test:
   # database: GoGym_production
   # username: GoGym
   # password: <%= ENV["GOGYM_DATABASE_PASSWORD"] %>
+
+# renderデプロイ時の設定
+production:
+  <<: *default
+  database: gogymdb
+  username: <%= ENV['DATABASE_USERNAME'] %>
+  password: <%= ENV['DATABASE_PASSWORD'] %>
+  host: <%= ENV['DATABASE_HOST'] %>
