@@ -9,7 +9,7 @@ ARG RUBY_VERSION
 ARG NODE_VERSION
 ENV LANG C.UTF-8
 ENV TZ Asia/Tokyo
-# ENV RAILS_ENV=production
+ENV RAILS_ENV=production
 
 # 必要なパッケージのインストール
 RUN curl -sL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - \
@@ -39,7 +39,7 @@ RUN yarn install
 # ローカルのGoGym配下のファイルをコンテナ内のGoGym配下にコピー
 COPY . /GoGym
 
-# ENTRYPOINT ["./entrypoints.sh"]
+ENTRYPOINT ["./entrypoints.sh"]
 
 EXPOSE 3000
 
