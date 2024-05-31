@@ -9,7 +9,6 @@ ARG RUBY_VERSION
 ARG NODE_VERSION
 ENV LANG C.UTF-8
 ENV TZ Asia/Tokyo
-ENV RAILS_ENV=production
 
 # 必要なパッケージのインストール
 RUN curl -sL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - \
