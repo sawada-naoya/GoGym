@@ -5,8 +5,6 @@ services:
     environment:
       TZ: Asia/Tokyo
       POSTGRES_PASSWORD: password
-      POSTGRES_USER: postgres
-      POSTGRES_DB: GoGym_development
     # コンテナ内のデータをホストマシンのデータと永続化するためのボリュームをマウント
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -26,11 +24,6 @@ services:
     environment:
       TZ: Asia/Tokyo
       ENVFILE: ${GOOGLE_MAPS_API_KEY}
-      DATABASE_HOST: db
-      DATABASE_USERNAME: postgres
-      DATABASE_PASSWORD: password
-      DATABASE_URL: postgres://postgres:password@db:5432/GoGym_development
-      RAILS_ENV: development
     ports:
       - "3000:3000"
     # web サービスは db サービスに依存する。これにより、db サービスが起動されるまで web サービスは起動されない
