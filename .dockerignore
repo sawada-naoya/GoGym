@@ -42,4 +42,4 @@ node_modules
 .ruby-lsp/**/*
 fly.toml
 
-docker-compose.override.yml
+docker-compose-dev.yml
