@@ -13,6 +13,9 @@ Rails.application.routes.draw do
   resources :inquiries, only: [:new, :create]
   resources :users do
     get 'reviews', to: 'reviews#user_index', as: 'user_reviews'
+    member do
+      get :favorites
+    end
   end
   resources :locations
 
@@ -28,5 +31,6 @@ Rails.application.routes.draw do
       get 'search'
     end
     resources :reviews, shallow: true
+    resource :favorite, only: [:create, :destroy]
   end
 end

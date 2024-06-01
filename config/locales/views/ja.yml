@@ -67,8 +67,8 @@ ja:
     gym_update_failure: "ジム情報を更新出来ませんでした"
     gym_delete_success: "ジム情報を削除しました"
     no_review: "口コミを入力してください"
-    bookmark_create: "ブックマークしました"
-    bookmark_delete: "ブックマークを外しました"
+    favorite_create: "お気に入りに追加しました"
+    favorite_delete: "お気に入りを解除しました"
     no_bookmark: "ブックマーク中の掲示板がありません"
     password_update_success: 'パスワードを変更しました'
     password_update_failure: 'パスワード変更出来ませんでした'

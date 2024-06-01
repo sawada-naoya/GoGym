@@ -1,0 +1,3 @@
+<%= turbo_stream.replace "favorite-button-for-gym-#{@gym.id}" do %>
+  <%= render 'favorites/unfavorite', gym: @gym %>
+<% end %>

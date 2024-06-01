@@ -1,0 +1,88 @@
+<% content_for(:title, "#{@user.name}") %>
+<%= render "shared/flash_message" %>
+<% breadcrumb :user_show, @user %>
+<div class="wrapper">
+  <div class="d-flex flex-column mx-auto align-items-center">
+    <h1 class="text-center" style="padding: 0 250px;"><%= @user.name %>のマイページ</h1>
+    <%= render "/shared/mypage_info" %>
+    <% @favorite_gyms.each do |gym| %>
+      <div class="card mb-3 mx-auto p-2" style="width: 50%;">
+        <div class="row g-0">
+          <div class="col-md-4 d-flex align-items-center">
+            <%= image_tag(@gym_images[gym.id], class: "img-fluid rounded", alt: "Gym Image") %>
+          </div>
+          <div class="col-md-8">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="card-title me-3"><%= link_to gym.name, gym_path(gym) %></h5>
+                <div id="favorite-button-for-gym-<%= gym.id %>">
+                  <% if current_user.favorite?(gym) %>
+                    <%= render 'favorites/unfavorite', gym: gym %>
+                  <% else %>
+                    <%= render 'favorites/favorite', gym: gym %>
+                  <% end %>
+                </div>
+              </div>
+              <div class="average-rating d-flex align-items-center mb-3">
+                <p>評価: <%= @average_ratings[gym.id] %></p>
+                <div class="stars">
+                  <div id="average-star-rating-<%= gym.id %>" class="raty"></div>
+                </div>
+              </div>
+              <p class="card-text"><%= gym.access %></p>
+              <p class="card-text">会費  <%= gym.membership_fee %></p>
+              <div class="card-text">
+                <% if gym.tags.any? %>
+                  <% gym.tags.each do |tag| %>
+                    <span class="badge bg-success"><%= tag.name %></span>
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+<div class="pagination d-flex justify-content-center">
+  <%= paginate @favorite_gyms%>
+</div>
+
+
+<script>
+  document.addEventListener('turbo:load', function() {
+    const gyms = <%= @favorite_gyms.map { |gym| { id: gym.id, rating: @average_ratings[gym.id] } }.to_json.html_safe %>;
+    gyms.forEach(function(gym) {
+      const averageRatingElement = document.getElementById('average-star-rating-' + gym.id);
+      if (averageRatingElement && !averageRatingElement.classList.contains('raty-initialized')) {
+        averageRatingElement.classList.add('raty-initialized');
+        new Raty(averageRatingElement, {
+          size: 20,  // 星のサイズを調整
+          starOff: '/assets/star-off.png',
+          starOn: '/assets/star-on.png',
+          starHalf: '/assets/star-half.png',
+          score: gym.rating,
+          readOnly: true
+        }).init();
+      }
+    });
+  });
+</script>
+
+<style>
+.average-rating p {
+  margin-bottom: 0;
+}
+
+.average-rating .stars {
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.average-rating .raty img {
+  width: 20px; /* アイコンのサイズを調整 */
+  height: 20px;
+}
+</style>
