@@ -15,13 +15,9 @@ RUN curl -sL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - \
 && wget --quiet -O - /tmp/pubkey.gpg https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
 && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
 && apt-get update -qq \
-&& apt-get install -y build-essential nodejs yarn libvips libpq-dev python3 python3-pip python3-venv \
+&& apt-get install -y build-essential nodejs yarn libvips libpq-dev \
 && apt-get clean \
 && rm -rf /var/lib/apt/lists/*
-
-# Python仮想環境の作成
-RUN python3 -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
 
 # コンテナ内に作業ディレクトリ GoGym を作成
 # RUN mkdir /GoGym

@@ -2,14 +2,14 @@
   <% if logged_in? %>
     <h3 class="text-lg font-semibold mb-6">あなたにおすすめのジム</h3>
     <div class="row justify-content-center g-3">
-      <% @recommended_gyms.first(3).each do |gym| %>
+      <% @gyms.first(3).each do |gym| %>
         <div class="col-12 col-sm-6 col-md-4">
           <div class="card shadow-sm" style="width: 18rem;">
-            <%= image_tag(gym_image(gym), size: "150x150", class: "card-img-top", alt: "Gym Image") %>
+            <%= image_tag(@gym_images[gym.id], size: "150x150", class: "card-img-top", alt: "Gym Image") %>
             <div class="card-body">
               <h6 class="card-title"><%= link_to gym.name, gym_path(gym) %></h6>
               <div class="average-rating d-flex align-items-center mb-3">
-                <p>評価: <%= gym_average_rating(gym) %></p>
+                <p>評価: <%= @average_ratings[gym.id] %></p>
                 <div class="stars">
                   <div id="average-star-rating-<%= gym.id %>" class="raty"></div>
                 </div>
@@ -22,14 +22,14 @@
   <% else %>
     <h3 class="text-lg font-semibold mb-6">よく見られているジムはこちら</h3>
     <div class="row justify-content-center g-3">
-      <% @popular_gyms.first(3).each do |gym| %>
+      <% @gyms.first(3).each do |gym| %>
         <div class="col-12 col-sm-6 col-md-4">
           <div class="card shadow-sm" style="width: 18rem;">
-            <%= image_tag(gym_image(gym), size: "150x150", class: "card-img-top", alt: "Gym Image") %>
+            <%= image_tag(@gym_images[gym.id], size: "150x150", class: "card-img-top", alt: "Gym Image") %>
             <div class="card-body">
               <h6 class="card-title"><%= link_to gym.name, gym_path(gym) %></h6>
               <div class="average-rating d-flex align-items-center mb-3">
-                <p>評価: <%= gym_average_rating(gym) %></p>
+                <p>評価: <%= @average_ratings[gym.id] %></p>
                 <div class="stars">
                   <div id="average-star-rating-<%= gym.id %>" class="raty"></div>
                 </div>
