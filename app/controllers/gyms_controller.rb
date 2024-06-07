@@ -32,6 +32,12 @@ class GymsController < ApplicationController
     end
     @average_ratings = calculate_average_ratings_for_gyms(@gyms)
     @gym_images = get_gym_images(@gyms)
+
+    # if logged_in?
+    #   @recommended_gyms = RecommendationService.recommended_gyms_for_user(current_user)
+    # else
+    #   @popular_gyms = RecommendationService.popular_gyms
+    # end
   end
 
   def images_index
