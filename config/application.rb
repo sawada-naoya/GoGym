@@ -16,5 +16,6 @@ module GoGym
     config.i18n.load_path += Dir[Rails.root.join('config', 'locales', 'view', '*.{rb, yml}')]
     config.decorator_class = 'Draper::Decorator'
     config.autoload_paths += %W(#{config.root}/app/decorators)
+    config.autoload_paths += %W(#{config.root}/app/services)
   end
 end

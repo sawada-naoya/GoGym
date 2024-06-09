@@ -1,8 +1,8 @@
 class UsersController < ApplicationController
-    # ユーザーがログインしているかどうかをチェック
     before_action :require_login, only: [:show, :favorites]
     before_action :set_user, only: [:show, :favorites, :edit_review, :update_review, :destroy_review]
     before_action :set_review, only: [:edit_review, :update_review, :destroy_review]
+    protect_from_forgery with: :null_session
 
   def new
     @user = User.new
