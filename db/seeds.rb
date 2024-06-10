@@ -23,6 +23,26 @@ def get_coordinates(address)
   end
 end
 
+tags = [
+  '駐車場',
+  '駐輪場',
+  'パーソナルトレーニング',
+  'タンニング',
+  '体組成計',
+  'サウナ',
+  'プール',
+  '酸素カプセル',
+  '24時間営業',
+  'お風呂',
+  'スタジオ',
+  'プロテインラウンジ',
+  'ウォーターサーバー'
+]
+
+tags.each do |tag_name|
+  Tag.find_or_create_by!(name: tag_name)
+end
+
 # 本番環境でのみジムデータを作成
 if Rails.env.production?
   # JSONファイルから読み込んだジムデータをデータベースに保存
@@ -64,6 +84,16 @@ else
   # ユーザーのIDを取得
   user_ids = User.pluck(:id)
 
+  # タグの作成
+  tags = [
+    '駐車場', '駐輪場', 'パーソナルトレーニング', 'タンニング',
+    '体組成計', 'サウナ', 'プール', '酸素カプセル',
+    '24時間営業', 'お風呂', 'スタジオ', 'プロテインラウンジ',
+    'ウォーターサーバー'
+  ]
+
+  tag_records = tags.map { |tag_name| Tag.find_or_create_by!(name: tag_name) }
+
   # JSONファイルから読み込んだジムデータをデータベースに保存
   gyms.each do |gym|
     lat, lng = get_coordinates(gym['address'])
@@ -89,31 +119,14 @@ else
       Review.create!(
         title: Faker::JapaneseMedia::StudioGhibli.movie,
         content: Faker::JapaneseMedia::StudioGhibli.quote,
-        rating: rand(1.0..5.0).round(1), # 1.0から5.0のランダムな評価を追加
+        rating: (rand(9) * 0.5 + 1.0).round(1), # 1.0から5.0のランダムな評価を追加
         image: 'app/assets/images/fake.jpg',
         user_id: user_ids.sample,
         gym_id: created_gym.id # 正しい gym_id を使用
       )
     end
+
+    # 各ジムにランダムに4つのタグを関連付け
+    created_gym.tags << tag_records.sample(4)
   end
-end
-
-tags = [
-  '駐車場',
-  '駐輪場',
-  'パーソナルトレーニング',
-  'タンニング',
-  '体組成計',
-  'サウナ',
-  'プール',
-  '酸素カプセル',
-  '24時間営業',
-  'お風呂',
-  'スタジオ',
-  'プロテインラウンジ',
-  'ウォーターサーバー'
-]
-
-tags.each do |tag_name|
-  Tag.find_or_create_by!(name: tag_name)
 end

@@ -1,5 +1,5 @@
 class FavoritesController < ApplicationController
-  # before_action :authenticate_user!
+  before_action :require_login
 
   def create
     @gym = Gym.find(params[:gym_id])

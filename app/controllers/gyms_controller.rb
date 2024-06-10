@@ -1,13 +1,15 @@
+require './app/services/recommend_service'
+
 class GymsController < ApplicationController
   before_action :require_login, only: [:new, :create, :edit, :update]
   before_action :set_gym, only: [:show, :edit, :update, :images_index]
   before_action :calculate_average_rating, only: [:show, :images_index]
+  before_action :load_tags, only: [:new, :create, :edit, :update]
 
   # GET /gyms/new
   def new
     @gym = Gym.new
     @gym.build_location
-    @tags = Tag.all
   end
 
   # POST /gyms
@@ -17,7 +19,6 @@ class GymsController < ApplicationController
       redirect_to @gym
       flash[:success] = t('flash.gym_create_success')
     else
-      @tags = Tag.all
       flash.now[:danger] = t('flash.gym_create_failure')
       render :new, status: :unprocessable_entity
     end
@@ -33,15 +34,26 @@ class GymsController < ApplicationController
     @average_ratings = calculate_average_ratings_for_gyms(@gyms)
     @gym_images = get_gym_images(@gyms)
 
-    # if logged_in?
-    #   @recommended_gyms = RecommendationService.recommended_gyms_for_user(current_user)
-    # else
-    #   @popular_gyms = RecommendationService.popular_gyms
-    # end
+    if logged_in?
+      begin
+        Rails.logger.info "現在のユーザーID: #{current_user.id}"
+        @recommended_gyms = RecommendService.new(current_user).call
+        Rails.logger.info "推奨ジム: #{@recommended_gyms.pluck(:id)}"
+      rescue => e
+        Rails.logger.error "エラー: #{e.message}"
+        Rails.logger.error e.backtrace.join("\n")
+        @recommended_gyms = []
+      end
+    else
+      @recommended_gyms = []
+    end
+
+    if @recommended_gyms.empty?
+      @popular_gyms = Gym.order('view_count DESC').limit(3) # よく見られているジムを取得
+    end
   end
 
   def images_index
-    @gym = Gym.find(params[:id])
     @reviews = @gym.reviews.where.not(image: nil).page(params[:page]).per(9)
   end
 
@@ -49,27 +61,28 @@ class GymsController < ApplicationController
     @gym = Gym.includes(:location, :reviews).find(params[:id])
     @gyms = Gym.includes(:location).all
     @tags = @gym.tags
+    increment_view_count
   end
 
   # データの編集画面を表示
   def edit
-    @gym = Gym.find(params[:id])
-    @tags = Tag.all
   end
 
   def update
-    @gym = Gym.find(params[:id])
     if @gym.update(gym_params)
       redirect_to @gym
       flash[:success] = t('flash.gym_update_success')
     else
-      @tags = Tag.all
       render :edit, status: :unprocessable_entity
       flash.now[:danger] = t('flash.gym_update_failure')
     end
   end
 
   private
+
+  def increment_view_count
+    @gym.increment!(:view_count)
+  end
 
   def set_gym
     @gym = Gym.find(params[:id])
@@ -92,26 +105,17 @@ class GymsController < ApplicationController
     location_attributes: [:address])
   end
 
-  def require_login
-    unless logged_in?
-      message = if action_name == 'edit'
-                  "編集を行うにはログインが必要です。"
-                elsif action_name == 'new' || action_name == 'create'
-                  "登録するにはログインが必要です。"
-                else
-                  "この操作を行うにはログインが必要です。"
-                end
-      flash[:danger] = message
-      redirect_to login_path
-    end
-  end
-
   def get_gym_images(gyms)
     images = {}
     gyms.each do |gym|
       review_with_image = gym.reviews.where.not(image: nil).first
       images[gym.id] = review_with_image&.image&.url || 'fake'
     end
+    Rails.logger.debug { "Gym Images: #{images.inspect}" }
     images
+  end
+
+  def load_tags
+    @tags = Tag.all
   end
 end
