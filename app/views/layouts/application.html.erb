@@ -12,8 +12,18 @@
 
     <%= favicon_link_tag('logo_top') %>
     <script src="<%= asset_path('raty.js') %>"></script>
+    <script src="<%= asset_path('loading.js') %>"></script>
   </head>
   <body class="<%= 'top-index' if controller_name == 'top' && action_name == 'index' %>">
+    <div class="loader">
+      <div class="loader-inner pacman">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
+    </div>
     <header>
       <% if logged_in? %>
         <%= render "/shared/header" %>
