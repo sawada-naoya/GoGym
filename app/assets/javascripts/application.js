@@ -3,6 +3,7 @@
 //= require rails-ujs
 //= require bootstrap-sprockets
 //= require raty
+//= require loading
 //= require_tree .
 
 // ページ内のすべてのクラスが btn-outline-success である要素を選択
