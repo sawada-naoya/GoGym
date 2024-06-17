@@ -1,2 +1,0 @@
-class SocialProvider < ApplicationRecord
-end
