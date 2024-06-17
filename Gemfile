@@ -117,8 +117,4 @@ gem 'gretel'
 
 gem 'letter_opener_web'
 
-gem 'pycall'
-
-gem 'pandas'
-
 gem 'whenever', require: false

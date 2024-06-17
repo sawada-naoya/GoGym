@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  get 'oauths/oauth'
+  get 'oauths/callback'
   mount LetterOpenerWeb::Engine, at: '/letter_opener' if Rails.env.development?
 
   root 'top#index'
@@ -8,6 +10,10 @@ Rails.application.routes.draw do
   delete '/logout', to: 'user_sessions#destroy', as: :logout
   get '/terms', to: 'static_pages#terms'
   get '/privacy', to: 'static_pages#privacy'
+
+  post "oauth/callback", to: "oauths#callback"
+  get "oauth/callback", to: "oauths#callback"
+  get "oauth/:provider", to: "oauths#oauth", as: :auth_at_provider
 
   resources :top, only: %i[index]
   resources :inquiries, only: [:new, :create]
