@@ -13,6 +13,15 @@
     <%= favicon_link_tag('logo_top') %>
     <script src="<%= asset_path('raty.js') %>"></script>
     <script src="<%= asset_path('loading.js') %>"></script>
+
+    <!-- Open Graph meta tags -->
+    <meta property="og:title" content="GoGym" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="<%= request.original_url %>" />
+    <meta property="og:image" content="<%= url_for('/og_image.png') %>" />
+    <meta property="og:description" content="Find the best gyms with GoGym!" />
+    <meta property="og:site_name" content="GoGym" />
+
   </head>
   <body class="<%= 'top-index' if controller_name == 'top' && action_name == 'index' %>">
     <div class="loader">

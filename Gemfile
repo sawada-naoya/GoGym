@@ -89,7 +89,7 @@ group :test do
 
 end
 
-gem 'sorcery', "0.16.3"
+gem 'sorcery'
 
 gem 'rails-i18n'
 

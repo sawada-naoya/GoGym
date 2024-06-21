@@ -38,20 +38,6 @@ Rails.application.configure do
     config.logger    = ActiveSupport::TaggedLogging.new(logger)
   end
 
-  # デプロイするサービスのホストを追加する(fly.io)
-  # config.hosts << "gogym.fly.dev"
-  # メール設定
-  # config.action_mailer.default_url_options = { host: 'gogym.fly.dev' }
-  # config.action_mailer.delivery_method = :smtp
-  # config.action_mailer.smtp_settings = {
-  #   address: 'smtp.gmail.com',
-  #   port: 587,
-  #   domain: 'gmail.com',
-  #   user_name: ENV['GMAIL_USERNAME'],
-  #   password: ENV['GMAIL_PASSWORD'],
-  #   authentication: :plain,
-  #   enable_starttls_auto: true
-  # }
   # デプロイするサービスのホストを追加する(render)
   config.hosts << 'gogym-m40u.onrender.com'
   # メール設定
@@ -70,4 +56,6 @@ Rails.application.configure do
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
+
+  config.sorcery.google_callback_url = 'https://gogym-m40u.onrender.com//oauth/callback?provider=google'
 end

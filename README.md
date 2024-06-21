@@ -87,8 +87,8 @@ MVP リリース
 本リリース
 
 - レーティング：ratyrate
-- レコメンド：Amazon Personalize
-- ソーシャルログイン：Facebook Login API,Google Sign-In API,Twitter API
+- レコメンド：
+- ソーシャルログイン：
 - パスワード変更
 - お気に入り
 
@@ -101,15 +101,17 @@ https://i.gyazo.com/52f5cdbf4b70a102134574b023ce4001.png
 
 ■ 技術選定案
 - 開発環境: Docker
-- サーバサイド: Ruby on Rails 7系、Ruby、Rails 7.0.4.3
+- サーバサイド: Ruby on Rails 7.0.8.1、Ruby 3.2.2
 - フロントエンド: HotWire
-- CSSフレームワーク: bootstrap5系、Silicon（Bootstrapテンプレート）
+- CSSフレームワーク: bootstrap5系
 - WebAPI: Google MapAPI（GoogleマップのジオロケーションAPI）、Geocoder、Amazon Personalize、Facebook Login API、Google Sign-In API、Twitter API
 - インフラ:
-  - Webアプリケーションサーバ: Fly.io
-  - ファイルサーバ: Fly.io
-  - セッションサーバ: Fly.io
-  - データベースサーバ: PostgreSQL（Fly Postgres）
+  - Webアプリケーションサーバ: render
+  - ファイルサーバ: render
+  - セッションサーバ: render
+  - データベースサーバ:  postgres (PostgreSQL) 16.2
 - その他：
   - VCS: GitHub
   - CI/CD: GitHubActions
+  - node.js 16.20.2
+  - yarn 1.22.19
