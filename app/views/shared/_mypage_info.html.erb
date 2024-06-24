@@ -1,5 +1,11 @@
-<div class="btn-group mb-5" style="max-width: 800px;">
-  <%= link_to '会員情報', user_path(current_user), class: "btn btn-outline-success border-1", style: "width: 200px;" %>
-  <%= link_to 'お気に入り', favorites_user_path(current_user), class: "btn btn-outline-success border-1", style: "width: 200px;" %>
-  <%= link_to '口コミ一覧',  user_user_reviews_path(user_id: current_user.id), class: "btn btn-outline-success border-1", style: "width: 200px;" %>
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-8">
+      <div class="btn-group d-flex justify-content-center mb-5">
+        <%= link_to '会員情報', user_path(current_user), class: "btn btn-outline-success flex-fill", style: "min-width: 100px;" %>
+        <%= link_to 'お気に入り', favorites_user_path(current_user), class: "btn btn-outline-success flex-fill", style: "min-width: 100px;" %>
+        <%= link_to '口コミ一覧', user_user_reviews_path(user_id: current_user.id), class: "btn btn-outline-success flex-fill", style: "min-width: 100px;" %>
+      </div>
+    </div>
+  </div>
 </div>

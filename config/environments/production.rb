@@ -57,5 +57,5 @@ Rails.application.configure do
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
 
-  config.sorcery.google_callback_url = 'https://gogym-m40u.onrender.com//oauth/callback?provider=google'
+  # config.sorcery.google_callback_url = 'https://gogym-m40u.onrender.com//oauth/callback?provider=google'
 end

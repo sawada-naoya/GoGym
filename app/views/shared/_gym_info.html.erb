@@ -1,26 +1,46 @@
-<div class="d-flex justify-content-between align-items-center" style="padding: 0 250px;">
-  <h1 class="me-5"><%= @gym.name %></h1>
-  <div>
-    <% if current_user %>
-      <% if current_user.favorite?(@gym) %>
-        <%= render 'favorites/unfavorite', gym: @gym %>
-      <% else %>
-        <%= render 'favorites/favorite', gym: @gym %>
-      <% end %>
-    <% end %>
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10 text-center">
+      <div class="d-flex justify-content-center align-items-center flex-wrap">
+        <h1 class="me-2 gym-title"><%= @gym.name %></h1>
+        <div class="favorite-button ms-2">
+          <% if current_user %>
+            <% if current_user.favorite?(@gym) %>
+              <%= render 'favorites/unfavorite', gym: @gym %>
+            <% else %>
+              <%= render 'favorites/favorite', gym: @gym %>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
-<div class="average-rating d-flex align-items-center mb-3">
-  <h3>評価: <%= @average_rating %></h3>
-  <div id="average-star-rating" style="margin-left: 10px;"></div>
+
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-10">
+      <div class="average-rating d-flex justify-content-center align-items-center mb-3">
+        <h3 class="me-2">評価: <%= @average_rating %></h3>
+        <div id="average-star-rating"></div>
+      </div>
+    </div>
+  </div>
 </div>
-<div class="btn-group mb-5" style="max-width: 800px;">
-  <%= link_to '店舗情報', gym_path(@gym), class: "btn btn-outline-success border-1", style: "width: 200px;" %>
-  <%= link_to '写真', images_gym_path(@gym), class: "btn btn-outline-success border-1", style: "width: 200px;" %>
-  <%= link_to '口コミ一覧', gym_reviews_path(@gym), class: "btn btn-outline-success border-1", style: "width: 200px;" %>
-  <% if logged_in? %>
-    <%= link_to '口コミ投稿', new_gym_review_path(@gym), class: "btn btn-outline-success border-1", style: "width: 200px;" %>
-  <% end %>
+
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-12 text-center">
+      <div class="btn-group d-flex justify-content-center flex-wrap mb-5">
+        <%= link_to '店舗情報', gym_path(@gym), class: "btn btn-outline-success flex-grow-1 mb-2", style: "min-width: 150px;" %>
+        <%= link_to '写真', images_gym_path(@gym), class: "btn btn-outline-success flex-grow-1 mb-2", style: "min-width: 150px;" %>
+        <%= link_to '口コミ一覧', gym_reviews_path(@gym), class: "btn btn-outline-success flex-grow-1 mb-2", style: "min-width: 150px;" %>
+        <% if logged_in? %>
+          <%= link_to '口コミ投稿', new_gym_review_path(@gym), class: "btn btn-outline-success flex-grow-1 mb-2", style: "min-width: 150px;" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>

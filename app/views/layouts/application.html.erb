@@ -38,6 +38,7 @@
       <% end %>
     </header>
     <main>
+      <%= render "shared/flash_message" %>
       <%= breadcrumbs separator: " &rsaquo; " %>
       <%= yield %>
     </main>

@@ -21,12 +21,11 @@ body {
 
 main {
   flex-grow: 1;
-  padding-top: 100px;
   padding-bottom: 50px;
 }
 
 header {
-  position: fixed;
+  position: sticky;
   top: 0;
   width: 100%;
   z-index: 1000;
@@ -36,14 +35,36 @@ footer {
   flex-shrink: 0;
 }
 
+/*星評価のデザイン*/
+.average-rating p {
+  margin-bottom: 0;
+}
+
+.average-rating .stars {
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.average-rating .raty img {
+  width: 20px; /* アイコンのサイズを調整 */
+  height: 20px;
+}
+
 /*ページネーション自体のデザイン*/
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
 .pagination>li>a {
   display: inline-block;
   border: none;     /*枠線をなくす*/
   color: #696969;   /*文字の色を変える*/
   font-size: 25px;  /*文字の大きさを大きくする*/
   border-radius: 50%; /*角を完全に丸くする*/
-  width: 30px; /*幅を設定*/
+  width: 20px; /*幅を設定*/
   height: 30px; /*高さを設定*/
   line-height: 30px; /*テキストを中央に配置*/
   text-align: center; /* 水平方向の中心配置を追加 */
@@ -51,7 +72,7 @@ footer {
 }
 
 .pagination>li {
-  margin-right: 20px; /*ページ間の間隔を広げる*/
+  margin-right: 15px; /*ページ間の間隔を広げる*/
 }
 
 /* 表示しているページ番号のデザイン */
@@ -71,6 +92,7 @@ footer {
   line-height: 30px; /*テキストを中央に配置*/
 }
 
+/* 口コミ一覧 */
 .review-container {
   max-width: 700px; /* 最大幅を700pxに設定 */
   width: 100%; /* 幅を100%に設定して、親要素に合わせて伸縮するようにする */
@@ -83,22 +105,10 @@ footer {
   max-height: 600px; /* カードの高さを固定 */
 }
 
-.star-rating {
-  display: inline-block;
-  margin-left: 10px;
-}
-
-.average-rating {
-  display: flex;
-  align-items: center;
-}
-
-.average-rating h3 {
-  margin-bottom: 0;
-}
-
-#average-star-rating {
-  margin-left: 10px;
+/* おすすめのジム用のカードに適用するスタイル */
+.recommend-card {
+  max-width: 18rem;
+  margin: auto; /* カードを中央に配置 */
 }
 
 .custom-link {
