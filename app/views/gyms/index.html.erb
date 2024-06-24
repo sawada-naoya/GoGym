@@ -1,8 +1,8 @@
 <% content_for(:title, t('gyms.index') ) %>
 <% breadcrumb :gyms %>
-<div class="wrapper">
+<div class="wrapper mt-5">
   <% if @gyms.blank? %>
-    <div style="text-align: center; margin-top: 20px;">
+    <div class="text-center">
       <p><%= t('flash.no_search_result') %></p>
       <p>新たなジムの情報を追加する場合は<%= link_to(new_gym_path, class: 'btn btn-link') do %>こちら<% end %></p>
     </div>
@@ -11,8 +11,14 @@
   <% else %>
     <p><%= t('flash.no_result') %></p>
   <% end %>
-  <div class="pagination d-flex justify-content-center">
-    <%= paginate @gyms%>
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <div class="pagination d-flex justify-content-center flex-wrap">
+          <%= paginate @gyms %>
+        </div>
+      </div>
+    </div>
   </div>
   <hr class="my-4">
   <%= render "/shared/recommend" %>

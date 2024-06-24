@@ -1,75 +1,82 @@
 <% content_for(:title, "#{@gym.name}") %>
-<%= render "shared/flash_message" %>
 <% breadcrumb :gym, @gym %>
-<div class="wrapper">
-  <div class="d-flex flex-column mx-auto align-items-center">
-    <%= render "/shared/gym_info" %>
-    <section class="text-gray-600 body-font mx-auto" style="max-width: 1000px;">
-      <div class="flex flex-wrap -m-4">
-        <div class="p-4 lg:w-1/4 md:w-1/2">
-          <div class="d-flex flex-wrap">
-            <% if @gym.reviews.any? { |review| review.image.present? } %>
-              <% @gym.reviews.each do |review| %>
-                <% if review.image.present? %>
-                  <%= image_tag review.image.url %>
-                  <% break %>
+<%= render "/shared/gym_info" %>
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10">
+      <div class="d-flex flex-column align-items-center">
+        <section class="text-gray-600 body-font w-100">
+          <div class="d-flex flex-wrap justify-content-center">
+            <div class="p-4 col-lg-3 col-md-6">
+              <div class="d-flex flex-wrap justify-content-center">
+                <% if @gym.reviews.any? { |review| review.image.present? } %>
+                  <% @gym.reviews.each do |review| %>
+                    <% if review.image.present? %>
+                      <%= image_tag review.image.url, class: "img-fluid" %>
+                      <% break %>
+                    <% end %>
+                  <% end %>
+                <% else %>
+                  <%= image_tag 'fake.jpg', class: "img-fluid" %>
                 <% end %>
-              <% end %>
-            <% else %>
-              <%= image_tag 'fake.jpg' %>
-            <% end %>
+              </div>
+            </div>
           </div>
+        </section>
+        <table class="table table-responsive mx-auto mt-3" style="max-width: 100%;">
+          <tbody>
+            <tr class="table-secondary">
+              <th scope="row" class="text-center">店名</th>
+              <td style="background-color: white;"><%= @gym.name %></td>
+            </tr>
+            <tr class="table-secondary">
+              <th scope="row" class="text-center">住所</th>
+              <td style="background-color: white;">
+                <%= @gym.location.address %>
+                <div id="map" class="img-fluid" style="height: 400px; width: 100%;"></div>
+              </td>
+            </tr>
+            <tr class="table-secondary">
+              <th scope="row" class="text-center">交通手段</th>
+              <td style="background-color: white;"><%= @gym.access %></td>
+            </tr>
+            <tr class="table-secondary">
+              <th scope="row" class="text-center">会費</th>
+              <td style="background-color: white;"><%= @gym.membership_fee %></td>
+            </tr>
+            <tr class="table-secondary">
+              <th scope="row" class="text-center">営業時間</th>
+              <td style="background-color: white;"><%= @gym.business_hours %></td>
+            </tr>
+            <tr class="table-secondary">
+              <th scope="row" class="text-center">HP</th>
+              <td style="background-color: white;"><%= @gym.website %></td>
+            </tr>
+            <tr class="table-secondary">
+              <th scope="row" class="text-center">タグ</th>
+              <td style="background-color: white;">
+                <% if @tags.any? %>
+                  <% @tags.each do |tag| %>
+                    <%= link_to tag_path(tag) do %>
+                      <span class="badge bg-success"><%= tag.name %></span>
+                    <% end %>
+                  <% end %>
+                <% else %>
+                  タグがありません
+                <% end %>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="d-flex flex-column align-items-center mt-3">
+          <p class="text-center mb-2">より充実した情報を共有するため、店舗情報の加筆・修正にご協力ください。</p>
+          <%= link_to "編集はこちら", edit_gym_path(@gym), class: "btn btn-link p-0" %>
         </div>
       </div>
-    </section>
-    <table class="table mx-auto" style="max-width: 800px;">
-      <tbody>
-        <tr class="table-secondary">
-          <th scope="row" style="text-align: center;">店名</th>
-          <td style="background-color: white;"><%= @gym.name %></td>
-        </tr>
-        <tr class="table-secondary">
-          <th scope="row" style="text-align: center;">住所</th>
-          <td style="background-color: white;"><%= @gym.location.address %><div id="map" style="height: 400px; width: 400px;"></div></td>
-        </tr>
-        <tr class="table-secondary">
-          <th scope="row" style="text-align: center;">交通手段</th>
-          <td style="background-color: white;"><%= @gym.access %></td>
-        </tr>
-        <tr class="table-secondary">
-          <th scope="row" style="text-align: center;">会費</th>
-          <td style="background-color: white;"><%= @gym.membership_fee %></td>
-        </tr>
-        <tr class="table-secondary">
-          <th scope="row" style="text-align: center;">営業時間</th>
-          <td style="background-color: white;"><%= @gym.business_hours %></td>
-        </tr>
-        <tr class="table-secondary">
-          <th scope="row" style="text-align: center;">HP</th>
-          <td style="background-color: white;"><%= @gym.website %></td>
-        </tr>
-        <tr class="table-secondary">
-          <th scope="row" style="text-align: center;">タグ</th>
-          <td style="background-color: white;">
-            <% if @tags.any? %>
-              <% @tags.each do |tag| %>
-                <%= link_to tag_path(tag) do %>
-                  <span class="badge bg-success"><%= tag.name %></span>
-                <% end %>
-              <% end %>
-            <% else %>
-              タグがありません
-            <% end %>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <div class="d-flex">
-      <p>より充実した情報を共有するため、店舗情報の加筆・修正にご協力ください。</p>
-      <%= link_to "編集はこちら", edit_gym_path(@gym) %>
     </div>
   </div>
 </div>
+
 
 <script>
 function initMap() {

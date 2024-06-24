@@ -1,8 +1,8 @@
 <% content_for(:title, t(".gyms.new")) %>
 <% breadcrumb :edit_gym, @gym %>
-<div class="mt-5">
+<div class="container mt-5">
   <div class="row justify-content-center">
-    <div class="col-md-8">
+    <div class="col-12 col-md-10 col-lg-8">
       <h1 class="text-center mb-4">ジム情報を編集</h1>
       <%= render "shared/error_message", model: @gym %>
 
@@ -39,7 +39,7 @@
           <%= f.text_field :website, id: :gym_website, class: "form-control"%>
         </div>
 
-                <div class="mb-3">
+        <div class="mb-3">
           <%= f.label :tags, "タグ", class: "form-label" %>
           <% @tags.each do |tag| %>
             <div class="form-check">

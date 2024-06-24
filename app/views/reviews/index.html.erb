@@ -1,12 +1,17 @@
 <% content_for(:title, "#{@gym.name}") %>
 <% breadcrumb :gym_reviews, @gym %>
+<%= render "/shared/gym_info" %>
 <div class="wrapper">
-  <%= render "shared/flash_message" %>
   <div class="d-flex flex-column mx-auto align-items-center">
-    <%= render "/shared/gym_info" %>
     <%= render "/shared/review" %>
-    <div class="pagination d-flex justify-content-center">
-      <%= paginate @reviews%>
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <div class="pagination d-flex justify-content-center flex-wrap">
+            <%= paginate @reviews %>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

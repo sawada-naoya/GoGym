@@ -1,8 +1,7 @@
 <% content_for(:title, "#{@user.name}") %>
-<%= render "shared/flash_message" %>
 <% breadcrumb :user_show, @user %>
-<div class="wrapper">
-  <div class="d-flex flex-column mx-auto align-items-center">
+<div class="wrapper mt-5">
+  <div class="d-flex flex-column mx-auto align-items-center text-nowrap">
     <h1 class="text-center" style="padding: 0 250px;"><%= @user.name %>のマイページ</h1>
     <%= render "/shared/mypage_info" %>
     <% @favorite_gyms.each do |gym| %>
@@ -45,8 +44,14 @@
     <% end %>
   </div>
 </div>
-<div class="pagination d-flex justify-content-center">
-  <%= paginate @favorite_gyms%>
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <div class="pagination d-flex justify-content-center flex-wrap">
+        <%= paginate @favorite_gyms %>
+      </div>
+    </div>
+  </div>
 </div>
 
 

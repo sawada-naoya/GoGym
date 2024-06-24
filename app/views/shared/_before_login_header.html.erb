@@ -1,32 +1,29 @@
 <div class='sticky-top'>
-  <nav class='navbar navbar-dark bg-dark'>
+  <nav class='navbar navbar-expand-md navbar-dark bg-dark'>
     <div class="container-fluid">
-      <div class="d-flex justify-content-start align-items-center">
-        <%= link_to root_path,class: 'navbar-brand' do %>
-          <span style="color: #227D51; font-size: 30px; font-weight: 900; font-family: Arial; ">GoGym</span>
-        <% end %>
-      </div>
-      <% unless current_page?(root_path) %>
-        <%= search_form_for @q, url: gyms_path do |f| %>
-          <div class="row row-cols-lg-auto">
-            <%# <div class="col px-1"> %>
-              <%# <%= f.search_field :location_address_cont, placeholder: "エリア・駅", id: "address", class: 'form-control' %>
-            <%# </div> %>
-            <%# <div class="col px-1"> %>
-              <%# <%= f.submit t('top.index.search'), onclick: "codeAddress()", class: 'btn btn-primary btn-success' %>
-            <%# </div> %>
-            <div class="col px-1">
-              <%= f.search_field :name_cont, class: 'form-control',placeholder: 'キーワード' %>
-            </div>
-            <div class="col px-1">
-              <%= f.submit t('top.index.search'), class: 'btn btn-primary btn-success' %>
-            </div>
-          </div>
-        <% end %>
+      <%= link_to root_path, class: 'navbar-brand' do %>
+        <span style="color: #227D51; font-size: 30px; font-weight: 900; font-family: Arial;">GoGym</span>
       <% end %>
-      <div class="d-flex justify-content-end align-items-center">
-        <%= link_to t('shared.header.login'), login_path, class: "btn btn-outline-light me-2", style: "font-size: 15px;" %>
-        <%= link_to t('shared.header.member_registration'), new_user_path, class: "btn btn-outline-success", style: "font-size: 15px;" %>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarContent">
+        <% unless current_page?(root_path) %>
+          <%= search_form_for @q, url: gyms_path, class: 'd-flex mx-auto my-2 my-lg-0' do |f| %>
+            <div class="input-group">
+              <%= f.search_field :name_cont, class: 'form-control', placeholder: 'キーワード' %>
+              <button class="btn btn-primary btn-success" type="submit"><%= t('top.index.search') %></button>
+            </div>
+          <% end %>
+        <% end %>
+        <div class="navbar-nav ms-auto d-flex align-items-center flex-row">
+          <p class="nav-item m-0">
+            <%= link_to t('shared.header.login'), login_path, class: "btn btn-outline-light me-2", style: "font-size: 15px;" %>
+          </p>
+          <p class="nav-item m-0">
+            <%= link_to t('shared.header.member_registration'), new_user_path, class: "btn btn-outline-success", style: "font-size: 15px;" %>
+          </p>
+        </div>
       </div>
     </div>
   </nav>

@@ -1,17 +1,19 @@
-<div class="d-flex justify-content-center mb-5">
+<div class="d-flex flex-column flex-md-row justify-content-center align-items-center mb-5">
   <% if @tag %>
-    <h1 class="me-5"><%= @tag.name %> タグがついているジム <%= @gyms.count %>件</h1>
+    <h1 class="mb-3 mb-md-0 me-md-5 text-nowrap"><%= @tag.name %> タグがついているジム <%= @gyms.count %>件</h1>
   <% else %>
-    <h1 class="me-5">キーワードで見つかったジム <%= @gyms.count %>件</h1>
+    <h1 class="mb-3 mb-md-0 me-md-5 text-nowrap">キーワードで見つかったジム <%= @gyms.count %>件</h1>
   <% end %>
-  <i class="fa-solid fa-location-dot fa-3x me-3" style="color: #198754;"></i>
-  <%= link_to t('top.index.location_search'), locations_path, class: "btn btn-success btn-lg", style: "font-size: 25px; ml-5" %>
+  <div class="d-flex flex-column flex-md-row align-items-center">
+    <%# <i class="fa-solid fa-location-dot fa-3x me-3 mb-3 mb-md-0" style="color: #198754;"></i> %>
+    <%= link_to t('top.index.location_search'), locations_path, class: "btn btn-success btn-lg", style: "font-size: 25px;" %>
+  </div>
 </div>
-<div class="d-flex justify-content-center mb-5">
+<div class="d-flex justify-content-center mb-5 text-nowrap">
   <h5>新たなジムの情報を追加する場合は<%= link_to(new_gym_path, class: 'custom-link') do %>こちら<% end %></h5>
 </div>
 <% @gyms.each do |gym| %>
-  <div class="card mb-3 mx-auto p-2" style="width: 50%;">
+  <div class="card mb-3 mx-auto p-2" style="width: 65%;">
     <div class="row g-0">
       <div class="col-md-4 d-flex align-items-center">
         <%= image_tag(@gym_images[gym.id], class: "img-fluid rounded", alt: "Gym Image") %>
@@ -19,7 +21,7 @@
       <div class="col-md-8">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center">
-            <h5 class="card-title me-3"><%= link_to gym.name, gym_path(gym) %></h5>
+            <div class="card-title me-3"><%= link_to gym.name, gym_path(gym) %></div>
             <div id="favorite-button-for-gym-<%= gym.id %>">
               <% if current_user %>
                 <% if current_user.favorite?(gym) %>
@@ -30,7 +32,7 @@
               <% end %>
             </div>
           </div>
-          <div class="average-rating d-flex align-items-center mb-3">
+          <div class="average-rating d-flex align-items-center mb-3 text-nowrap">
             <p>評価: <%= @average_ratings[gym.id] %></p>
             <div class="stars">
               <div id="average-star-rating-<%= gym.id %>" class="raty"></div>
@@ -70,20 +72,3 @@
     });
   });
 </script>
-
-<style>
-.average-rating p {
-  margin-bottom: 0;
-}
-
-.average-rating .stars {
-  display: flex;
-  align-items: center;
-  margin-left: 10px;
-}
-
-.average-rating .raty img {
-  width: 20px; /* アイコンのサイズを調整 */
-  height: 20px;
-}
-</style>
