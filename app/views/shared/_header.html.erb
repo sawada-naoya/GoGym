@@ -11,7 +11,7 @@
         <% unless current_page?(root_path) %>
           <%= search_form_for @q, url: gyms_path, class: 'd-flex mx-auto my-2 my-lg-0' do |f| %>
             <div class="input-group">
-              <%= f.search_field :name_cont, class: 'form-control', placeholder: 'キーワード' %>
+              <%= f.search_field :name_cont, class: 'form-control', placeholder: 'ジム名で検索' %>
               <button class="btn btn-primary btn-success" type="submit"><%= t('top.index.search') %></button>
             </div>
           <% end %>
