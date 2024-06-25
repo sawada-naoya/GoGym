@@ -1,11 +1,11 @@
 <% content_for(:title, "#{@user.name}") %>
 <% breadcrumb :user_show, @user %>
-<div class="wrapper mt-5">
-  <div class="d-flex flex-column mx-auto align-items-center text-nowrap">
-    <h1 class="text-center" style="padding: 0 250px;"><%= @user.name %>のマイページ</h1>
+<div class="container mt-5">
+  <div class="d-flex flex-column mx-auto align-items-center">
+    <h1 class="text-center mb-4 text-nowrap"><%= @user.name %>のマイページ</h1>
     <%= render "/shared/mypage_info" %>
     <% @favorite_gyms.each do |gym| %>
-      <div class="card mb-3 mx-auto p-2" style="width: 50%;">
+      <div class="card mb-3 mx-auto p-2" style="width: 65%;">
         <div class="row g-0">
           <div class="col-md-4 d-flex align-items-center">
             <%= image_tag(@gym_images[gym.id], class: "img-fluid rounded", alt: "Gym Image") %>
@@ -13,7 +13,7 @@
           <div class="col-md-8">
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-center">
-                <h5 class="card-title me-3"><%= link_to gym.name, gym_path(gym) %></h5>
+                <div class="card-title me-3"><%= link_to gym.name, gym_path(gym) %></div>
                 <div id="favorite-button-for-gym-<%= gym.id %>">
                   <% if current_user.favorite?(gym) %>
                     <%= render 'favorites/unfavorite', gym: gym %>
@@ -22,8 +22,8 @@
                   <% end %>
                 </div>
               </div>
-              <div class="average-rating d-flex align-items-center mb-3">
-                <p>評価: <%= @average_ratings[gym.id] %></p>
+              <div class="average-rating d-flex align-items-center mb-3 text-nowrap">
+                <p class="mb-0">評価: <%= @average_ratings[gym.id] %></p>
                 <div class="stars">
                   <div id="average-star-rating-<%= gym.id %>" class="raty"></div>
                 </div>

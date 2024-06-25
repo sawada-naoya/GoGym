@@ -1,15 +1,14 @@
 <div class="d-flex flex-column flex-md-row justify-content-center align-items-center mb-5">
   <% if @tag %>
-    <h1 class="mb-3 mb-md-0 me-md-5 text-nowrap"><%= @tag.name %> タグがついているジム <%= @gyms.count %>件</h1>
+    <h1 class="mb-3 mb-md-0 me-md-5"><%= @tag.name %> タグがついているジム <%= @gyms.count %>件</h1>
   <% else %>
-    <h1 class="mb-3 mb-md-0 me-md-5 text-nowrap">キーワードで見つかったジム <%= @gyms.count %>件</h1>
+    <h1 class="mb-3 mb-md-0 me-md-5">キーワードで見つかったジム <%= @gyms.count %>件</h1>
   <% end %>
   <div class="d-flex flex-column flex-md-row align-items-center">
-    <%# <i class="fa-solid fa-location-dot fa-3x me-3 mb-3 mb-md-0" style="color: #198754;"></i> %>
     <%= link_to t('top.index.location_search'), locations_path, class: "btn btn-success btn-lg", style: "font-size: 25px;" %>
   </div>
 </div>
-<div class="d-flex justify-content-center mb-5 text-nowrap">
+<div class="d-flex justify-content-center mb-5">
   <h5>新たなジムの情報を追加する場合は<%= link_to(new_gym_path, class: 'custom-link') do %>こちら<% end %></h5>
 </div>
 <% @gyms.each do |gym| %>

@@ -153,5 +153,283 @@
   {"name": "エニタイムフィットネス 登戸店", "address": "神奈川県川崎市多摩区登戸3135 1F"},
   {"name": "エニタイムフィットネス 登戸駅前店", "address": "神奈川県川崎市多摩区登戸3465 いろはビル 2F-3F"},
   {"name": "エニタイムフィットネス 八丁畷店", "address": "神奈川県川崎市川崎区池田2-7-9 池田町ビル 1F/2F"},
-  {"name": "エニタイムフィットネス 溝の口店", "address": "神奈川県川崎市高津区溝口2-13-1-1 1F"}
+  {"name": "エニタイムフィットネス 溝の口店", "address": "神奈川県川崎市高津区溝口2-13-1-1 1F"},
+  {
+        "website": "https://fitplace.jp/gyms/nippori/",
+        "name": "FIT PLACE 日暮里店",
+        "address": "東京都荒川区東日暮里5-51-12 日暮里安永ビル2階",
+        "access": "JR山手線/ 日暮里駅　徒歩2分"
+  },
+  {
+        "website": "https://fitplace.jp/gyms/higashi-yamato/",
+        "name": "FIT PLACE 東大和店",
+        "address": "東京都東大和市清原1-1213-6 東大和リビングテラス",
+        "access": "西武拝島線 東大和市駅より車7分 / 西武拝島線 小川駅より車7分 / 西武多摩湖線 東大和市駅より車7分 駐車場139台完備"
+    },
+    {
+        "website": "https://fitplace.jp/gyms/machida/",
+        "name": "FIT PLACE 町田店",
+        "address": "東京都町田市原町田4-11-14 コロンブスビル7F",
+        "access": "JR町田駅北口、小田急町田駅南口より徒歩3分"
+    },
+    {
+        "website": "https://fitplace.jp/gyms/bubaigawara/",
+        "name": "FIT PLACE 分倍河原店",
+        "address": "東京都府中市美好町3-5-25　堀江ビル1階・2階",
+        "access": "京王線分倍河原駅 徒歩4分/JR南武線分倍河原駅 徒歩4分"
+    },
+    {
+        "website": "https://fitplace.jp/gyms/machiya/",
+        "name": "FIT PLACE 町屋店",
+        "address": "東京都荒川区町屋1-4-4 JH・MACHIYA第2 1F/2F",
+        "access": "東京メトロ千代田線 町屋駅 1番出口徒歩2分/京成本線 町屋駅 徒歩3分/都電荒川線 町屋駅前駅 徒歩3分"
+    },
+    {
+        "website": "https://fitplace.jp/gyms/ikebukuro/",
+        "name": "FIT PLACE 池袋店",
+        "address": "東京都豊島区東池袋1-39-4",
+        "access": "JR山手線 / 池袋駅 徒歩3分"
+    },
+    {
+        "website": "https://fitplace.jp/gyms/shinjuku-nishiguchi/",
+        "name": "FIT PLACE 新宿西口店",
+        "address": "東京都新宿区西新宿1-20-2 西新宿室町ビル 地下1階",
+        "access": "JR各線 / 新宿駅 徒歩5分 東京メトロ / 新宿駅 徒歩1分 京王線 / 新宿駅 徒歩5分"
+    },
+    {
+        "website": "https://fitplace.jp/gyms/suidobashi/",
+        "name": "FIT PLACE 水道橋店",
+        "address": "東京都千代田区神田三崎町２丁目２０−１０ 勝又ビル 2階・3階",
+        "access": "JR水道橋駅 西口 徒歩1分"
+    },
+    {
+        "website": "https://fitplace.jp/gyms/ueno/",
+        "name": "FIT PLACE 上野店",
+        "address": "東京都台東区上野2-12-20 NDKロータスビル1F",
+        "access": "ＪＲ線 上野駅 徒歩4分/ＪＲ線 御徒町駅 徒歩3分/東京メトロ 銀座線 上野広小路駅 徒歩1分"
+    },
+    {
+        "website": "https://fitplace.jp/gyms/otsuka/",
+        "name": "FIT PLACE 大塚店",
+        "address": "東京都豊島区北大塚2-2-2 ba06 5階",
+        "access": "JR山手線 / 大塚駅 徒歩1分"
+    },
+    {
+        "website": "https://fitplace.jp/gyms/omori/",
+        "name": "FIT PLACE 大森店",
+        "address": "東京都大田区大森北一丁目1番2号 YK-15ビル 7F",
+        "access": "JR京浜東北線 / 大森駅 徒歩約1分"
+    },
+    {
+        "website": "https://fitplace.jp/gyms/shimoakatsuka/",
+        "name": "FIT PLACE 下赤塚店",
+        "address": "東京都板橋区赤塚新町1-20-2 ドリーム赤塚 1階",
+        "access": "東京メトロ副都心線 / 地下鉄赤塚駅 徒歩1分 東武東上線/ 下赤塚駅 徒歩2分"
+    },
+    {
+        "website": "https://fitplace.jp/gyms/itabashi/",
+        "name": "FIT PLACE 板橋店",
+        "address": "東京都北区滝野川7-8-8 NT板橋駅前ビル 地下1階",
+        "access": "JR埼京線 / 板橋駅 徒歩1分 都営三田線 / 新板橋駅 徒歩7分"
+    },
+    {
+        "website": "https://fitplace.jp/gyms/hasune/",
+        "name": "FIT PLACE 蓮根店",
+        "address": "東京都板橋区坂下2-16-5 サンキャピタル第一ビル2F",
+        "access": "都営三田線 蓮根駅 東口 徒歩1分"
+    },
+    {
+        "website": "https://fitplace.jp/gyms/shin-koiwa/",
+        "name": "FIT PLACE 新小岩店",
+        "address": "東京都葛飾区新小岩1-50-1 アネックスⅡ 2〜4F",
+        "access": "JR総武線 新小岩駅 南口徒歩2分"
+    },
+    {
+        "website": "https://fitplace.jp/gyms/minamiasagaya/",
+        "name": "FIT PLACE 南阿佐ケ谷店",
+        "address": "東京都杉並区成田東5-42-15 ジョイフルプラザ 3F",
+        "access": "丸ノ内線南阿佐ケ谷駅１番出口すぐ"
+    },
+    {
+        "website": "https://fitplace.jp/gyms/kanda/",
+        "name": "FIT PLACE 神田店",
+        "address": "東京都千代田区鍛冶町1-7-9 大朋ビル3F",
+        "access": "JR/銀座線　神田駅南口　徒歩2分"
+    },
+    {
+        "website": "https://fitplace.jp/gyms/minowa/",
+        "name": "FIT PLACE 三ノ輪店",
+        "address": "東京都台東区竜泉２丁目20-9",
+        "access": "東京メトロ日比谷線 / 三ノ輪駅 徒歩1分"
+    },
+    {
+        "website": "https://fitplace.jp/gyms/musashikoganei/",
+        "name": "FIT PLACE 武蔵小金井店",
+        "address": "東京都小金井市小金井市本町5-18-5 太平ビル B1F",
+        "access": "JR武蔵小金井駅北口徒歩1分"
+    },
+    {
+        "website": "https://fitplace.jp/gyms/kanamachi/",
+        "name": "FIT PLACE 金町店",
+        "address": "東京都葛飾区東金町1-42-5 豊勢金町ビル3F",
+        "access": "JR常磐線金町駅北口 徒歩2分"
+    },
+    {
+      "name": "ゴールドジム 戸塚神奈川店",
+      "address": "神奈川県横浜市戸塚区戸塚町10番地戸塚モディ6F"
+  },
+  {
+      "name": "ゴールドジム 湘南神奈川店",
+      "address": "神奈川県藤沢市辻堂2-7-1 湘南パールビル3・4Ｆ"
+  },
+  {
+      "name": "ゴールドジム 横須賀神奈川店",
+      "address": "神奈川県横須賀市若松町2-4 横須賀中央駅前ビル5F"
+  },
+  {
+      "name": "ゴールドジム 溝の口神奈川店",
+      "address": "神奈川県川崎市高津区溝口1丁目1番30号 溝の口ブロックスビル2F・3F（受付は3Ｆになります。）"
+  },
+  {
+      "name": "ゴールドジム 厚木神奈川店",
+      "address": "神奈川県厚木市中町2-4-13 本厚木駅前ビル5・6Ｆ"
+  },
+  {
+      "name": "ゴールドジム 大宮さいたま店",
+      "address": "埼玉県さいたま市大宮区桜木町2-1-1 大宮アルシェビル7F"
+  },
+  {
+      "name": "ゴールドジム さいたまスーパーアリーナ店",
+      "address": "埼玉県さいたま市中央区新都心8番地 さいたまスーパーアリーナ6F"
+  },
+  {
+      "name": "ゴールドジム 吉川埼玉店",
+      "address": "埼玉県吉川市保1-13-3 ライフ吉川駅前店2F"
+  },
+  {
+      "name": "ゴールドジム 東浦和さいたま店",
+      "address": "埼玉県さいたま市緑区大字中尾緑島2503-3 浦和駅　徒歩20分 浦和駅東口　国際興業バス　浦04系統　大谷口県営住宅　下車　徒歩3分 東浦和駅　徒歩20分"
+  },
+  {
+      "name": "ゴールドジム 新所沢埼玉店",
+      "address": "埼玉県所沢市緑町1-1-11 西武ショッピングプラザ　新所沢グリーンハイツB1F"
+  },
+  {
+      "name": "ゴールドジム 牛久茨城店",
+      "address": "茨城県牛久市牛久町280番地 エスカード牛久店"
+  },
+  {
+      "name": "ゴールドジム スパレア宇都宮店",
+      "address": "栃木県宇都宮市上戸祭町216-1"
+  },
+  {
+      "name": "ゴールドジム スパレア足利店",
+      "address": "栃木県足利市大月町3-2 アシコタウンあしかが内"
+  },
+  {
+      "name": "ゴールドジム 高崎群馬店",
+      "address": "群馬県高崎市飯塚町382-13"
+  },
+  {
+      "name": "ゴールドジム 前橋インター店",
+      "address": "群馬県高崎市中尾町44番地アカマルA館1階"
+  },
+  {
+      "name": "ゴールドジム 久喜埼玉店",
+      "address": "埼玉県久喜市久喜中央1-1-20 クッキープラザ4Ｆ"
+  },
+  {
+      "name": "ゴールドジム 本川越埼玉店",
+      "address": "埼玉県川越市新富町1-22 西武本川越ぺぺ5F"
+  },
+  {
+      "name": "ゴールドジム 土浦茨城店",
+      "address": "茨城県土浦市中村南4-11-7"
+  },
+  {
+      "name": "ゴールドジム 守谷茨城店",
+      "address": "茨城県守谷市松ヶ丘３丁目２１ー１"
+  },
+  {
+      "name": "ゴールドジム 前橋リリカ店",
+      "address": "群馬県前橋市国領町2-13-1"
+  },
+  {
+    "website": "https://www.s-re.jp/ryogoku/",
+    "name": "スポーツクラブ ルネサンス 両国24",
+    "address": "東京都 墨田区両国2-10-14",
+    "access": "JR総武線「両国駅」西口出口より徒歩3分 都営大江戸線「両国駅」A4出口より徒歩7分"
+},
+{
+    "website": "https://www.s-re.jp/kameido/",
+    "name": "スポーツクラブ＆スパ ルネサンス 亀戸24",
+    "address": "東京都 江東区亀戸2-1-1 2-4F (コモディイイダ上)",
+    "access": "JR「亀戸駅」「錦糸町駅」北口より徒歩8分 半蔵門線「錦糸町駅」5番出口より徒歩8分 ※駐車場210台／駐輪場300台以上有"
+},
+{
+    "website": "https://www.s-re.jp/sangenjaya/",
+    "name": "スポーツクラブ ルネサンス 三軒茶屋24",
+    "address": "東京都世田谷区三軒茶屋2-2-16",
+    "access": "『東急田園都市線』三軒茶屋駅 世田谷通り口より徒歩4分・『東急世田谷線』三軒茶屋駅より徒歩6分・三軒茶屋駅より国道246号線を駒沢方面へ世田谷郵便局すぐ近く"
+},
+{
+    "website": "https://www.s-re.jp/waseda/",
+    "name": "スポーツクラブ ルネサンス 早稲田",
+    "address": "東京都 豊島区高田1-19-24",
+    "access": "都電荒川線「面影橋」「学習院下」より徒歩5分 東京メトロ副都心線「雑司が谷駅」出口3より徒歩8分 JR・西武新宿線・東京メトロ東西線「高田馬場駅」（「早稲田駅」）より徒歩15分"
+},
+{
+    "website": "https://www.s-re.jp/akabane/",
+    "name": "スポーツクラブ ルネサンス 赤羽",
+    "address": "東京都 北区赤羽西1-6-1 パルロード2・4F",
+    "access": "JR「赤羽駅」北改札西口徒歩1分 ビビオ内4F（エレベーターで4Fへお越しください）"
+},
+{
+    "website": "https://www.s-re.jp/hikarigaoka/",
+    "name": "スポーツクラブ ルネサンス 光が丘",
+    "address": "東京都 練馬区高松5-8 J．CITYビル1階",
+    "access": "大江戸線「光が丘駅A5出口」より徒歩10分 笹目通り「高松5丁目」「谷原3丁目」が最も近い交差点。下記外観写真22階ビル「J.CITY」を目印にお越しください。"
+},
+{
+    "website": "https://www.s-re.jp/kitasenju/",
+    "name": "スポーツクラブ ルネサンス 北千住24",
+    "address": "東京都 足立区千住旭町5-2（東京電機大学5号館内）",
+    "access": "ＪＲ常磐線、千代田線、日比谷線『北千住駅』東口から徒歩約3分"
+},
+{
+    "website": "https://www.s-re.jp/aoto/",
+    "name": "スポーツクラブ ルネサンス 青砥24",
+    "address": "東京都 葛飾区青戸6丁目2-1",
+    "access": "京成「青砥駅」徒歩2分 高砂・お花茶屋・立石・奥戸方面からも自転車ですぐ。"
+},
+{
+    "website": "https://www.s-re.jp/sengawa/",
+    "name": "スポーツクラブ ルネサンス 仙川24",
+    "address": "東京都 調布市仙川町2-19-6",
+    "access": "京王線「仙川駅」より徒歩3分＊駅から甲州街道方面へ＊小田急バスターミナル横"
+},
+{
+    "website": "https://www.s-re.jp/nishikokubunji/",
+    "name": "スポーツクラブ ルネサンス 西国分寺24",
+    "address": "東京都 国分寺市泉町2-9-2",
+    "access": "JR中央線、JR武蔵野線 西国分寺駅南口 徒歩2分"
+},
+{
+    "website": "https://www.s-re.jp/kunitachi/",
+    "name": "スポーツクラブ＆スパ ルネサンス 国立24",
+    "address": "東京都 国立市東1-7-1",
+    "access": "JR「国立駅」南口より徒歩3分（立川より中央線で1駅） JR「谷保駅」よりバス10分（立川より南武線で3駅） 恋ヶ窪駅、東京都立多摩総合医療センターより自転車で10分"
+},
+{
+    "website": "https://www.s-re.jp/higashikurume/",
+    "name": "スポーツクラブ ルネサンス 東久留米24",
+    "address": "東京都 東久留米市本町3丁目3",
+    "access": "西武池袋線「東久留米駅」西口から徒歩7分 東久留米市役所から徒歩1分"
+},
+{
+    "website": "https://www.s-re.jp/higashifushimi/",
+    "name": "スポーツクラブ ルネサンス 東伏見24",
+    "address": "東京都 西東京市東伏見3-4-1東伏見STEP22",
+    "access": "西武新宿線「東伏見駅」"
+}
 ]
