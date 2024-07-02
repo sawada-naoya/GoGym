@@ -9,10 +9,13 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarContent">
         <% unless current_page?(root_path) %>
-          <%= search_form_for @q, url: gyms_path, class: 'd-flex mx-auto my-2 my-lg-0' do |f| %>
-            <div class="input-group">
-              <%= f.search_field :name_cont, class: 'form-control', placeholder: 'ジム名で検索' %>
-              <button class="btn btn-primary btn-success" type="submit"><%= t('top.index.search') %></button>
+          <%= search_form_for @q, url: gyms_path, class: 'd-flex mx-auto my-2 my-lg-0 position-relative' do |f| %>
+            <div data-controller="autocomplete" data-autocomplete-url-value="/gyms/autocomplete" role="combobox">
+              <div class="input-group">
+                <%= f.search_field :name_cont, data: { autocomplete_target: 'input' }, class: 'form-control', placeholder: 'ジム名で検索' %>
+                <button class="btn btn-success" type="submit"><%= t('top.index.search') %></button>
+              </div>
+              <ul class="list-group bg-white position-absolute w-100" data-autocomplete-target="results" hidden></ul>
             </div>
           <% end %>
         <% end %>

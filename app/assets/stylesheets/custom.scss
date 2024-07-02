@@ -35,6 +35,30 @@ footer {
   flex-shrink: 0;
 }
 
+.list-group-item {
+  cursor: pointer;
+}
+
+.list-group-item:hover {
+  background-color: #e3f2fd;  // ホバー時の背景色を変更
+}
+
+.autocomplete-container {
+  position: relative;
+}
+
+.autocomplete-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  border: 1px solid #ced4da;
+  border-top: none;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
 /*星評価のデザイン*/
 .average-rating p {
   margin-bottom: 0;
