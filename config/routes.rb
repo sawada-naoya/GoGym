@@ -35,6 +35,7 @@ Rails.application.routes.draw do
     end
     collection do
       get 'search'
+      get 'autocomplete'
     end
     resources :reviews, shallow: true
     resource :favorite, only: [:create, :destroy]

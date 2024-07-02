@@ -1,0 +1,5 @@
+<% gyms.each do |gym| %>
+  <li class="list-group-item list-group-item-action" role="option" data-autocomplete-value="<%= gym.name %>" data-autocomplete-label="<%= gym.name %>">
+    <%= gym.name %>
+  </li>
+<% end %>
