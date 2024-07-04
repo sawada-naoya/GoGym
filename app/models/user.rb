@@ -4,6 +4,7 @@ class User < ApplicationRecord
   has_many :favorites, dependent: :destroy
   has_many :favorite_gyms, through: :favorites, source: :gym
   has_many :authentications, dependent: :destroy
+  has_many :gyms
 
   validates :name, presence: { message: 'を入力してください' }, length: { maximum: 255 }
   validates :email, presence: { message: 'を入力してください' }, uniqueness: true
