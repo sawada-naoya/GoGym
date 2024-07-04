@@ -14,7 +14,7 @@ class GymsController < ApplicationController
 
   # POST /gyms
   def create
-    @gym = Gym.new(gym_params)
+    @gym = current_user.gyms.build(gym_params)
     if @gym.save
       redirect_to @gym
       flash[:success] = t('flash.gym_create_success')

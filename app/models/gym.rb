@@ -5,6 +5,7 @@ class Gym < ApplicationRecord
   has_many :tags, through: :gym_tags
   has_many :favorites, dependent: :destroy
   has_many :favorited_by, through: :favorites, source: :user
+  belongs_to :user
 
   # 親モデルのフォームから子モデルの属性を直接受け取ることができるようにする
   accepts_nested_attributes_for :location
