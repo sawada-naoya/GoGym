@@ -45,6 +45,13 @@ end
 
 # 本番環境でのみジムデータを作成
 if Rails.env.production?
+  # 管理者ユーザーを作成
+  admin_user = User.create!(
+    name: 'Admin',
+    email: 'admin@example.com',
+    password: 'adminpassword',
+    password_confirmation: 'adminpassword'
+  )
   # JSONファイルから読み込んだジムデータをデータベースに保存
   gyms.each do |gym|
     # 既存のジムデータを確認
@@ -58,7 +65,8 @@ if Rails.env.production?
       access: gym['access'] || 'アクセス情報がありません',
       membership_fee: gym['membership_fee'] || '料金情報がありません',
       business_hours: gym['business_hours'] || '営業時間情報がありません',
-      website: gym['website'] || ' '
+      website: gym['website'] || ' ',
+      user_id: admin_user.id
     )
 
     # 各ジムに対応するロケーションデータを作成
@@ -103,7 +111,8 @@ else
       access: gym['access'] || 'アクセス情報がありません',
       membership_fee: Faker::Commerce.price(range: 1000..10000),
       business_hours: '9:00 - 21:00',
-      website: Faker::Internet.url
+      website: Faker::Internet.url,
+      user_id: user_ids.sample
     )
 
     # 各ジムに対応するロケーションデータを作成
