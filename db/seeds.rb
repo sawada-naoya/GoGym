@@ -45,6 +45,10 @@ end
 
 # 本番環境でのみジムデータを作成
 if Rails.env.production?
+  # 既存のデータを削除
+  Gym.delete_all
+  User.delete_all
+
   # 管理者ユーザーを作成
   admin_user = User.create!(
     name: 'Admin',
