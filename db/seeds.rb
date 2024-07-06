@@ -45,6 +45,12 @@ end
 
 # 本番環境でのみジムデータを作成
 if Rails.env.production?
+  # 管理者ユーザーを作成
+  admin_user = User.find_or_create_by!(email: 'admin@example.com') do |user|
+    user.name = 'Admin User'
+    user.password = 'adminpassword'
+    user.password_confirmation = 'adminpassword'
+  end
   # JSONファイルから読み込んだジムデータをデータベースに保存
   gyms.each do |gym|
     # 既存のジムデータを確認
