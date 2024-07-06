@@ -58,7 +58,8 @@ if Rails.env.production?
       access: gym['access'] || 'アクセス情報がありません',
       membership_fee: gym['membership_fee'] || '料金情報がありません',
       business_hours: gym['business_hours'] || '営業時間情報がありません',
-      website: gym['website'] || ' '
+      website: gym['website'] || ' ',
+      user_id: admin_user.id
     )
 
     # 各ジムに対応するロケーションデータを作成
