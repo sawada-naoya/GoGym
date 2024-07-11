@@ -2,7 +2,14 @@
 <% breadcrumb :root %>
 <div class="container mt-5">
   <div class="row justify-content-center">
-    <h2 class="col-12 text-center mb-3" style="font-weight: 900;"><%= t('top.index.text') %></h2>
+    <div class="mb-3">
+      <h1 class="col-12 display-4 text-center text-white fw-bold mb-4" style="font-size: 70px">GoGym</h1>
+      <h5 class="col-8 lead text-white mb-4 fw-semibold h1-width" style="font-size: 20px">
+        あなたのトレーニングライフをサポートするための最適なジムを見つけましょう!<br>
+        GoGymは、トレーニングをしている人、始めたい人に向けた、ジム検索サービスです。
+      </h5>
+    </div>
+    <h2 class="col-12 text-center mb-3 text-white fw-semibold"><%= t('top.index.text') %></h2>
   </div>
   <%= search_form_for @q, url: gyms_path, remote: true do |f| %>
     <div class="row justify-content-center">
