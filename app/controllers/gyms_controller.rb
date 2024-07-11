@@ -79,7 +79,7 @@ class GymsController < ApplicationController
   end
 
   def autocomplete
-    @gyms = Gym.where("name like ?", "%#{params[:q]}%").limit(10)
+    @gyms = Gym.where("name like ?", "%#{params[:q]}%").limit(6)
     render partial: 'shared/autocomplete', locals: { gyms: @gyms }
   end
 
