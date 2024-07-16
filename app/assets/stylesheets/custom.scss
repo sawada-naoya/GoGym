@@ -119,11 +119,12 @@ footer {
   color: #696969;   /*文字の色を変える*/
   font-size: 25px;  /*文字の大きさを大きくする*/
   border-radius: 50%; /*角を完全に丸くする*/
-  width: 20px; /*幅を設定*/
+  width: 30px; /*幅を設定*/
   height: 30px; /*高さを設定*/
   line-height: 30px; /*テキストを中央に配置*/
   text-align: center; /* 水平方向の中心配置を追加 */
   text-decoration: none; /* 下線を消す */
+  transition: background 0.3s; /* 背景色の変更をスムーズにする */
 }
 
 .pagination>li {
@@ -133,18 +134,27 @@ footer {
 /* 表示しているページ番号のデザイン */
 .pagination>.active>a {
   background: #227D51;     /*背景の色を変える*/
-  border-radius: 50%;     /*角を丸くする*/
-  width: 30px; /*幅を設定*/
-  height: 30px; /*高さを設定*/
-  line-height: 30px; /*テキストを中央に配置*/
+  color: #ffffff; /*文字の色を白に変える*/
 }
 
 /*ホバー時のデザイン*/
 .pagination>li>a:hover {
-  border-radius: 50%;    /*角を丸くする*/
-  width: 30px; /*幅を設定*/
-  height: 30px; /*高さを設定*/
-  line-height: 30px; /*テキストを中央に配置*/
+  background: #e0e0e0; /*ホバー時の背景色を設定*/
+  color: #000000; /*ホバー時の文字色を変更*/
+}
+
+/* 画面サイズに応じた調整 */
+@media (max-width: 576px) {
+  .pagination>li>a, .pagination>.active>a {
+    width: 1.5rem;      /* 幅を小さくする */
+    height: 1.5rem;     /* 高さを小さくする */
+    line-height: 1.5rem; /* テキストを中央に配置 */
+    font-size: 0.75rem; /* 文字の大きさを小さくする */
+  }
+
+  .pagination>li {
+    margin-right: 0.25rem; /* ページ間の間隔を小さくする */
+  }
 }
 
 /* 口コミ一覧 */

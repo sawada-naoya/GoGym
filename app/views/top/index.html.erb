@@ -24,4 +24,67 @@
       </div>
     </div>
   <% end %>
+  <h2 class="col-12 text-center mb-3 text-white fw-semibold mt-5">地図から探す</h2>
+  <div class="d-flex justify-content-center mb-5">
+    <div id="map" style="height: 600px; width: 600px;"></div>
+  </div>
 </div>
+
+
+<script>
+function initMap() {
+  // ブラウザがGeolocation APIをサポートしているかどうかをチェック
+  if (navigator.geolocation) {
+    // getCurrentPositionメソッドを使用して、ユーザーの現在の位置情報を取得
+    navigator.geolocation.getCurrentPosition(function(position) {
+      // positionオブジェクトから緯度と経度を取得し、currentPosオブジェクトに格納
+      const currentPos = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      };
+
+      // Google Maps APIを使用して地図を初期化
+      // document.getElementById('map')で指定されたHTML要素に地図を表示
+      const map = new google.maps.Map(document.getElementById('map'), {
+        // 地図の中心をcurrentPosに設定
+        center: currentPos,
+        // 地図のズームレベルを設定
+        zoom: 14,
+      });
+
+      var currentInfowindow = null; // 現在開いているインフォウィンドウを管理する変数
+      <% @gyms.each do |gym| %>
+        <% if gym.location %>
+          var marker = new google.maps.Marker({
+            position: {lat: <%= gym.location.latitude %>, lng: <%= gym.location.longitude %>},
+            map: map,
+            title: '<%= j gym.name %>'
+          });
+          (function(marker, gymName) { // 即時関数でスコープを作成
+            // マーカーがクリックされた時のイベントリスナーを設定
+            marker.addListener('click', function() {
+              // 既に開いているインフォウィンドウがあれば閉じる
+              if (currentInfowindow) {
+                currentInfowindow.close();
+              }
+              var infowindow = new google.maps.InfoWindow();
+              var content = '<%= j(link_to gym.name, gym_path(gym)) %>'; // ERBタグ内でjメソッドを使う
+              infowindow.setContent(content);
+              infowindow.open(map, marker);
+              // 現在開いているインフォウィンドウを更新
+              currentInfowindow = infowindow;
+            });
+          })(marker, '<%= gym.name %>'); // 即時関数に現在のマーカーとジムのインスタンスを渡す
+        <% end %>
+      <% end %>
+
+    }, function() {
+      console.log('現在地の取得に失敗しました。');
+    });
+  } else {
+    console.log('このブラウザはGeolocation APIをサポートしていません。');
+  }
+}
+</script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=<%= ENV["GOOGLE_MAPS_API_KEY"] %>&callback=initMap"></script>
