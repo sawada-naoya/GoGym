@@ -18,10 +18,15 @@
     <meta property="og:title" content="GoGym" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="<%= request.original_url %>" />
-    <meta property="og:image" content="<%= url_for('/og_image.png') %>" />
+    <meta property="og:image" content="<%= asset_path('og_image.png') %>" />
     <meta property="og:description" content="Find the best gyms with GoGym!" />
     <meta property="og:site_name" content="GoGym" />
 
+    <!-- Twitter Card meta tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="GoGym - Find Your Best Gym">
+    <meta name="twitter:description" content="Find the best gyms with GoGym!">
+    <meta name="twitter:image" content="<%= asset_path('og_image.png') %>">
   </head>
   <body class="<%= 'top-index' if controller_name == 'top' && action_name == 'index' %>">
     <header>
