@@ -14,19 +14,7 @@
     <script src="<%= asset_path('raty.js') %>"></script>
     <script src="<%= asset_path('loading.js') %>"></script>
 
-    <!-- Open Graph meta tags -->
-    <meta property="og:title" content="GoGym" />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="<%= request.original_url %>" />
-    <meta property="og:image" content="<%= asset_path('og_image.png') %>" />
-    <meta property="og:description" content="Find the best gyms with GoGym!" />
-    <meta property="og:site_name" content="GoGym" />
-
-    <!-- Twitter Card meta tags -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="GoGym - Find Your Best Gym">
-    <meta name="twitter:description" content="Find the best gyms with GoGym!">
-    <meta name="twitter:image" content="<%= asset_path('og_image.png') %>">
+    <%= display_meta_tags(default_meta_tags) %>
   </head>
   <body class="<%= 'top-index' if controller_name == 'top' && action_name == 'index' %>">
     <header>

@@ -120,3 +120,5 @@ gem 'letter_opener_web'
 gem 'whenever', require: false
 
 gem 'sidekiq'
+
+gem "meta-tags"
