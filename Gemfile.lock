@@ -129,6 +129,7 @@ GEM
       request_store (>= 1.0)
       ruby2_keywords
     erubi (1.12.0)
+    excon (0.111.0)
     execjs (2.9.1)
     factory_bot (6.4.6)
       activesupport (>= 5.0.0)
@@ -142,8 +143,24 @@ GEM
     faraday-net_http (3.1.0)
       net-http
     ffi (1.16.3)
+    fog-aws (3.24.0)
+      fog-core (~> 2.1)
+      fog-json (~> 1.1)
+      fog-xml (~> 0.1)
+    fog-core (2.5.0)
+      builder
+      excon (~> 0.71)
+      formatador (>= 0.2, < 2.0)
+      mime-types
+    fog-json (1.2.0)
+      fog-core
+      multi_json (~> 1.10)
+    fog-xml (0.1.4)
+      fog-core
+      nokogiri (>= 1.5.11, < 2.0.0)
     font-awesome-sass (6.5.2)
       sassc (~> 2.0)
+    formatador (1.1.0)
     geocoder (1.8.2)
     globalid (1.2.1)
       activesupport (>= 6.1)
@@ -219,10 +236,14 @@ GEM
     meta-tags (2.22.0)
       actionpack (>= 6.0.0, < 8.1)
     method_source (1.0.0)
+    mime-types (3.5.2)
+      mime-types-data (~> 3.2015)
+    mime-types-data (3.2024.0806)
     mini_magick (4.12.0)
     mini_mime (1.1.5)
     minitest (5.22.3)
     msgpack (1.7.2)
+    multi_json (1.15.0)
     multi_xml (0.7.1)
       bigdecimal (~> 3.1)
     net-http (0.4.1)
@@ -446,6 +467,7 @@ DEPENDENCIES
   draper (= 4.0.2)
   factory_bot_rails
   faker
+  fog-aws
   font-awesome-sass
   geocoder
   google_places
