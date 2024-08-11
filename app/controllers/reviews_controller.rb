@@ -3,7 +3,7 @@ class ReviewsController < ApplicationController
   before_action :set_review, only: [:edit, :update, :destroy]
 
   def index
-    @reviews = @gym.reviews.page(params[:page]).per(5)
+    @reviews = @gym.reviews.order(created_at: :desc).page(params[:page]).per(5)
     @average_rating = @gym.reviews.average(:rating).to_f.round(2)
   end
 

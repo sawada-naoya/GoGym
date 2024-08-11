@@ -122,3 +122,5 @@ gem 'whenever', require: false
 gem 'sidekiq'
 
 gem "meta-tags"
+
+gem 'fog-aws'

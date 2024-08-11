@@ -97,7 +97,7 @@ MVP リリース
 - ActiveJob,Sidekiq
 
 ■ ER 図
-https://i.gyazo.com/52f5cdbf4b70a102134574b023ce4001.png
+https://gyazo.com/204ee43865c85fe73ba3eeead0b42d3a
 
 ■ 技術選定案
 - 開発環境: Docker
