@@ -7,9 +7,6 @@ Rails.application.configure do
   config.consider_all_requests_local       = false
   config.action_controller.perform_caching = true
 
-  # 静的ファイルの提供を有効化
-  config.public_file_server.enabled = true
-
   config.public_file_server.enabled = ENV["RAILS_SERVE_STATIC_FILES"].present?
 
   config.assets.compile = true
@@ -18,6 +15,13 @@ Rails.application.configure do
   config.assets.prefix = "/assets"
 
   config.active_storage.service = :amazon
+
+  # デバッグ用のログ出力を追加
+  if Rails.env.production?
+    Rails.logger.info "AWS_ACCESS_KEY_ID: #{ENV['AWS_ACCESS_KEY_ID']}"
+    Rails.logger.info "AWS_SECRET_ACCESS_KEY: #{ENV['AWS_SECRET_ACCESS_KEY']}"
+    Rails.logger.info "AWS_BUCKET_NAME: #{ENV['AWS_BUCKET_NAME']}"
+  end
 
   config.log_level = :info
 
