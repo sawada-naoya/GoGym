@@ -17,7 +17,7 @@ Rails.application.configure do
   config.assets.precompile += %w( application.css )
   config.assets.prefix = "/assets"
 
-  config.active_storage.service = :local
+  config.active_storage.service = :amazon
 
   config.log_level = :info
 
