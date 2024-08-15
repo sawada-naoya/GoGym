@@ -13,9 +13,9 @@ class RecommendService
   private
 
   #　コンテンツフィルタリング
-    # ① 現在のユーザーが評価を行ったジムをデータベースから取得
-    # ② 取得したジムに関連するタグを集計し、出現頻度が高い順に3つのタグを選ぶ
-    # ③ 選定したタグに基づいて、関連するジムをデータベースから取得
+    # ① 現在のユーザーが評価したジム（例: ゴールドジム渋谷店）をデータベースから取得します。
+    # ② 取得したジムに関連するタグ（例: 24時間、サウナ、プロテイン、駐車場、パーソナル）を確認し、同様のタグを持つジムを検索します。検索されたジムに設定されているタグの中で、出現頻度が高い順に3つのタグ（例: プロテイン、24時間、サウナ）を選びます。
+    # ③ 選定された3つのタグに基づいて、同様のタグを持つジムをデータベースからすべて取得します。
 
   def content_based_recommended_gyms
     @logger.info "コンテンツベースのフィルタリングを実行中: ユーザーID=#{@user.id}"
@@ -43,10 +43,10 @@ class RecommendService
 
 
   #　ユーザー・ベースの協調フィルタリング
-    # ① 自分と同じジムを３つ以上お気に入り登録しているユーザーを探す
-    # ② 各ジムに対する平均ratingが＋ー0.2以内の平均ratingを持つユーザーを探す
-    # ③ ②で見つけたユーザーの評価しているジムの中で、ユーザーの平均ratingよりも高く評価しているジムを探す。
-    # ④ それを各ユーザーのビューに渡して３つのおすすめのジムを表示させる。
+    # ① 自分と同じジムを3つ以上お気に入り登録しているユーザーを探します。
+    # ② そのユーザーの平均評価が、自分の平均評価の±0.2以内のユーザーを探します。
+    # ③ ②で見つけたユーザーが評価しているジムの中で、自身の平均評価よりも高く評価しているジムを探します。
+    # ④ それを各ユーザーのビューに渡して、3つのおすすめのジムとして取得します。
 
   def user_based_recommendations
     @logger.info "ユーザーベースのフィルタリングを実行中: ユーザーID=#{@user.id}"
@@ -119,11 +119,26 @@ class RecommendService
     Gym.where(id: highly_rated_gyms.uniq)
   end
 
+  # 最終的なおすすめジムの表示:
+  # コンテンツベースフィルタリングとユーザーベースフィルタリングで取得されたジムを組み合わせ、重複したジムを最終的なおすすめジムとしてユーザーに表示します。
+
   def recommended_gyms
     user_based_gyms = user_based_recommendations
     content_based_gyms = content_based_recommended_gyms
     @logger.info "ユーザーベースの推奨ジム: #{user_based_gyms.pluck(:id)}"
     @logger.info "コンテンツベースの推奨ジム: #{content_based_gyms.pluck(:id)}"
-    (user_based_gyms + content_based_gyms).uniq
+    # 重複するジムを抽出
+    duplicated_gyms = user_based_gyms & content_based_gyms
+
+    # 重複がない、もしくは2つ未満の場合は、ユーザーベースのジムを優先して表示
+    if duplicated_gyms.size >= 2
+      @recommended_gyms = duplicated_gyms
+    else
+      @recommended_gyms = user_based_gyms
+    end
+
+    # ログに表示されるジムのIDを記録
+    Rails.logger.info "推奨ジム: #{@recommended_gyms.pluck(:id)}"
+    @recommended_gyms
   end
 end

@@ -25,7 +25,7 @@ class UsersController < ApplicationController
 
   def favorites
     @q = @user.favorite_gyms.ransack(params[:q])
-    @favorite_gyms = @q.result(distinct: true).order(created_at: :desc).page(params[:page]).per(5)
+    @favorite_gyms = @q.result(distinct: true).order(created_at: :desc).page(params[:page]).per(10)
     @average_ratings = calculate_average_ratings_for_gyms(@favorite_gyms)
     @gym_images = get_gym_images(@favorite_gyms)
   end

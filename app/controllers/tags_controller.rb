@@ -1,7 +1,7 @@
 class TagsController < ApplicationController
   def show
     @tag = Tag.find(params[:id])
-    @gyms = @tag.gyms.page(params[:page]).per(5)
+    @gyms = @tag.gyms.page(params[:page]).per(10)
     @average_ratings = calculate_average_ratings_for_gyms(@gyms)
     @gym_images = get_gym_images(@gyms)
   end
