@@ -30,8 +30,7 @@ Things you may want to cover:
 
 ■ このサービスへの思い・作りたい理由  
 トレーニングマシンの数や広さ、立地、金額、混雑具合、接客などジムによって、トレーニングのしやすさには違いがあります。私は普段同じジムに行っていますが、より快適にトレーニングをできる環境があれば、様々なジムを利用してみたいと思っています。  
-また、以前海外や国内へ旅行に行った際、宿泊先の近くにジムがあれば行きたいと考えました。しかし地域のジムを探しても情報が少ない事が多く、利用には至りませんでした。  
-そのようなことから、旅行先の有無に限らず、それ以外の条件(設備、金額、広さなど)でも自分に合ったジムを見つけるサービスがあれば便利なのになと思っていました。そこで、「自身にとって最適なジムを探せるサービスを作ってみよう！」と思い、このサービスを作るに至りました。
+そのような思いから、自分に合ったジムを見つけるサービスがあると便利だと思いこのサービスを作るに至りました。
 
 ■ ユーザー層について  
 メインターゲット：トレーニングを始めたい人  
@@ -73,38 +72,26 @@ MVP リリース
 - パスワード変更
 - お気に入り
 
-■ 機能の実装方針予定  
-MVP リリース
-
-- トップページ
-- 検索：ransack,kaminari,stimulus-autocomplete
-- タグ
-- 詳細(閲覧・編集)
-- 口コミ・写真投稿(閲覧・編集・削除)：Action Text,Active Storage,CarrierWave
-- 会員登録・ログイン：device
-- 位置情報：Google Maps Platform,Geocoder
-
-本リリース
-
-- レーティング：ratyrate
-- レコメンド：
-- ソーシャルログイン：
-- パスワード変更
-- お気に入り
-
-バックエンド処理
-
-- ActiveJob,Sidekiq
-
 ■ ER 図
-https://gyazo.com/204ee43865c85fe73ba3eeead0b42d3a
 
-■ 技術選定案
+![スクリーンショット 2024-08-15 22 00 44](https://github.com/user-attachments/assets/96906ea7-954e-48e1-9e3b-4ec94fade68d)
+
+
+■ 使用技術
+| **カテゴリ** | **技術** |
+----|---- 
+| フロントエンド | JavaScript、HotWire CSS |
+| サーバサイド | Ruby on Rail、Ruby |
+| インフラ | render |
+| データベース | PostgreSQL |
+| 開発環境 | Docker |
+| WebAPI | Geocoding API、Maps JavaScript API |
+
 - 開発環境: Docker
 - サーバサイド: Ruby on Rails 7.0.8.1、Ruby 3.2.2
 - フロントエンド: HotWire
-- CSSフレームワーク: bootstrap5系
-- WebAPI: Google MapAPI（GoogleマップのジオロケーションAPI）、Geocoder、Amazon Personalize、Facebook Login API、Google Sign-In API、Twitter API
+- CSSフレームワーク: bootstrap
+- WebAPI: Geocoding API、Maps JavaScript API
 - インフラ:
   - Webアプリケーションサーバ: render
   - ファイルサーバ: render
