@@ -27,9 +27,9 @@ class GymsController < ApplicationController
   def index
     if params[:tag_id]
       @tag = Tag.find(params[:tag_id])
-      @gyms = @tag.gyms.page(params[:page]).per(5)
+      @gyms = @tag.gyms.page(params[:page]).per(10)
     else
-      @gyms = @q.result(distinct: true).page(params[:page]).per(5)
+      @gyms = @q.result(distinct: true).page(params[:page]).per(10)
     end
     @average_ratings = calculate_average_ratings_for_gyms(@gyms)
     @gym_images = get_gym_images(@gyms)
