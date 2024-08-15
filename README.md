@@ -78,7 +78,7 @@ X、SEO など
 ----|---- 
 | フロントエンド | HTML、CSS、JavaScript、HotWire |
 | サーバサイド | Ruby on Rail、Ruby |
-| インフラ | render |
+| インフラ | Render |
 | データベース | PostgreSQL |
 | 開発環境 | Docker |
 | WebAPI | Geocoding API、Maps JavaScript API |
