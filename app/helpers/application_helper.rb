@@ -15,7 +15,7 @@ module ApplicationHelper
       reverse: true,
       charset: 'utf-8',
       description: 'GoGymはジムの検索サービスです。あなたのベストジムを見つけてみませんか？ Find the best gyms with GoGym!',
-      keywords: 'ジム,スポーツ,スポーツ施設,gym,スポーツジム',
+      keywords: 'トレーニング,training,ジム,スポーツ,スポーツ施設,gym,スポーツジム,筋トレ,プロテイン,運動,ダイエット,減量,ボディメイク,bodymake',
       canonical: Rails.env.production? ? 'https://gogym-m40u.onrender.com' : request.original_url,
       separator: '|',
       og: {
