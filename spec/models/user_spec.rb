@@ -1,31 +1,47 @@
 require 'rails_helper'
 
 RSpec.describe User, type: :model do
-  it '名前、メールがあり、パスワードは3文字以上であれば有効であること' do
-    user = build(:user, password: 'password', password_confirmation: 'password')
-    expect(user).to be_valid
-  end
+  # ここからテストスタート
+  # user作成に対するテスト
+  describe 'バリデーションチェック' do
+    let(:user) { FactoryBot.build(:user) }
 
-  it 'メールはユニークであること' do
-    user = create(:user, password: 'password', password_confirmation: 'password')
-    user2 = build(:user, email: user.email)
-    expect(user2).not_to be_valid
-    expect(user2.errors[:email]).to include('はすでに存在します')
-  end
-
-  it 'メールアドレス名前は必須項目であること' do
-    user = build(:user, password: 'password', password_confirmation: 'password')
-    user.email = nil
-    user.name = nil
-    user.valid?
-    expect(user.errors[:email]).to include('を入力してください')
-    expect(user.errors[:name]).to include('を入力してください')
-  end
-
-  it '名は255文字以下であること' do
-    user = build(:user, password: 'password', password_confirmation: 'password')
-    user.name = 'a' * 256
-    user.valid?
-    expect(user.errors[:name]).to include('は255文字以内で入力してください')
+    it '設定したバリデーションが機能しているか' do
+      expect(user).to be_valid
+    end
+    it '名前が未入力だとinvalidになるか' do
+      user.name = nil
+      expect(user).to be_invalid
+    end
+    it '名前が256文字以上だとinvalidになるか' do
+      user.name = 'a'* 256
+      expect(user).to be_invalid
+    end
+    it 'メールが未入力だとinvalidになるか' do
+      user.email = nil
+      expect(user).to be_invalid
+    end
+    it 'メールが重複しているとinvalidになるか' do
+      user.save
+      user2 = FactoryBot.build(:user, email: user.email)
+      expect(user2).to be_invalid
+    end
+    it 'パスワードが未入力だとinvalidになるか' do
+      user.password = nil
+      expect(user).to be_invalid
+    end
+    it 'パスワードが3文字未満だとinvalidになるか' do
+      user.password = 'a'* 2
+      expect(user).to be_invalid
+    end
+    it 'パスワードが確認入力と一致しない場合invalidになるか' do
+      user.password = 'password'
+      user.password_confirmation = 'different_password'
+      expect(user).to be_invalid
+    end
+    it 'パスワード確認が未入力だとinvalidになるか' do
+      user.password_confirmation = nil
+      expect(user).to be_invalid
+    end
   end
 end
