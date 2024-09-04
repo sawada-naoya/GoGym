@@ -82,4 +82,4 @@ X、SEO など
 | データベース | PostgreSQL |
 | 開発環境 | Docker |
 | WebAPI | Geocoding API、Maps JavaScript API |
-| その他 | VCS: GitHub、CI/CD: GitHub Actions |
+| その他 | VCS: GitHub　|
