@@ -1,0 +1,171 @@
+version: '3'
+
+vars:
+  DOCKER_COMPOSE_FILE: ./infra/docker/docker-compose.yml
+  API_DIR: ./apps/api
+  WEB_DIR: ./apps/web
+  OPENAPI_DIR: ./packages/openapi
+
+tasks:
+  # Setup commands
+  setup:
+    desc: Setup the entire project
+    deps: [gen, up, migrate, seed]
+
+  clean:
+    desc: Clean all generated files and containers
+    cmds:
+      - task: down
+      - rm -rf {{.API_DIR}}/internal/gen
+      - rm -rf {{.WEB_DIR}}/types/generated
+      - rm -rf {{.OPENAPI_DIR}}/generated
+      - docker system prune -f
+
+  # Code generation
+  gen:
+    desc: Generate all code from OpenAPI spec
+    deps: [gen-go, gen-ts]
+
+  gen-go:
+    desc: Generate Go server code from OpenAPI spec
+    dir: "{{.OPENAPI_DIR}}"
+    cmds:
+      - ./gen-go.sh
+
+  gen-ts:
+    desc: Generate TypeScript client code from OpenAPI spec
+    dir: "{{.OPENAPI_DIR}}"
+    cmds:
+      - ./gen-ts.sh
+
+  # Docker operations
+  up:
+    desc: Start all services
+    cmds:
+      - docker-compose -f {{.DOCKER_COMPOSE_FILE}} up -d
+
+  down:
+    desc: Stop all services
+    cmds:
+      - docker-compose -f {{.DOCKER_COMPOSE_FILE}} down
+
+  logs:
+    desc: Show logs for all services
+    cmds:
+      - docker-compose -f {{.DOCKER_COMPOSE_FILE}} logs -f
+
+  logs-api:
+    desc: Show API logs
+    cmds:
+      - docker-compose -f {{.DOCKER_COMPOSE_FILE}} logs -f api
+
+  logs-web:
+    desc: Show Web logs
+    cmds:
+      - docker-compose -f {{.DOCKER_COMPOSE_FILE}} logs -f web
+
+  # Database operations
+  migrate:
+    desc: Run database migrations
+    cmds:
+      - docker-compose -f {{.DOCKER_COMPOSE_FILE}} exec api goose -dir /app/infra/migrations mysql "gogym:password@tcp(mysql:3306)/gogym" up
+
+  migrate-down:
+    desc: Rollback database migration
+    cmds:
+      - docker-compose -f {{.DOCKER_COMPOSE_FILE}} exec api goose -dir /app/infra/migrations mysql "gogym:password@tcp(mysql:3306)/gogym" down
+
+  migrate-status:
+    desc: Check migration status
+    cmds:
+      - docker-compose -f {{.DOCKER_COMPOSE_FILE}} exec api goose -dir /app/infra/migrations mysql "gogym:password@tcp(mysql:3306)/gogym" status
+
+  seed:
+    desc: Seed database with sample data
+    cmds:
+      - docker-compose -f {{.DOCKER_COMPOSE_FILE}} exec mysql mysql -u gogym -ppassword -D gogym < /app/infra/seeds/seed.sql
+
+  # Development commands
+  dev:
+    desc: Start development environment
+    cmds:
+      - task: gen
+      - task: up
+      - task: migrate
+      - echo "Development environment started!"
+      - echo "API: http://localhost:8080"
+      - echo "Web: http://localhost:3000"
+      - echo "MinIO Console: http://localhost:9001"
+
+  # API commands
+  api:
+    desc: Start API server locally (outside Docker)
+    dir: "{{.API_DIR}}"
+    cmds:
+      - go run cmd/api/main.go
+
+  api-build:
+    desc: Build API binary
+    dir: "{{.API_DIR}}"
+    cmds:
+      - go build -o bin/gogym-api cmd/api/main.go
+
+  api-test:
+    desc: Run API tests
+    dir: "{{.API_DIR}}"
+    cmds:
+      - go test -v ./...
+
+  api-lint:
+    desc: Run API linting
+    dir: "{{.API_DIR}}"
+    cmds:
+      - golangci-lint run
+
+  # Web commands
+  web:
+    desc: Start web server locally (outside Docker)
+    dir: "{{.WEB_DIR}}"
+    cmds:
+      - pnpm dev
+
+  web-build:
+    desc: Build web application
+    dir: "{{.WEB_DIR}}"
+    cmds:
+      - pnpm build
+
+  web-test:
+    desc: Run web tests
+    dir: "{{.WEB_DIR}}"
+    cmds:
+      - pnpm test
+
+  web-lint:
+    desc: Run web linting
+    dir: "{{.WEB_DIR}}"
+    cmds:
+      - pnpm lint
+
+  # Testing
+  test:
+    desc: Run all tests
+    deps: [api-test, web-test]
+
+  lint:
+    desc: Run all linting
+    deps: [api-lint, web-lint]
+
+  # Production builds
+  build:
+    desc: Build all applications
+    deps: [api-build, web-build]
+
+  # Health checks
+  health:
+    desc: Check service health
+    cmds:
+      - curl -f http://localhost:8080/health || echo "API: DOWN"
+      - curl -f http://localhost:3000 || echo "Web: DOWN"
+      - docker-compose -f {{.DOCKER_COMPOSE_FILE}} exec mysql mysqladmin ping -h mysql -u gogym -ppassword || echo "MySQL: DOWN"
+      - docker-compose -f {{.DOCKER_COMPOSE_FILE}} exec redis redis-cli ping || echo "Redis: DOWN"
