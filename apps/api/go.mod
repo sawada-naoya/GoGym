@@ -1,6 +1,6 @@
 module gogym-api
 
-go 1.22.0
+go 1.25
 
 require (
 	github.com/labstack/echo/v4 v4.11.3
@@ -13,6 +13,7 @@ require (
 	github.com/redis/go-redis/v9 v9.3.1
 	github.com/aws/aws-sdk-go v1.48.16
 	github.com/hibiken/asynq v0.24.1
+	github.com/google/wire v0.6.0
 	golang.org/x/crypto v0.18.0
 	gorm.io/gorm v1.25.5
 	gorm.io/driver/mysql v1.5.2

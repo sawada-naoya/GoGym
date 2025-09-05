@@ -6,7 +6,7 @@ A modern gym search and review platform built with Go backend and Next.js fronte
 
 This is a monorepo containing:
 
-- **Backend**: Go 1.22+ with Echo framework, Clean Architecture
+- **Backend**: Go 1.25+ with Echo framework, Clean Architecture
 - **Frontend**: Next.js 14+ with App Router, React Server Components
 - **Database**: MySQL 8.0 with spatial support
 - **Storage**: S3-compatible (MinIO for dev)
@@ -19,7 +19,7 @@ This is a monorepo containing:
 
 - [Docker](https://docs.docker.com/get-docker/) and Docker Compose
 - [Task](https://taskfile.dev/#/installation) - task runner
-- [Go 1.22+](https://golang.org/dl/) (for local development)
+- [Go 1.25+](https://golang.org/dl/) (for local development)
 - [Node.js 18+](https://nodejs.org/) and [pnpm](https://pnpm.io/) (for local development)
 
 ### Setup
