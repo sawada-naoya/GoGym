@@ -1,0 +1,542 @@
+openapi: 3.0.3
+info:
+  title: GoGym API
+  description: Gym search and review service API
+  version: 1.0.0
+  contact:
+    name: GoGym Team
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Development server
+
+paths:
+  /gyms/search:
+    get:
+      summary: Search gyms with location and filters
+      operationId: searchGyms
+      parameters:
+        - name: q
+          in: query
+          description: Search query for gym name/description
+          schema:
+            type: string
+            maxLength: 255
+        - name: lat
+          in: query
+          description: Latitude for location search
+          schema:
+            type: number
+            format: double
+            minimum: -90
+            maximum: 90
+        - name: lon
+          in: query
+          description: Longitude for location search
+          schema:
+            type: number
+            format: double
+            minimum: -180
+            maximum: 180
+        - name: radius_m
+          in: query
+          description: Search radius in meters
+          schema:
+            type: integer
+            minimum: 100
+            maximum: 50000
+            default: 5000
+        - name: cursor
+          in: query
+          description: Cursor for pagination
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Number of results to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Successful search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GymSearchResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /gyms/{id}:
+    get:
+      summary: Get gym by ID
+      operationId: getGym
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Gym ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Gym details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Gym'
+        '404':
+          description: Gym not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/signup:
+    post:
+      summary: User registration
+      operationId: signup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      summary: User login
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /photos/presign:
+    post:
+      summary: Get presigned URL for photo upload
+      operationId: presignPhoto
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PresignRequest'
+      responses:
+        '200':
+          description: Presigned URL generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PresignResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Gym:
+      type: object
+      required:
+        - id
+        - name
+        - location
+        - address
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          maxLength: 255
+          example: "Fitness Club Tokyo"
+        description:
+          type: string
+          nullable: true
+          example: "Modern gym with state-of-the-art equipment"
+        location:
+          $ref: '#/components/schemas/Location'
+        address:
+          type: string
+          maxLength: 500
+          example: "1-2-3 Shibuya, Shibuya-ku, Tokyo"
+        city:
+          type: string
+          nullable: true
+          maxLength: 100
+          example: "Tokyo"
+        prefecture:
+          type: string
+          nullable: true
+          maxLength: 100
+          example: "Tokyo"
+        postal_code:
+          type: string
+          nullable: true
+          pattern: '^[0-9]{3}-[0-9]{4}$'
+          example: "150-0002"
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
+        average_rating:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 5
+          nullable: true
+          example: 4.2
+        review_count:
+          type: integer
+          minimum: 0
+          example: 15
+        created_at:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+
+    Location:
+      type: object
+      required:
+        - latitude
+        - longitude
+      properties:
+        latitude:
+          type: number
+          format: double
+          minimum: -90
+          maximum: 90
+          example: 35.6762
+        longitude:
+          type: number
+          format: double
+          minimum: -180
+          maximum: 180
+          example: 139.6503
+
+    Tag:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          maxLength: 50
+          example: "24時間営業"
+
+    Review:
+      type: object
+      required:
+        - id
+        - user_id
+        - gym_id
+        - rating
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        user_id:
+          type: integer
+          format: int64
+          example: 1
+        gym_id:
+          type: integer
+          format: int64
+          example: 1
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 4
+        comment:
+          type: string
+          nullable: true
+          maxLength: 1000
+          example: "Great facility with modern equipment"
+        photos:
+          type: array
+          items:
+            type: string
+            format: uri
+          example: ["https://s3.example.com/photos/1.jpg"]
+        user_display_name:
+          type: string
+          nullable: true
+          example: "John D."
+        created_at:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+
+    GymSearchResponse:
+      type: object
+      required:
+        - gyms
+        - has_more
+      properties:
+        gyms:
+          type: array
+          items:
+            $ref: '#/components/schemas/Gym'
+        next_cursor:
+          type: string
+          nullable: true
+          description: Cursor for next page
+        has_more:
+          type: boolean
+          description: Whether there are more results
+
+    SignupRequest:
+      type: object
+      required:
+        - email
+        - password
+        - display_name
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          example: "user@example.com"
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+          example: "securePassword123"
+        display_name:
+          type: string
+          maxLength: 100
+          example: "John Doe"
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          example: "user@example.com"
+        password:
+          type: string
+          example: "securePassword123"
+
+    AuthResponse:
+      type: object
+      required:
+        - access_token
+        - refresh_token
+        - expires_in
+        - user
+      properties:
+        access_token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        refresh_token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        expires_in:
+          type: integer
+          description: Access token expiry time in seconds
+          example: 3600
+        user:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      required:
+        - id
+        - email
+        - display_name
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        display_name:
+          type: string
+          example: "John Doe"
+        created_at:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+
+    PresignRequest:
+      type: object
+      required:
+        - filename
+        - content_type
+      properties:
+        filename:
+          type: string
+          maxLength: 255
+          example: "gym-photo-001.jpg"
+        content_type:
+          type: string
+          enum: ["image/jpeg", "image/png", "image/webp"]
+          example: "image/jpeg"
+
+    PresignResponse:
+      type: object
+      required:
+        - presigned_url
+        - public_url
+        - expires_in
+      properties:
+        presigned_url:
+          type: string
+          format: uri
+          example: "https://s3.amazonaws.com/bucket/path?X-Amz-Signature=..."
+        public_url:
+          type: string
+          format: uri
+          example: "https://cdn.example.com/photos/gym-photo-001.jpg"
+        expires_in:
+          type: integer
+          description: Presigned URL expiry time in seconds
+          example: 3600
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          example: "bad_request"
+        message:
+          type: string
+          example: "Invalid request parameters"
+        details:
+          type: object
+          nullable: true
+          additionalProperties: true
