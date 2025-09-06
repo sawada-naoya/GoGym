@@ -1,0 +1,16 @@
+# Grafana ダッシュボード自動プロビジョニング設定
+# 起動時に自動的にダッシュボードをロード
+
+apiVersion: 1
+
+providers:
+  # デフォルトダッシュボードプロバイダー
+  - name: 'default'
+    orgId: 1
+    folder: ''
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
