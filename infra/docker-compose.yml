@@ -1,0 +1,216 @@
+# GoGym アプリケーション用 Docker Compose 設定
+# 開発環境で必要な全てのサービス（MySQL, Redis, MinIO, ImgProxy, API, Web）を起動
+# 使用方法: docker-compose up -d
+
+name: gogym
+
+services:
+  # MySQL 8.0 データベースサーバー
+  # ジム情報、ユーザー情報、レビュー等のメインデータを格納
+  mysql:
+    image: mysql:8.0
+    container_name: gogym-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      TZ: ${TZ:-Asia/Tokyo}
+    ports:
+      - "${MYSQL_PORT:-3307}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init:/docker-entrypoint-initdb.d
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-time-zone=+09:00
+    networks:
+      - gogym-network
+
+  # Redis キャッシュサーバー
+  # セッション管理、一時的なデータキャッシュに使用
+  redis:
+    image: redis:7-alpine
+    container_name: gogym-redis
+    ports:
+      - "${REDIS_PORT:-6380}:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - gogym-network
+
+  # MinIO S3互換オブジェクトストレージ
+  # ジムの写真やユーザーのプロフィール画像を格納
+  minio:
+    image: minio/minio:latest
+    container_name: gogym-minio
+    ports:
+      - "${MINIO_PORT:-9001}:9000"
+      - "${MINIO_CONSOLE_PORT:-9002}:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - gogym-network
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: gogym-minio-init
+    depends_on:
+      - minio
+    volumes:
+      - ./minio-init.sh:/minio-init.sh
+    entrypoint: /bin/sh
+    command: -c "chmod +x /minio-init.sh && /minio-init.sh"
+    networks:
+      - gogym-network
+
+  # ImgProxy 画像変換・リサイズサーバー
+  # MinIOに保存された画像のリサイズ、フォーマット変換、最適化を行う
+  imgproxy:
+    image: darthsim/imgproxy:latest
+    container_name: gogym-imgproxy
+    ports:
+      - "${IMGPROXY_PORT:-8082}:8080"
+    environment:
+      IMGPROXY_BIND: "0.0.0.0:8080"
+      IMGPROXY_USE_S3: "true"
+      IMGPROXY_S3_ENDPOINT: "http://minio:9000"
+      IMGPROXY_S3_REGION: "${S3_REGION}"
+      AWS_ACCESS_KEY_ID: "${S3_ACCESS_KEY}"
+      AWS_SECRET_ACCESS_KEY: "${S3_SECRET_KEY}"
+      IMGPROXY_LOCAL_FILESYSTEM_ROOT: /var/lib/imgproxy
+      IMGPROXY_ALLOW_ORIGIN: "*"
+    depends_on:
+      - minio
+    networks:
+      - gogym-network
+
+  # Prometheus メトリクス収集サーバー
+  # アプリケーションのメトリクス収集とアラート機能を提供
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: gogym-prometheus
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - prometheus_data:/prometheus
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - gogym-network
+
+  # Grafana 可視化・ダッシュボードサーバー
+  # Prometheusやデータベースのメトリクスを美しいダッシュボードで表示
+  grafana:
+    image: grafana/grafana:latest
+    container_name: gogym-grafana
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin123}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_INSTALL_PLUGINS: "grafana-clock-panel,grafana-simple-json-datasource"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - prometheus
+      - mysql
+      - redis
+    networks:
+      - gogym-network
+
+  # Go API サーバー
+  # RESTful APIを提供し、フロントエンドからのリクエストを処理
+  api:
+    build:
+      context: ../apps/api
+      dockerfile: Dockerfile
+    container_name: gogym-api
+    ports:
+      - "${API_PORT:-8081}:8081"
+    environment:
+      - APP_ENV=${APP_ENV}
+      - APP_PORT=${APP_PORT}
+      - TZ=${TZ}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_ADDR=${REDIS_ADDR}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_DB=${REDIS_DB}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_ACCESS_EXPIRES_IN=${JWT_ACCESS_EXPIRES_IN}
+      - JWT_REFRESH_EXPIRES_IN=${JWT_REFRESH_EXPIRES_IN}
+      - S3_ENDPOINT=${S3_ENDPOINT}
+      - S3_BUCKET=${S3_BUCKET}
+      - S3_ACCESS_KEY=${S3_ACCESS_KEY}
+      - S3_SECRET_KEY=${S3_SECRET_KEY}
+      - S3_REGION=${S3_REGION}
+      - S3_PUBLIC_URL=${S3_PUBLIC_URL}
+      - CORS_ALLOW_ORIGINS=${CORS_ALLOW_ORIGINS}
+    depends_on:
+      - mysql
+      - redis
+      - minio
+    volumes:
+      - ../apps/api:/app
+    networks:
+      - gogym-network
+    restart: unless-stopped
+
+  # Next.js Web フロントエンド
+  # ユーザー向けWebインターフェースを提供
+  web:
+    build:
+      context: ../apps/web
+      dockerfile: Dockerfile
+    container_name: gogym-web
+    ports:
+      - "${WEB_PORT:-3001}:3001"
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - NEXT_PUBLIC_IMGPROXY_URL=${NEXT_PUBLIC_IMGPROXY_URL}
+    depends_on:
+      - api
+    volumes:
+      - ../apps/web:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - gogym-network
+    restart: unless-stopped
+
+# 永続化ボリューム設定
+# コンテナを削除してもデータが保持される
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  minio_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+# ネットワーク設定
+# 全てのコンテナが同一ネットワーク内で通信可能
+networks:
+  gogym-network:
+    driver: bridge

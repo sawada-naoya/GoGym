@@ -37,4 +37,6 @@
 
 /.env
 
-/public/uploads
+/public/
+
+/.claude

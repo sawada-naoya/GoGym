@@ -6,7 +6,7 @@ A modern gym search and review platform built with Go backend and Next.js fronte
 
 This is a monorepo containing:
 
-- **Backend**: Go 1.22+ with Echo framework, Clean Architecture
+- **Backend**: Go 1.25+ with Echo framework, Clean Architecture
 - **Frontend**: Next.js 14+ with App Router, React Server Components
 - **Database**: MySQL 8.0 with spatial support
 - **Storage**: S3-compatible (MinIO for dev)
@@ -19,7 +19,7 @@ This is a monorepo containing:
 
 - [Docker](https://docs.docker.com/get-docker/) and Docker Compose
 - [Task](https://taskfile.dev/#/installation) - task runner
-- [Go 1.22+](https://golang.org/dl/) (for local development)
+- [Go 1.25+](https://golang.org/dl/) (for local development)
 - [Node.js 18+](https://nodejs.org/) and [pnpm](https://pnpm.io/) (for local development)
 
 ### Setup
@@ -28,8 +28,19 @@ This is a monorepo containing:
    ```bash
    git clone <repository-url>
    cd GoGym
-   cp .env.example .env
-   # Edit .env with your configuration
+   
+   # 環境変数ファイルをコピー（目的に応じて選択）
+   
+   # Docker Compose開発環境の場合
+   cp .env.docker.sample .env
+   
+   # Go API単体開発の場合  
+   cp apps/api/.env.sample apps/api/.env
+   
+   # Next.js Web単体開発の場合
+   cp apps/web/.env.sample apps/web/.env.local
+   
+   # 必要に応じて設定値を編集
    ```
 
 2. **Start development environment**
@@ -157,12 +168,23 @@ GoGym/
 
 ### Environment Variables
 
-Key configuration in `.env`:
+環境変数は機能別に分離されています：
+
+#### `.env.docker.sample` - Docker Compose用  
+プロジェクトルートにあり、Docker Compose環境での開発に必要な設定。コンテナ間通信用の内部ホスト名を含む。
+
+#### `apps/api/.env.sample` - Go API サーバー用
+Go APIサーバーをローカル実行する場合の設定。外部サービス接続用。
+
+#### `apps/web/.env.sample` - Next.js Web用
+Next.js Webフロントエンドの設定。Public環境変数を含む。
+
+### Key Configuration Areas
 
 - **Database**: MySQL connection settings
-- **Authentication**: JWT secrets and expiration
+- **Authentication**: JWT secrets and expiration  
 - **Storage**: S3/MinIO configuration for photos
-- **External APIs**: Google Maps API key
+- **External APIs**: Google Maps API key (future)
 
 ### Feature Flags
 
