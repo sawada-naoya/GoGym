@@ -1,3 +1,6 @@
+// internal/usecase/gym/interfaces.go
+// 役割: ジムユースケースとRepository interface（Application Layer）
+// ビジネスロジックを実装し、ドメインエンティティとインターフェースにのみ依存する
 package gym
 
 import (

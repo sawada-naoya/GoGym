@@ -1,6 +1,6 @@
 // internal/domain/user/value.go
-// 役割: ユーザードメインのバリューオブジェクト
-// Email正規化/検証、Password強度チェック等のユーザー関連バリューオブジェクトの定義
+// 役割: ユーザードメインのValue Object（Domain Layer）
+// 不変性と検証ロジックを持つ純粋なドメインバリューオブジェクト。GORM/JSONタグは一切なし
 package user
 
 import (
@@ -10,12 +10,12 @@ import (
 	"unicode"
 )
 
-// Email represents email value object with validation and normalization
+// Email は検証と正規化機能付きのメールアドレスバリューオブジェクトを表す
 type Email string
 
 var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 
-// NewEmail creates a new email with validation and normalization
+// NewEmail は検証と正規化付きで新しいメールアドレスを作成する
 func NewEmail(email string) (Email, error) {
 	normalized := strings.TrimSpace(strings.ToLower(email))
 	
@@ -34,7 +34,7 @@ func NewEmail(email string) (Email, error) {
 	return Email(normalized), nil
 }
 
-// IsValid validates the email format
+// IsValid はメールアドレスの形式を検証する
 func (e Email) IsValid() bool {
 	if e == "" || len(string(e)) > 255 {
 		return false
@@ -42,12 +42,12 @@ func (e Email) IsValid() bool {
 	return emailRegex.MatchString(string(e))
 }
 
-// String returns string representation
+// String は文字列表現を返す
 func (e Email) String() string {
 	return string(e)
 }
 
-// Domain returns the domain part of the email
+// Domain はメールアドレスのドメイン部分を返す
 func (e Email) Domain() string {
 	parts := strings.Split(string(e), "@")
 	if len(parts) != 2 {
@@ -56,12 +56,12 @@ func (e Email) Domain() string {
 	return parts[1]
 }
 
-// Password represents password validation rules
+// Password はパスワード検証ルールを表す
 type Password struct {
 	value string
 }
 
-// NewPassword creates a new password with validation
+// NewPassword は検証付きで新しいパスワードを作成する
 func NewPassword(password string) (*Password, error) {
 	if err := ValidatePassword(password); err != nil {
 		return nil, err
@@ -70,12 +70,12 @@ func NewPassword(password string) (*Password, error) {
 	return &Password{value: password}, nil
 }
 
-// String returns the password value (use carefully)
+// String はパスワード値を返す（慎重に使用）
 func (p *Password) String() string {
 	return p.value
 }
 
-// ValidatePassword validates password strength
+// ValidatePassword はパスワード強度を検証する
 func ValidatePassword(password string) error {
 	if len(password) < 8 {
 		return common.NewDomainError(common.ErrWeakPassword, "weak_password", "password must be at least 8 characters")
@@ -108,7 +108,7 @@ func ValidatePassword(password string) error {
 	return nil
 }
 
-// ValueError represents value object validation error
+// ValueError はバリューオブジェクト検証エラーを表す
 type ValueError struct {
 	Field   string
 	Message string

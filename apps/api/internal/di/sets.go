@@ -9,6 +9,7 @@ import (
 	"gogym-api/internal/adapter/auth"
 	gormAdapter "gogym-api/internal/adapter/db/gorm"
 	userUC "gogym-api/internal/usecase/user"
+	gymUC "gogym-api/internal/usecase/gym"
 )
 
 // =============================================================================
@@ -43,12 +44,11 @@ var InfrastructureSet = wire.NewSet(
 // RepositorySet はデータアクセス層の実装を提供
 // GORM実装、Redis実装、S3実装等
 var RepositorySet = wire.NewSet(
-	// TODO: Repository実装を追加
-	// gormAdapter.NewUserRepository,
-	// gormAdapter.NewRefreshTokenRepository,
-	// gormAdapter.NewGymRepository,
-	// gormAdapter.NewTagRepository,
-	// gormAdapter.NewFavoriteRepository,
+	// Repository実装
+	gormAdapter.NewUserRepository,
+	gormAdapter.NewRefreshTokenRepository,
+	gormAdapter.NewGymRepository,
+	gormAdapter.NewTagRepository,
 	
 	// 将来の拡張
 	// redisAdapter.NewCacheRepository,
@@ -63,9 +63,9 @@ var RepositorySet = wire.NewSet(
 // UseCaseSet はビジネスロジック層を提供
 // ドメインロジックを実装するユースケース群
 var UseCaseSet = wire.NewSet(
-	// TODO: UseCase実装を追加（Repository実装完了後）
-	// userUC.NewUseCase,
-	// gymUC.NewUseCase,
+	// UseCase実装
+	userUC.NewUseCase,
+	gymUC.NewUseCase,
 )
 
 // =============================================================================
@@ -126,18 +126,9 @@ var ServerSet = wire.NewSet(
 
 // InterfaceSet はインターフェースと実装の結合を定義
 // 依存性逆転の原則に従ったインターフェース結合
+// Wireでは、関数が直接インターフェースを返すため、明示的なBindは不要
+// RepositorySetで定義された関数が自動的に適切なインターフェースを返す
 var InterfaceSet = wire.NewSet(
-	// TODO: インターフェースバインディングを追加
-	
-	// User domain interfaces
-	// wire.Bind(new(userUC.Repository), new(*gormAdapter.UserRepository)),
-	// wire.Bind(new(userUC.RefreshTokenRepository), new(*gormAdapter.RefreshTokenRepository)),
-	
-	// Gym domain interfaces
-	// wire.Bind(new(gymUC.Repository), new(*gormAdapter.GymRepository)),
-	// wire.Bind(new(gymUC.TagRepository), new(*gormAdapter.TagRepository)),
-	// wire.Bind(new(gymUC.FavoriteRepository), new(*gormAdapter.FavoriteRepository)),
-	
 	// Service interfaces (認証サービス)
 	wire.Bind(new(userUC.PasswordService), new(*auth.PasswordService)),
 	wire.Bind(new(userUC.TokenService), new(*auth.TokenService)),

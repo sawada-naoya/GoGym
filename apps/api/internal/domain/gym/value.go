@@ -1,13 +1,13 @@
 // internal/domain/gym/value.go
-// 役割: ジムドメインのバリューオブジェクト
-// Equipment、PriceRange等のジム関連のバリューオブジェクトの定義と検証
+// 役割: ジムドメインのValue Object（Domain Layer）
+// 不変性と検証ロジックを持つ純粋なドメインバリューオブジェクト。GORM/JSONタグは一切なし
 package gym
 
 // Equipment represents gym equipment as a value object
 type Equipment struct {
-	Name        string `json:"name" validate:"required,max=100"`
-	Description string `json:"description" validate:"max=500"`
-	Available   bool   `json:"available"`
+	Name        string `validate:"required,max=100"`
+	Description string `validate:"max=500"`
+	Available   bool
 }
 
 // NewEquipment creates a new equipment value object
@@ -21,9 +21,9 @@ func NewEquipment(name, description string, available bool) Equipment {
 
 // PriceRange represents gym pricing as a value object
 type PriceRange struct {
-	Min      int    `json:"min" validate:"min=0"`
-	Max      int    `json:"max" validate:"min=0"`
-	Currency string `json:"currency" validate:"required,len=3"`
+	Min      int    `validate:"min=0"`
+	Max      int    `validate:"min=0"`
+	Currency string `validate:"required,len=3"`
 }
 
 // NewPriceRange creates a new price range value object

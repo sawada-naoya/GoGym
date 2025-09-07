@@ -1,3 +1,6 @@
+// internal/usecase/user/user.go
+// 役割: ユーザーユースケースとRepository interface（Application Layer）
+// ビジネスロジックを実装し、ドメインエンティティとインターフェースにのみ依存する
 package user
 
 import (
