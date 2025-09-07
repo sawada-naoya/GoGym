@@ -1,21 +1,11 @@
 import Link from 'next/link'
+import { Gym } from '@/types/gym'
 
 interface GymCardProps {
-  gym: {
-    id: string
-    name: string
-    location: string
-    distance: string
-    rating: number
-    reviewCount: number
-    price: string
-    image: string
-    features: string[]
-    isFavorite?: boolean
-  }
+  gym: Gym
 }
 
-export default function GymCard({ gym }: GymCardProps) {
+const GymCard = ({ gym }: GymCardProps) => {
   return (
     <Link href={`/gyms/${gym.id}`}>
       <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group cursor-pointer">
@@ -37,20 +27,20 @@ export default function GymCard({ gym }: GymCardProps) {
               console.log('Toggle favorite')
             }}
           >
-            {gym.isFavorite ? '♥' : '♡'}
+            ♡
           </button>
 
-          {/* 距離バッジ */}
+          {/* エリアバッジ */}
           <div className="absolute bottom-3 left-3 bg-white/90 px-2 py-1 rounded-md text-sm font-medium text-gray-800">
-            {gym.distance}
+            {gym.city || gym.prefecture || '東京'}
           </div>
         </div>
 
         {/* 情報部分 */}
         <div className="p-4">
-          {/* エリア */}
+          {/* アドレス */}
           <div className="text-sm text-gray-600 mb-1">
-            <span>{gym.location}</span>
+            <span>{gym.address}</span>
           </div>
 
           {/* ジム名 */}
@@ -62,36 +52,41 @@ export default function GymCard({ gym }: GymCardProps) {
           <div className="flex items-center mb-2">
             <div className="flex items-center">
               <span className="text-yellow-400 mr-1">★</span>
-              <span className="text-sm font-medium text-gray-900">{gym.rating}</span>
-              <span className="ml-1 text-sm text-gray-600">({gym.reviewCount}件のレビュー)</span>
+              <span className="text-sm font-medium text-gray-900">
+                {gym.average_rating?.toFixed(1) || 'N/A'}
+              </span>
+              <span className="ml-1 text-sm text-gray-600">({gym.review_count}件のレビュー)</span>
             </div>
           </div>
 
-          {/* 特徴・設備 */}
+          {/* 説明文 */}
+          {gym.description && (
+            <div className="mb-3 text-sm text-gray-600 line-clamp-2">
+              {gym.description}
+            </div>
+          )}
+
+          {/* タグ */}
           <div className="mb-3">
             <div className="flex flex-wrap gap-1">
-              {gym.features.slice(0, 3).map((feature, index) => (
+              {gym.tags.slice(0, 3).map((tag) => (
                 <span 
-                  key={index}
+                  key={tag.id}
                   className="px-2 py-1 bg-booking-50 text-booking-700 text-xs rounded-md"
                 >
-                  {feature}
+                  {tag.name}
                 </span>
               ))}
-              {gym.features.length > 3 && (
+              {gym.tags.length > 3 && (
                 <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md">
-                  +{gym.features.length - 3}
+                  +{gym.tags.length - 3}
                 </span>
               )}
             </div>
           </div>
 
-          {/* 価格 */}
-          <div className="flex justify-between items-end">
-            <div>
-              <span className="text-lg font-bold text-gray-900">{gym.price}</span>
-              <span className="text-sm text-gray-600 ml-1">/月</span>
-            </div>
+          {/* アクションボタン */}
+          <div className="flex justify-end">
             <button className="text-booking-700 hover:text-booking-800 text-sm font-medium transition-colors">
               詳細を見る →
             </button>
@@ -101,3 +96,5 @@ export default function GymCard({ gym }: GymCardProps) {
     </Link>
   )
 }
+
+export default GymCard
