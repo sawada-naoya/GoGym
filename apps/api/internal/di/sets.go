@@ -6,8 +6,11 @@ package di
 import (
 	"github.com/google/wire"
 
+	"gogym-api/configs"
 	"gogym-api/internal/adapter/auth"
 	gormAdapter "gogym-api/internal/adapter/db/gorm"
+	"gogym-api/internal/adapter/http/handler"
+	"gogym-api/internal/adapter/http/router"
 	"gogym-api/internal/infra/db"
 	userUC "gogym-api/internal/usecase/user"
 	gymUC "gogym-api/internal/usecase/gym"
@@ -21,6 +24,9 @@ import (
 // InfrastructureSet は外部サービスとの接続を提供
 // データベース接続、認証サービス、将来のRedis/S3等
 var InfrastructureSet = wire.NewSet(
+	// 設定から各コンポーネント用の設定を抽出
+	ProvideDatabaseConfig,
+	
 	// データベース接続
 	db.NewGormDB,
 	
@@ -36,6 +42,11 @@ var InfrastructureSet = wire.NewSet(
 	// redis.NewRedisClient,
 	// s3.NewS3Service,
 )
+
+// ProvideDatabaseConfig は設定からデータベース設定を提供
+func ProvideDatabaseConfig(cfg *configs.Config) configs.DatabaseConfig {
+	return cfg.Database
+}
 
 // =============================================================================
 // 2. Repository Set (データアクセス層)
@@ -77,9 +88,9 @@ var UseCaseSet = wire.NewSet(
 // HandlerSet はHTTPハンドラー層を提供
 // HTTPリクエストを受け取りUseCaseに処理を委譲
 var HandlerSet = wire.NewSet(
-	// TODO: Handler実装を追加（UseCase実装完了後）
-	// handler.NewUserHandler,
-	// handler.NewGymHandler,
+	// Handler実装
+	handler.NewUserHandler,
+	handler.NewGymHandler,
 )
 
 // =============================================================================
@@ -104,8 +115,8 @@ var MiddlewareSet = wire.NewSet(
 // RouterSet はHTTPルーター層を提供
 // エンドポイントとハンドラーのマッピング
 var RouterSet = wire.NewSet(
-	// TODO: Router実装を追加
-	// router.NewRouter,
+	// Router実装
+	router.NewRouter,
 )
 
 // =============================================================================

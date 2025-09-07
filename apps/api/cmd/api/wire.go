@@ -10,10 +10,14 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/google/wire"
 	"github.com/labstack/echo/v4"
 
 	"gogym-api/configs"
+	"gogym-api/internal/adapter/http/handler"
+	"gogym-api/internal/adapter/http/router"
+	"gogym-api/internal/di"
 )
 
 // Server はEchoサーバーのラッパー構造体
@@ -48,7 +52,13 @@ type Server struct {
 func InitServer(ctx context.Context, config *configs.Config, logger *slog.Logger) (*Server, error) {
 	wire.Build(
 		// 基本的なEchoサーバーを作成する関数
-		NewBasicEcho,
+		NewConfiguredEcho,
+		
+		// 依存関係を注入（Router以外）
+		di.InfrastructureSet,
+		di.RepositorySet,
+		di.UseCaseSet,
+		di.HandlerSet,
 		
 		// Server構造体を構築
 		wire.Struct(new(Server), "Echo", "Config", "Logger"),
@@ -59,7 +69,30 @@ func InitServer(ctx context.Context, config *configs.Config, logger *slog.Logger
 // NewBasicEcho は基本的なEchoサーバーを作成
 func NewBasicEcho() *echo.Echo {
 	e := echo.New()
-	// 基本的なミドルウェア設定は後で追加
+	
+	// バリデーターを設定
+	e.Validator = &CustomValidator{validator: validator.New()}
+	
+	return e
+}
+
+// CustomValidator カスタムバリデーター
+type CustomValidator struct {
+	validator *validator.Validate
+}
+
+// Validate バリデーション実行
+func (cv *CustomValidator) Validate(i interface{}) error {
+	return cv.validator.Struct(i)
+}
+
+// NewConfiguredEcho はルーティング設定済みのEchoサーバーを作成
+func NewConfiguredEcho(gymHandler *handler.GymHandler, userHandler *handler.UserHandler) *echo.Echo {
+	e := NewBasicEcho()
+	
+	// ルーティング設定
+	router.NewRouter(e, gymHandler, userHandler)
+	
 	return e
 }
 

@@ -121,9 +121,11 @@ func (h *GymHandler) GetRecommendedGyms(c echo.Context) error {
 	// おすすめジム取得実行
 	result, err := h.gu.RecommendGyms(ctx, recommendReq)
 	if err != nil {
+		// デバッグ用：エラーを詳細にログ
+		println("Handler error:", err.Error())
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error":   "recommend_failed",
-			"message": "Failed to fetch recommended gyms",
+			"message": err.Error(),
 		})
 	}
 

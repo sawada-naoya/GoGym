@@ -9,8 +9,15 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"gogym-api/configs"
+	"gogym-api/internal/adapter/db/gorm"
+	"gogym-api/internal/adapter/http/handler"
+	"gogym-api/internal/adapter/http/router"
+	"gogym-api/internal/di"
+	"gogym-api/internal/infra/db"
+	"gogym-api/internal/usecase/gym"
 	"log/slog"
 )
 
@@ -39,7 +46,17 @@ import (
 //	                      │
 //	                 Echo *Server
 func InitServer(ctx context.Context, config *configs.Config, logger *slog.Logger) (*Server, error) {
-	echo := NewBasicEcho()
+	databaseConfig := di.ProvideDatabaseConfig(config)
+	gormDB, err := db.NewGormDB(databaseConfig)
+	if err != nil {
+		return nil, err
+	}
+	repository := gorm.NewGymRepository(gormDB)
+	tagRepository := gorm.NewTagRepository(gormDB)
+	useCase := gym.NewUseCase(repository, tagRepository, logger)
+	gymHandler := handler.NewGymHandler(useCase)
+	userHandler := handler.NewUserHandler()
+	echo := NewConfiguredEcho(gymHandler, userHandler)
 	server := &Server{
 		Echo:   echo,
 		Config: config,
@@ -61,6 +78,26 @@ type Server struct {
 // NewBasicEcho は基本的なEchoサーバーを作成
 func NewBasicEcho() *echo.Echo {
 	e := echo.New()
+
+	e.Validator = &CustomValidator{validator: validator.New()}
+
+	return e
+}
+
+// CustomValidator カスタムバリデーター
+type CustomValidator struct {
+	validator *validator.Validate
+}
+
+// Validate バリデーション実行
+func (cv *CustomValidator) Validate(i interface{}) error {
+	return cv.validator.Struct(i)
+}
+
+// NewConfiguredEcho はルーティング設定済みのEchoサーバーを作成
+func NewConfiguredEcho(gymHandler *handler.GymHandler, userHandler *handler.UserHandler) *echo.Echo {
+	e := NewBasicEcho()
+	router.NewRouter(e, gymHandler, userHandler)
 
 	return e
 }

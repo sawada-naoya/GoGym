@@ -24,12 +24,12 @@ func (UserRecord) TableName() string {
 
 // RefreshTokenRecord はリフレッシュトークンエンティティ用のGORMレコードを表す
 type RefreshTokenRecord struct {
-	ID        int64          `gorm:"primaryKey;autoIncrement"`
-	UserID    int64          `gorm:"not null;index"`
-	TokenHash string         `gorm:"uniqueIndex;size:255;not null"`
-	ExpiresAt time.Time      `gorm:"not null;index"`
-	CreatedAt time.Time      `gorm:"autoCreateTime"`
-	User      *UserRecord    `gorm:"foreignKey:UserID"`
+	ID        int64       `gorm:"primaryKey;autoIncrement"`
+	UserID    int64       `gorm:"not null;index"`
+	TokenHash string      `gorm:"uniqueIndex;size:255;not null"`
+	ExpiresAt time.Time   `gorm:"not null;index"`
+	CreatedAt time.Time   `gorm:"autoCreateTime"`
+	User      *UserRecord `gorm:"foreignKey:UserID"`
 }
 
 // TableName はGORM用のテーブル名を返す
