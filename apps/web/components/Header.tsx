@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 
-export default function Header() {
+const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
@@ -93,3 +93,5 @@ export default function Header() {
     </header>
   )
 }
+
+export default Header

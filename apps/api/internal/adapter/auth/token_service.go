@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"gogym-api/configs"
 	"gogym-api/internal/domain/common"
 	"time"
 
@@ -29,14 +30,14 @@ type TokenService struct {
 	issuer           string
 }
 
-// NewTokenService creates a new token service
-func NewTokenService(accessSecret, refreshSecret, issuer string) *TokenService {
+// NewTokenService creates a new token service from auth config
+func NewTokenService(authConfig configs.AuthConfig) *TokenService {
 	return &TokenService{
-		accessSecret:     []byte(accessSecret),
-		refreshSecret:    []byte(refreshSecret),
-		accessExpiresIn:  time.Hour,      // 1 hour
-		refreshExpiresIn: 24 * time.Hour, // 24 hours
-		issuer:           issuer,
+		accessSecret:     []byte(authConfig.JWTSecret),
+		refreshSecret:    []byte(authConfig.JWTSecret), // 同じシークレットを使用
+		accessExpiresIn:  authConfig.AccessExpiresIn,
+		refreshExpiresIn: authConfig.RefreshExpiresIn,
+		issuer:           authConfig.Issuer,
 	}
 }
 

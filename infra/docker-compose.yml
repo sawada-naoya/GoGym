@@ -114,7 +114,7 @@ services:
     image: grafana/grafana:latest
     container_name: gogym-grafana
     ports:
-      - "${GRAFANA_PORT:-3000}:3000"
+      - "${GRAFANA_PORT:-3004}:3000"
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin123}
@@ -180,7 +180,7 @@ services:
       dockerfile: Dockerfile
     container_name: gogym-web
     ports:
-      - "${WEB_PORT:-3001}:3001"
+      - "${WEB_PORT:-3003}:3003"
     environment:
       - NODE_ENV=${NODE_ENV}
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
