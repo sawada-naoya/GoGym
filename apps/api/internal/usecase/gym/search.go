@@ -2,7 +2,6 @@ package gym
 
 import (
 	"context"
-	"gogym-api/internal/domain/common"
 	"gogym-api/internal/domain/gym"
 )
 
@@ -26,11 +25,11 @@ func (uc *UseCase) SearchGyms(ctx context.Context, req SearchGymRequest) (*Searc
 		req.RadiusM = &defaultRadius
 	}
 
-	searchQuery := common.SearchQuery{
+	searchQuery := gym.SearchQuery{
 		Query:    req.Query,
 		Location: req.Location,
 		RadiusM:  req.RadiusM,
-		Pagination: common.Pagination{
+		Pagination: gym.Pagination{
 			Cursor: req.Cursor,
 			Limit:  req.Limit,
 		},
@@ -39,7 +38,7 @@ func (uc *UseCase) SearchGyms(ctx context.Context, req SearchGymRequest) (*Searc
 	result, err := uc.gymRepo.Search(ctx, searchQuery)
 	if err != nil {
 		uc.logger.ErrorContext(ctx, "failed to search gyms", "error", err)
-		return nil, common.NewDomainErrorWithCause(err, "search_failed", "failed to search gyms")
+		return nil, gym.NewDomainErrorWithCause(err, "search_failed", "failed to search gyms")
 	}
 
 	return &SearchGymsResponse{
@@ -50,17 +49,17 @@ func (uc *UseCase) SearchGyms(ctx context.Context, req SearchGymRequest) (*Searc
 }
 
 // GetGym retrieves a gym by ID
-func (uc *UseCase) GetGym(ctx context.Context, id common.ID) (*gym.Gym, error) {
+func (uc *UseCase) GetGym(ctx context.Context, id gym.ID) (*gym.Gym, error) {
 	uc.logger.InfoContext(ctx, "getting gym", "gym_id", id)
 
 	if id == 0 {
-		return nil, common.NewDomainError(common.ErrInvalidInput, "invalid_gym_id", "gym ID is required")
+		return nil, gym.NewDomainError(gym.ErrInvalidInput, "invalid_gym_id", "gym ID is required")
 	}
 
 	foundGym, err := uc.gymRepo.FindByID(ctx, id)
 	if err != nil {
 		uc.logger.ErrorContext(ctx, "failed to get gym", "gym_id", id, "error", err)
-		return nil, common.NewDomainErrorWithCause(err, "gym_not_found", "gym not found")
+		return nil, gym.NewDomainErrorWithCause(err, "gym_not_found", "gym not found")
 	}
 
 	return foundGym, nil

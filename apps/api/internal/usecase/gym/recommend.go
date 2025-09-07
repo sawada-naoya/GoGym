@@ -2,7 +2,7 @@ package gym
 
 import (
 	"context"
-	"gogym-api/internal/domain/common"
+	"gogym-api/internal/domain/gym"
 	"sort"
 )
 
@@ -13,17 +13,16 @@ func (uc *UseCase) RecommendGyms(ctx context.Context, req RecommendGymRequest) (
 		"limit", req.Limit,
 	)
 
-	// Set default limit
 	if req.Limit <= 0 || req.Limit > 50 {
 		req.Limit = 10
 	}
 
 	// Create search query for recommended gyms
-	searchQuery := common.SearchQuery{
+	searchQuery := gym.SearchQuery{
 		Query:    "", // No text search for recommendations
 		Location: req.UserLocation,
 		RadiusM:  nil, // No radius limit for recommendations
-		Pagination: common.Pagination{
+		Pagination: gym.Pagination{
 			Cursor: req.Cursor,
 			Limit:  req.Limit,
 		},
@@ -32,13 +31,11 @@ func (uc *UseCase) RecommendGyms(ctx context.Context, req RecommendGymRequest) (
 	result, err := uc.gymRepo.Search(ctx, searchQuery)
 	if err != nil {
 		uc.logger.ErrorContext(ctx, "failed to get recommended gyms", "error", err)
-		return nil, common.NewDomainErrorWithCause(err, "recommend_failed", "failed to get recommended gyms")
+		return nil, gym.NewDomainErrorWithCause(err, "recommend_failed", "failed to get recommended gyms")
 	}
 
-	// Apply recommendation logic (sort by rating and reviews)
 	gyms := result.Items
-	
-	// Add dummy ratings for gyms that don't have ratings (temporary until real data exists)
+
 	for i := range gyms {
 		if gyms[i].AverageRating == nil {
 			// Generate consistent rating based on gym ID
@@ -61,7 +58,7 @@ func (uc *UseCase) RecommendGyms(ctx context.Context, req RecommendGymRequest) (
 		if gyms[j].AverageRating != nil {
 			ratingJ = *gyms[j].AverageRating
 		}
-		
+
 		if ratingI == ratingJ {
 			return gyms[i].ReviewCount > gyms[j].ReviewCount
 		}

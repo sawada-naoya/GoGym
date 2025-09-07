@@ -4,14 +4,13 @@
 package user
 
 import (
-	"gogym-api/internal/domain/common"
 	"strings"
 	"time"
 )
 
 // User はユーザーの集約ルートを表す
 type User struct {
-	common.BaseEntity
+	BaseEntity
 	Email        Email
 	PasswordHash string
 	DisplayName  string `validate:"required,max=100"`
@@ -21,7 +20,7 @@ type User struct {
 // NewUser は検証付きで新しいユーザーを作成する
 func NewUser(email Email, displayName string) (*User, error) {
 	if !email.IsValid() {
-		return nil, common.NewDomainError(common.ErrInvalidEmail, "invalid_email", "invalid email format")
+		return nil, NewDomainError(ErrInvalidEmail, "invalid_email", "invalid email format")
 	}
 
 	user := &User{
@@ -39,7 +38,7 @@ func NewUser(email Email, displayName string) (*User, error) {
 // Validate はユーザーデータを検証する
 func (u *User) Validate() error {
 	if !u.Email.IsValid() {
-		return common.NewDomainError(common.ErrInvalidEmail, "invalid_email", "invalid email format")
+		return NewDomainError(ErrInvalidEmail, "invalid_email", "invalid email format")
 	}
 
 	if err := u.validateDisplayName(); err != nil {
@@ -52,11 +51,11 @@ func (u *User) Validate() error {
 // validateDisplayName は表示名を検証する
 func (u *User) validateDisplayName() error {
 	if u.DisplayName == "" {
-		return common.NewDomainError(common.ErrInvalidInput, "invalid_display_name", "display name is required")
+		return NewDomainError(ErrInvalidInput, "invalid_display_name", "display name is required")
 	}
 
 	if len(u.DisplayName) > 100 {
-		return common.NewDomainError(common.ErrInvalidInput, "invalid_display_name", "display name too long")
+		return NewDomainError(ErrInvalidInput, "invalid_display_name", "display name too long")
 	}
 
 	return nil
@@ -69,8 +68,8 @@ func (u *User) SetPasswordHash(hash string) {
 
 // RefreshToken はリフレッシュトークンエンティティを表す
 type RefreshToken struct {
-	ID        common.ID
-	UserID    common.ID
+	ID        ID
+	UserID    ID
 	TokenHash string
 	ExpiresAt time.Time
 	CreatedAt time.Time
@@ -79,7 +78,7 @@ type RefreshToken struct {
 
 
 // NewRefreshToken は新しいリフレッシュトークンを作成する
-func NewRefreshToken(userID common.ID, tokenHash string, expiresAt time.Time) *RefreshToken {
+func NewRefreshToken(userID ID, tokenHash string, expiresAt time.Time) *RefreshToken {
 	return &RefreshToken{
 		UserID:    userID,
 		TokenHash: tokenHash,

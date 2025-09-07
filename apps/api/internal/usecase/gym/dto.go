@@ -1,14 +1,13 @@
 package gym
 
 import (
-	"gogym-api/internal/domain/common"
 	"gogym-api/internal/domain/gym"
 )
 
 // SearchGymRequest represents search gym input
 type SearchGymRequest struct {
 	Query      string
-	Location   *common.Location
+	Location   *gym.Location
 	RadiusM    *int
 	Cursor     string
 	Limit      int
@@ -25,7 +24,7 @@ type SearchGymsResponse struct {
 type CreateGymRequest struct {
 	Name        string
 	Description *string
-	Location    common.Location
+	Location    gym.Location
 	Address     string
 	City        *string
 	Prefecture  *string
@@ -35,7 +34,7 @@ type CreateGymRequest struct {
 
 // RecommendGymRequest represents recommend gym input
 type RecommendGymRequest struct {
-	UserLocation *common.Location
+	UserLocation *gym.Location
 	Limit        int
 	Cursor       string
 }
@@ -49,13 +48,13 @@ type RecommendGymsResponse struct {
 
 // FavoriteGymRequest represents favorite gym input
 type FavoriteGymRequest struct {
-	UserID common.ID
-	GymID  common.ID
+	UserID gym.ID
+	GymID  gym.ID
 }
 
 // GetFavoriteGymsRequest represents get favorite gyms input
 type GetFavoriteGymsRequest struct {
-	UserID common.ID
+	UserID gym.ID
 	Limit  int
 	Cursor string
 }

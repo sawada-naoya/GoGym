@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	"gogym-api/internal/adapter/db/gorm/record"
-	"gogym-api/internal/domain/common"
 	"gogym-api/internal/domain/gym"
 	gymUsecase "gogym-api/internal/usecase/gym"
 	"gorm.io/gorm"
@@ -25,20 +24,20 @@ func NewGymRepository(db *gorm.DB) gymUsecase.Repository {
 }
 
 // FindByID はIDでジムを検索する
-func (r *gymRepository) FindByID(ctx context.Context, id common.ID) (*gym.Gym, error) {
+func (r *gymRepository) FindByID(ctx context.Context, id gym.ID) (*gym.Gym, error) {
 	var gymRecord record.GymRecord
 	if err := r.db.WithContext(ctx).Preload("Tags").First(&gymRecord, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, common.NewDomainError(common.ErrNotFound, "gym_not_found", "gym not found")
+			return nil, gym.NewDomainError(gym.ErrNotFound, "gym_not_found", "gym not found")
 		}
 		return nil, err
 	}
 
-	return gymRecord.ToEntity(), nil
+	return ToGymEntity(&gymRecord), nil
 }
 
 // Search はクエリとページングでジムを検索する
-func (r *gymRepository) Search(ctx context.Context, query common.SearchQuery) (*common.PaginatedResult[gym.Gym], error) {
+func (r *gymRepository) Search(ctx context.Context, query gym.SearchQuery) (*gym.PaginatedResult[gym.Gym], error) {
 	var gymRecords []record.GymRecord
 	
 	db := r.db.WithContext(ctx).Preload("Tags")
@@ -85,7 +84,7 @@ func (r *gymRepository) Search(ctx context.Context, query common.SearchQuery) (*
 	}
 
 	for _, gymRecord := range recordsToProcess {
-		entities = append(entities, *gymRecord.ToEntity())
+		entities = append(entities, *ToGymEntity(&gymRecord))
 	}
 
 	// 次のカーソルを決定
@@ -94,7 +93,7 @@ func (r *gymRepository) Search(ctx context.Context, query common.SearchQuery) (*
 		nextCursor = fmt.Sprintf("%d", entities[len(entities)-1].ID)
 	}
 
-	return &common.PaginatedResult[gym.Gym]{
+	return &gym.PaginatedResult[gym.Gym]{
 		Items:      entities,
 		NextCursor: nextCursor,
 		HasMore:    hasMore,
@@ -103,14 +102,14 @@ func (r *gymRepository) Search(ctx context.Context, query common.SearchQuery) (*
 
 // Create は新しいジムを作成する
 func (r *gymRepository) Create(ctx context.Context, gymEntity *gym.Gym) error {
-	gymRecord := record.FromGymEntity(gymEntity)
+	gymRecord := FromGymEntity(gymEntity)
 	
 	if err := r.db.WithContext(ctx).Create(gymRecord).Error; err != nil {
 		return err
 	}
 
 	// 生成されたIDでエンティティを更新
-	gymEntity.ID = common.ID(gymRecord.ID)
+	gymEntity.ID = gym.ID(gymRecord.ID)
 	gymEntity.CreatedAt = gymRecord.CreatedAt
 	gymEntity.UpdatedAt = gymRecord.UpdatedAt
 
@@ -119,7 +118,7 @@ func (r *gymRepository) Create(ctx context.Context, gymEntity *gym.Gym) error {
 
 // Update は既存のジムを更新する
 func (r *gymRepository) Update(ctx context.Context, gymEntity *gym.Gym) error {
-	gymRecord := record.FromGymEntity(gymEntity)
+	gymRecord := FromGymEntity(gymEntity)
 	
 	if err := r.db.WithContext(ctx).Save(gymRecord).Error; err != nil {
 		return err
@@ -132,14 +131,14 @@ func (r *gymRepository) Update(ctx context.Context, gymEntity *gym.Gym) error {
 }
 
 // Delete はIDでジムを削除する
-func (r *gymRepository) Delete(ctx context.Context, id common.ID) error {
+func (r *gymRepository) Delete(ctx context.Context, id gym.ID) error {
 	result := r.db.WithContext(ctx).Delete(&record.GymRecord{}, id)
 	if result.Error != nil {
 		return result.Error
 	}
 
 	if result.RowsAffected == 0 {
-		return common.NewDomainError(common.ErrNotFound, "gym_not_found", "gym not found")
+		return gym.NewDomainError(gym.ErrNotFound, "gym_not_found", "gym not found")
 	}
 
 	return nil

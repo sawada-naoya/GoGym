@@ -6,7 +6,6 @@ package gorm
 import (
 	"context"
 	"gogym-api/internal/adapter/db/gorm/record"
-	"gogym-api/internal/domain/common"
 	"gogym-api/internal/domain/user"
 	userUsecase "gogym-api/internal/usecase/user"
 	"gorm.io/gorm"
@@ -25,14 +24,14 @@ func NewRefreshTokenRepository(db *gorm.DB) userUsecase.RefreshTokenRepository {
 
 // Create は新しいリフレッシュトークンを作成する
 func (r *refreshTokenRepository) Create(ctx context.Context, tokenEntity *user.RefreshToken) error {
-	tokenRecord := record.FromRefreshTokenEntity(tokenEntity)
+	tokenRecord := FromRefreshTokenEntity(tokenEntity)
 	
 	if err := r.db.WithContext(ctx).Create(tokenRecord).Error; err != nil {
 		return err
 	}
 
 	// 生成されたIDでエンティティを更新
-	tokenEntity.ID = common.ID(tokenRecord.ID)
+	tokenEntity.ID = user.ID(tokenRecord.ID)
 	tokenEntity.CreatedAt = tokenRecord.CreatedAt
 
 	return nil
@@ -43,12 +42,12 @@ func (r *refreshTokenRepository) FindByTokenHash(ctx context.Context, tokenHash 
 	var tokenRecord record.RefreshTokenRecord
 	if err := r.db.WithContext(ctx).Where("token_hash = ?", tokenHash).First(&tokenRecord).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, common.NewDomainError(common.ErrNotFound, "token_not_found", "refresh token not found")
+			return nil, user.NewDomainError(user.ErrNotFound, "token_not_found", "refresh token not found")
 		}
 		return nil, err
 	}
 
-	return tokenRecord.ToEntity(), nil
+	return ToRefreshTokenEntity(&tokenRecord), nil
 }
 
 // DeleteByTokenHash はトークンハッシュでリフレッシュトークンを削除する
@@ -59,7 +58,7 @@ func (r *refreshTokenRepository) DeleteByTokenHash(ctx context.Context, tokenHas
 	}
 
 	if result.RowsAffected == 0 {
-		return common.NewDomainError(common.ErrNotFound, "token_not_found", "refresh token not found")
+		return user.NewDomainError(user.ErrNotFound, "token_not_found", "refresh token not found")
 	}
 
 	return nil
@@ -71,6 +70,6 @@ func (r *refreshTokenRepository) DeleteExpiredTokens(ctx context.Context) error 
 }
 
 // DeleteAllByUserID は特定のユーザーのすべてのリフレッシュトークンを削除する
-func (r *refreshTokenRepository) DeleteAllByUserID(ctx context.Context, userID common.ID) error {
+func (r *refreshTokenRepository) DeleteAllByUserID(ctx context.Context, userID user.ID) error {
 	return r.db.WithContext(ctx).Where("user_id = ?", int64(userID)).Delete(&record.RefreshTokenRecord{}).Error
 }

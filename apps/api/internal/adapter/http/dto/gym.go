@@ -1,12 +1,12 @@
 package dto
 
-import "gogym-api/internal/domain/common"
+import "gogym-api/internal/domain/gym"
 
 // リクエストDTO - HTTPリクエストから受け取るデータ
 type CreateGymRequest struct {
 	Name        string             `json:"name" validate:"required,max=255"`
 	Description *string            `json:"description,omitempty"`
-	Location    common.Location    `json:"location" validate:"required"`
+	Location    gym.Location    `json:"location" validate:"required"`
 	Address     string             `json:"address" validate:"required,max=500"`
 	City        *string            `json:"city,omitempty" validate:"omitempty,max=100"`
 	Prefecture  *string            `json:"prefecture,omitempty" validate:"omitempty,max=100"`
@@ -28,7 +28,7 @@ type GymResponse struct {
 	ID            int64               `json:"id"`
 	Name          string              `json:"name"`
 	Description   *string             `json:"description"`
-	Location      common.Location     `json:"location"`
+	Location      gym.Location     `json:"location"`
 	Address       string              `json:"address"`
 	City          *string             `json:"city"`
 	Prefecture    *string             `json:"prefecture"`

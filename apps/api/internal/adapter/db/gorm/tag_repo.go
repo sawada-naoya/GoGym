@@ -6,7 +6,6 @@ package gorm
 import (
 	"context"
 	"gogym-api/internal/adapter/db/gorm/record"
-	"gogym-api/internal/domain/common"
 	"gogym-api/internal/domain/gym"
 	gymUsecase "gogym-api/internal/usecase/gym"
 	"gorm.io/gorm"
@@ -31,14 +30,14 @@ func (r *tagRepository) FindAll(ctx context.Context) ([]gym.Tag, error) {
 
 	tags := make([]gym.Tag, len(tagRecords))
 	for i, tagRecord := range tagRecords {
-		tags[i] = *tagRecord.ToTagEntity()
+		tags[i] = *ToTagEntity(&tagRecord)
 	}
 
 	return tags, nil
 }
 
 // FindByIDs はIDリストでタグを検索する
-func (r *tagRepository) FindByIDs(ctx context.Context, ids []common.ID) ([]gym.Tag, error) {
+func (r *tagRepository) FindByIDs(ctx context.Context, ids []gym.ID) ([]gym.Tag, error) {
 	var tagRecords []record.TagRecord
 	int64IDs := make([]int64, len(ids))
 	for i, id := range ids {
@@ -51,7 +50,7 @@ func (r *tagRepository) FindByIDs(ctx context.Context, ids []common.ID) ([]gym.T
 
 	tags := make([]gym.Tag, len(tagRecords))
 	for i, tagRecord := range tagRecords {
-		tags[i] = *tagRecord.ToTagEntity()
+		tags[i] = *ToTagEntity(&tagRecord)
 	}
 
 	return tags, nil
@@ -66,7 +65,7 @@ func (r *tagRepository) FindByNames(ctx context.Context, names []string) ([]gym.
 
 	tags := make([]gym.Tag, len(tagRecords))
 	for i, tagRecord := range tagRecords {
-		tags[i] = *tagRecord.ToTagEntity()
+		tags[i] = *ToTagEntity(&tagRecord)
 	}
 
 	return tags, nil
@@ -74,14 +73,14 @@ func (r *tagRepository) FindByNames(ctx context.Context, names []string) ([]gym.
 
 // Create は新しいタグを作成する
 func (r *tagRepository) Create(ctx context.Context, tagEntity *gym.Tag) error {
-	tagRecord := record.FromTagEntity(tagEntity)
+	tagRecord := FromTagEntity(tagEntity)
 	
 	if err := r.db.WithContext(ctx).Create(tagRecord).Error; err != nil {
 		return err
 	}
 
 	// 生成されたIDでエンティティを更新
-	tagEntity.ID = common.ID(tagRecord.ID)
+	tagEntity.ID = gym.ID(tagRecord.ID)
 	tagEntity.CreatedAt = tagRecord.CreatedAt
 	tagEntity.UpdatedAt = tagRecord.UpdatedAt
 
@@ -96,7 +95,7 @@ func (r *tagRepository) CreateMany(ctx context.Context, tagEntities []gym.Tag) e
 
 	tagRecords := make([]record.TagRecord, len(tagEntities))
 	for i, tagEntity := range tagEntities {
-		tagRecords[i] = *record.FromTagEntity(&tagEntity)
+		tagRecords[i] = *FromTagEntity(&tagEntity)
 	}
 
 	if err := r.db.WithContext(ctx).Create(&tagRecords).Error; err != nil {
@@ -105,7 +104,7 @@ func (r *tagRepository) CreateMany(ctx context.Context, tagEntities []gym.Tag) e
 
 	// 生成されたIDとタイムスタンプでエンティティを更新
 	for i, tagRecord := range tagRecords {
-		tagEntities[i].ID = common.ID(tagRecord.ID)
+		tagEntities[i].ID = gym.ID(tagRecord.ID)
 		tagEntities[i].CreatedAt = tagRecord.CreatedAt
 		tagEntities[i].UpdatedAt = tagRecord.UpdatedAt
 	}

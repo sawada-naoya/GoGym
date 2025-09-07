@@ -4,7 +4,6 @@
 package user
 
 import (
-	"gogym-api/internal/domain/common"
 	"regexp"
 	"strings"
 	"unicode"
@@ -78,11 +77,11 @@ func (p *Password) String() string {
 // ValidatePassword はパスワード強度を検証する
 func ValidatePassword(password string) error {
 	if len(password) < 8 {
-		return common.NewDomainError(common.ErrWeakPassword, "weak_password", "password must be at least 8 characters")
+		return NewDomainError(ErrWeakPassword, "weak_password", "password must be at least 8 characters")
 	}
 
 	if len(password) > 128 {
-		return common.NewDomainError(common.ErrWeakPassword, "weak_password", "password too long")
+		return NewDomainError(ErrWeakPassword, "weak_password", "password too long")
 	}
 
 	var hasUpper, hasLower, hasNumber bool
@@ -98,8 +97,8 @@ func ValidatePassword(password string) error {
 	}
 
 	if !hasUpper || !hasLower || !hasNumber {
-		return common.NewDomainError(
-			common.ErrWeakPassword,
+		return NewDomainError(
+			ErrWeakPassword,
 			"weak_password",
 			"password must contain uppercase, lowercase, and number",
 		)

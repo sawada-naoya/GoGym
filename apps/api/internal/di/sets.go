@@ -1,5 +1,5 @@
-// internal/di/sets.go
-// 役割: 依存性注入のためのwire.NewSetを定義
+// di/sets.go
+// 役割: 依存性注入のためのwire.NewSetを定義（API Layer）
 // Clean Architectureの依存フローに従って各層のプロバイダーを整理
 package di
 
@@ -8,6 +8,7 @@ import (
 
 	"gogym-api/internal/adapter/auth"
 	gormAdapter "gogym-api/internal/adapter/db/gorm"
+	"gogym-api/internal/infra/db"
 	userUC "gogym-api/internal/usecase/user"
 	gymUC "gogym-api/internal/usecase/gym"
 )
@@ -21,7 +22,7 @@ import (
 // データベース接続、認証サービス、将来のRedis/S3等
 var InfrastructureSet = wire.NewSet(
 	// データベース接続
-	gormAdapter.NewGormDB,
+	db.NewGormDB,
 	
 	// 認証サービス（パスワードハッシュ化、JWT生成）
 	auth.NewPasswordService,

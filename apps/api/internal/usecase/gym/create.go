@@ -2,7 +2,6 @@ package gym
 
 import (
 	"context"
-	"gogym-api/internal/domain/common"
 	"gogym-api/internal/domain/gym"
 )
 
@@ -44,7 +43,7 @@ func (uc *UseCase) CreateGym(ctx context.Context, req CreateGymRequest) (*gym.Gy
 	// Save gym
 	if err := uc.gymRepo.Create(ctx, newGym); err != nil {
 		uc.logger.ErrorContext(ctx, "failed to create gym", "error", err)
-		return nil, common.NewDomainErrorWithCause(err, "create_failed", "failed to create gym")
+		return nil, gym.NewDomainErrorWithCause(err, "create_failed", "failed to create gym")
 	}
 
 	uc.logger.InfoContext(ctx, "gym created successfully", "gym_id", newGym.ID)
@@ -56,7 +55,7 @@ func (uc *UseCase) getOrCreateTags(ctx context.Context, tagNames []string) ([]gy
 	// Find existing tags
 	existing, err := uc.tagRepo.FindByNames(ctx, tagNames)
 	if err != nil {
-		return nil, common.NewDomainErrorWithCause(err, "tag_search_failed", "failed to search tags")
+		return nil, gym.NewDomainErrorWithCause(err, "tag_search_failed", "failed to search tags")
 	}
 
 	existingMap := make(map[string]gym.Tag)
@@ -84,7 +83,7 @@ func (uc *UseCase) getOrCreateTags(ctx context.Context, tagNames []string) ([]gy
 	// Save new tags if any
 	if len(newTags) > 0 {
 		if err := uc.tagRepo.CreateMany(ctx, newTags); err != nil {
-			return nil, common.NewDomainErrorWithCause(err, "tag_create_failed", "failed to create tags")
+			return nil, gym.NewDomainErrorWithCause(err, "tag_create_failed", "failed to create tags")
 		}
 	}
 
@@ -98,7 +97,7 @@ func (uc *UseCase) GetAllTags(ctx context.Context) ([]gym.Tag, error) {
 	tags, err := uc.tagRepo.FindAll(ctx)
 	if err != nil {
 		uc.logger.ErrorContext(ctx, "failed to get tags", "error", err)
-		return nil, common.NewDomainErrorWithCause(err, "tags_fetch_failed", "failed to fetch tags")
+		return nil, gym.NewDomainErrorWithCause(err, "tags_fetch_failed", "failed to fetch tags")
 	}
 
 	return tags, nil

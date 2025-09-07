@@ -4,15 +4,15 @@
 package review
 
 import (
-	"gogym-api/internal/domain/common"
+	"gogym-api/internal/domain/gym"
 	"strings"
 )
 
 // Review represents a gym review aggregate root
 type Review struct {
-	common.BaseEntity
-	UserID          common.ID
-	GymID           common.ID
+	gym.BaseEntity
+	UserID          gym.ID
+	GymID           gym.ID
 	Rating          Rating
 	Comment         *string
 	Photos          PhotoURLs
@@ -21,9 +21,9 @@ type Review struct {
 
 
 // NewReview creates a new review with validation
-func NewReview(userID, gymID common.ID, rating Rating) (*Review, error) {
+func NewReview(userID, gymID gym.ID, rating Rating) (*Review, error) {
 	if !rating.IsValid() {
-		return nil, common.NewDomainError(common.ErrInvalidRating, "invalid_rating", "rating must be between 1 and 5")
+		return nil, gym.NewDomainError(gym.ErrInvalidRating, "invalid_rating", "rating must be between 1 and 5")
 	}
 
 	review := &Review{
@@ -43,19 +43,19 @@ func NewReview(userID, gymID common.ID, rating Rating) (*Review, error) {
 // Validate validates review data
 func (r *Review) Validate() error {
 	if r.UserID == 0 {
-		return common.NewDomainError(common.ErrInvalidInput, "invalid_user_id", "user ID is required")
+		return gym.NewDomainError(gym.ErrInvalidInput, "invalid_user_id", "user ID is required")
 	}
 
 	if r.GymID == 0 {
-		return common.NewDomainError(common.ErrInvalidInput, "invalid_gym_id", "gym ID is required")
+		return gym.NewDomainError(gym.ErrInvalidInput, "invalid_gym_id", "gym ID is required")
 	}
 
 	if !r.Rating.IsValid() {
-		return common.NewDomainError(common.ErrInvalidRating, "invalid_rating", "rating must be between 1 and 5")
+		return gym.NewDomainError(gym.ErrInvalidRating, "invalid_rating", "rating must be between 1 and 5")
 	}
 
 	if r.Comment != nil && len(*r.Comment) > 1000 {
-		return common.NewDomainError(common.ErrInvalidInput, "invalid_comment", "comment too long")
+		return gym.NewDomainError(gym.ErrInvalidInput, "invalid_comment", "comment too long")
 	}
 
 	return nil
@@ -74,7 +74,7 @@ func (r *Review) SetComment(comment string) {
 // AddPhoto adds a photo URL to the review
 func (r *Review) AddPhoto(url PhotoURL) error {
 	if !url.IsValid() {
-		return common.NewDomainError(common.ErrInvalidInput, "invalid_photo_url", "invalid photo URL")
+		return gym.NewDomainError(gym.ErrInvalidInput, "invalid_photo_url", "invalid photo URL")
 	}
 
 	// Initialize Photos if nil
@@ -85,7 +85,7 @@ func (r *Review) AddPhoto(url PhotoURL) error {
 	// Check for duplicates
 	for _, existing := range r.Photos {
 		if existing.URL == url.URL {
-			return common.NewDomainError(common.ErrAlreadyExists, "photo_exists", "photo already exists in review")
+			return gym.NewDomainError(gym.ErrAlreadyExists, "photo_exists", "photo already exists in review")
 		}
 	}
 

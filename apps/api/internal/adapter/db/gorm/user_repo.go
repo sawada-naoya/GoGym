@@ -6,7 +6,6 @@ package gorm
 import (
 	"context"
 	"gogym-api/internal/adapter/db/gorm/record"
-	"gogym-api/internal/domain/common"
 	"gogym-api/internal/domain/user"
 	userUsecase "gogym-api/internal/usecase/user"
 	"gorm.io/gorm"
@@ -23,16 +22,16 @@ func NewUserRepository(db *gorm.DB) userUsecase.Repository {
 }
 
 // FindByID はIDでユーザーを検索する
-func (r *userRepository) FindByID(ctx context.Context, id common.ID) (*user.User, error) {
+func (r *userRepository) FindByID(ctx context.Context, id user.ID) (*user.User, error) {
 	var userRecord record.UserRecord
 	if err := r.db.WithContext(ctx).First(&userRecord, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, common.NewDomainError(common.ErrNotFound, "user_not_found", "user not found")
+			return nil, user.NewDomainError(user.ErrNotFound, "user_not_found", "user not found")
 		}
 		return nil, err
 	}
 
-	return userRecord.ToEntity()
+	return ToUserEntity(&userRecord)
 }
 
 // FindByEmail はメールアドレスでユーザーを検索する
@@ -40,24 +39,24 @@ func (r *userRepository) FindByEmail(ctx context.Context, email string) (*user.U
 	var userRecord record.UserRecord
 	if err := r.db.WithContext(ctx).Where("email = ?", email).First(&userRecord).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, common.NewDomainError(common.ErrNotFound, "user_not_found", "user not found")
+			return nil, user.NewDomainError(user.ErrNotFound, "user_not_found", "user not found")
 		}
 		return nil, err
 	}
 
-	return userRecord.ToEntity()
+	return ToUserEntity(&userRecord)
 }
 
 // Create は新しいユーザーを作成する
 func (r *userRepository) Create(ctx context.Context, userEntity *user.User) error {
-	userRecord := record.FromUserEntity(userEntity)
+	userRecord := FromUserEntity(userEntity)
 	
 	if err := r.db.WithContext(ctx).Create(userRecord).Error; err != nil {
 		return err
 	}
 
 	// 生成されたIDでエンティティを更新
-	userEntity.ID = common.ID(userRecord.ID)
+	userEntity.ID = user.ID(userRecord.ID)
 	userEntity.CreatedAt = userRecord.CreatedAt
 	userEntity.UpdatedAt = userRecord.UpdatedAt
 
@@ -66,7 +65,7 @@ func (r *userRepository) Create(ctx context.Context, userEntity *user.User) erro
 
 // Update は既存のユーザーを更新する
 func (r *userRepository) Update(ctx context.Context, userEntity *user.User) error {
-	userRecord := record.FromUserEntity(userEntity)
+	userRecord := FromUserEntity(userEntity)
 	
 	if err := r.db.WithContext(ctx).Save(userRecord).Error; err != nil {
 		return err
@@ -79,14 +78,14 @@ func (r *userRepository) Update(ctx context.Context, userEntity *user.User) erro
 }
 
 // Delete はIDでユーザーを削除する
-func (r *userRepository) Delete(ctx context.Context, id common.ID) error {
+func (r *userRepository) Delete(ctx context.Context, id user.ID) error {
 	result := r.db.WithContext(ctx).Delete(&record.UserRecord{}, id)
 	if result.Error != nil {
 		return result.Error
 	}
 
 	if result.RowsAffected == 0 {
-		return common.NewDomainError(common.ErrNotFound, "user_not_found", "user not found")
+		return user.NewDomainError(user.ErrNotFound, "user_not_found", "user not found")
 	}
 
 	return nil
