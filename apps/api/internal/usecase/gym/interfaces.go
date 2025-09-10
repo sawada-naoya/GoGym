@@ -9,7 +9,23 @@ import (
 	"log/slog"
 )
 
-// Repository interface for gym data access
+type UseCase struct {
+	gymRepo      Repository
+	tagRepo      TagRepository
+	favoriteRepo FavoriteRepository
+	logger       *slog.Logger
+}
+
+
+func NewUseCase(gymRepo Repository, tagRepo TagRepository, logger *slog.Logger) *UseCase {
+	return &UseCase{
+		gymRepo:      gymRepo,
+		tagRepo:      tagRepo,
+		favoriteRepo: nil, // TODO: Add favorite repository when implemented
+		logger:       logger,
+	}
+}
+
 type Repository interface {
 	FindByID(ctx context.Context, id gym.ID) (*gym.Gym, error)
 	Search(ctx context.Context, query gym.SearchQuery) (*gym.PaginatedResult[gym.Gym], error)
@@ -18,7 +34,6 @@ type Repository interface {
 	Delete(ctx context.Context, id gym.ID) error
 }
 
-// TagRepository interface for tag data access
 type TagRepository interface {
 	FindAll(ctx context.Context) ([]gym.Tag, error)
 	FindByIDs(ctx context.Context, ids []gym.ID) ([]gym.Tag, error)
@@ -27,28 +42,9 @@ type TagRepository interface {
 	CreateMany(ctx context.Context, tags []gym.Tag) error
 }
 
-// FavoriteRepository interface for favorite data access
 type FavoriteRepository interface {
 	AddFavorite(ctx context.Context, userID gym.ID, gymID gym.ID) error
 	RemoveFavorite(ctx context.Context, userID gym.ID, gymID gym.ID) error
 	GetFavoriteGyms(ctx context.Context, userID gym.ID, pagination gym.Pagination) (*gym.PaginatedResult[gym.Gym], error)
 	IsFavorite(ctx context.Context, userID gym.ID, gymID gym.ID) (bool, error)
-}
-
-// UseCase represents gym use cases
-type UseCase struct {
-	gymRepo      Repository
-	tagRepo      TagRepository
-	favoriteRepo FavoriteRepository
-	logger       *slog.Logger
-}
-
-// NewUseCase creates a new gym use case
-func NewUseCase(gymRepo Repository, tagRepo TagRepository, logger *slog.Logger) *UseCase {
-	return &UseCase{
-		gymRepo:      gymRepo,
-		tagRepo:      tagRepo,
-		favoriteRepo: nil, // TODO: Add favorite repository when implemented
-		logger:       logger,
-	}
 }

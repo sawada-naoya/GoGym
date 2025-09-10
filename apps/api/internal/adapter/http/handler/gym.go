@@ -108,7 +108,7 @@ func (h *GymHandler) GetGym(c echo.Context) error {
 func (h *GymHandler) GetRecommendedGyms(c echo.Context) error {
 	ctx := c.Request().Context()
 	limitParam := c.QueryParam("limit")
-	limit := 10 // デフォルト値
+	limit := 10
 	if limitParam != "" {
 		if parsedLimit, err := strconv.Atoi(limitParam); err == nil && parsedLimit > 0 && parsedLimit <= 50 {
 			limit = parsedLimit
@@ -121,12 +121,8 @@ func (h *GymHandler) GetRecommendedGyms(c echo.Context) error {
 	// おすすめジム取得実行
 	result, err := h.gu.RecommendGyms(ctx, recommendReq)
 	if err != nil {
-		// デバッグ用：エラーを詳細にログ
 		println("Handler error:", err.Error())
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error":   "recommend_failed",
-			"message": err.Error(),
-		})
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	// レスポンシに変換
@@ -134,4 +130,3 @@ func (h *GymHandler) GetRecommendedGyms(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, response)
 }
-

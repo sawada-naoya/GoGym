@@ -17,11 +17,10 @@ func (uc *UseCase) RecommendGyms(ctx context.Context, req RecommendGymRequest) (
 		req.Limit = 10
 	}
 
-	// Create search query for recommended gyms
 	searchQuery := gym.SearchQuery{
-		Query:    "", // No text search for recommendations
+		Query:    "",
 		Location: req.UserLocation,
-		RadiusM:  nil, // No radius limit for recommendations
+		RadiusM:  nil,
 		Pagination: gym.Pagination{
 			Cursor: req.Cursor,
 			Limit:  req.Limit,
@@ -31,7 +30,7 @@ func (uc *UseCase) RecommendGyms(ctx context.Context, req RecommendGymRequest) (
 	result, err := uc.gymRepo.Search(ctx, searchQuery)
 	if err != nil {
 		uc.logger.ErrorContext(ctx, "failed to get recommended gyms", "error", err)
-		return nil, gym.NewDomainErrorWithCause(err, "recommend_failed", "failed to get recommended gyms")
+		return nil, err
 	}
 
 	gyms := result.Items

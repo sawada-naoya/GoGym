@@ -4,30 +4,30 @@
 package record
 
 import (
-	"database/sql/driver"
 	"fmt"
 	"strings"
 	"time"
+
 	"gorm.io/gorm"
 )
 
 // GymRecord はジムエンティティ用のGORMレコードを表す
 type GymRecord struct {
-	ID               int64       `gorm:"primaryKey;autoIncrement"`
-	Name             string      `gorm:"size:255;not null"`
-	Description      *string     `gorm:"type:text"`
-	Location         string      `gorm:"column:location;type:point"`
-	LocationLatitude float64     `gorm:"-"` // 計算フィールド
+	ID                int64       `gorm:"primaryKey;autoIncrement"`
+	Name              string      `gorm:"size:255;not null"`
+	Description       *string     `gorm:"type:text"`
+	Location          string      `gorm:"column:location;type:point"`
+	LocationLatitude  float64     `gorm:"-"` // 計算フィールド
 	LocationLongitude float64     `gorm:"-"` // 計算フィールド
-	Address          string      `gorm:"size:500;not null"`
-	City             *string     `gorm:"size:100"`
-	Prefecture       *string     `gorm:"size:100"`
-	PostalCode       *string     `gorm:"size:10"`
-	AverageRating    *float32    `gorm:"column:average_rating;type:decimal(3,2)"`
-	ReviewCount      int         `gorm:"column:review_count;default:0"`
-	CreatedAt        time.Time   `gorm:"autoCreateTime"`
-	UpdatedAt        time.Time   `gorm:"autoUpdateTime"`
-	Tags             []TagRecord `gorm:"many2many:gym_tags;foreignKey:ID;joinForeignKey:gym_id;References:ID;joinReferences:tag_id;"`
+	Address           string      `gorm:"size:500;not null"`
+	City              *string     `gorm:"size:100"`
+	Prefecture        *string     `gorm:"size:100"`
+	PostalCode        *string     `gorm:"size:10"`
+	AverageRating     *float32    `gorm:"column:average_rating;type:decimal(3,2)"`
+	ReviewCount       int         `gorm:"column:review_count;default:0"`
+	CreatedAt         time.Time   `gorm:"autoCreateTime"`
+	UpdatedAt         time.Time   `gorm:"autoUpdateTime"`
+	Tags              []TagRecord `gorm:"many2many:gym_tags;foreignKey:ID;joinForeignKey:gym_id;References:ID;joinReferences:tag_id;"`
 }
 
 // TableName はGORM用のテーブル名を返す

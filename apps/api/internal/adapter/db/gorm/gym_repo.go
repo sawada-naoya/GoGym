@@ -26,7 +26,7 @@ func NewGymRepository(db *gorm.DB) gymUsecase.Repository {
 // FindByID はIDでジムを検索する
 func (r *gymRepository) FindByID(ctx context.Context, id gym.ID) (*gym.Gym, error) {
 	var gymRecord record.GymRecord
-	
+
 	// 基本的なGORMクエリでテスト（location除外）
 	if err := r.db.WithContext(ctx).Omit("location").Preload("Tags").First(&gymRecord, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -34,7 +34,7 @@ func (r *gymRepository) FindByID(ctx context.Context, id gym.ID) (*gym.Gym, erro
 		}
 		return nil, err
 	}
-	
+
 	// 座標をデフォルト値に設定（テスト用）
 	gymRecord.LocationLatitude = 35.6812
 	gymRecord.LocationLongitude = 139.7671
@@ -45,7 +45,7 @@ func (r *gymRepository) FindByID(ctx context.Context, id gym.ID) (*gym.Gym, erro
 // Search はクエリとページングでジムを検索する
 func (r *gymRepository) Search(ctx context.Context, query gym.SearchQuery) (*gym.PaginatedResult[gym.Gym], error) {
 	var gymRecords []record.GymRecord
-	
+
 	db := r.db.WithContext(ctx).Omit("location").Preload("Tags")
 
 	// 検索フィルタを適用
@@ -56,11 +56,10 @@ func (r *gymRepository) Search(ctx context.Context, query gym.SearchQuery) (*gym
 
 	// 位置フィルタが提供されている場合は適用
 	if query.Location != nil && query.RadiusM != nil {
-		// 簡単な距離計算（MySQL POINT型を使用）
 		lat := query.Location.Latitude
 		lng := query.Location.Longitude
 		radius := float64(*query.RadiusM) / 111000.0 // メートルを度に変換（近似値）
-		
+
 		db = db.Where("ST_Y(location) BETWEEN ? AND ? AND ST_X(location) BETWEEN ? AND ?",
 			lat-radius, lat+radius, lng-radius, lng+radius)
 	}
@@ -75,15 +74,14 @@ func (r *gymRepository) Search(ctx context.Context, query gym.SearchQuery) (*gym
 	if limit <= 0 {
 		limit = 20 // デフォルト制限
 	}
-	
+
 	if err := db.Limit(limit + 1).Find(&gymRecords).Error; err != nil {
 		return nil, err
 	}
 
-	// レコードをエンティティに変換
 	entities := make([]gym.Gym, 0, len(gymRecords))
 	hasMore := len(gymRecords) > limit
-	
+
 	recordsToProcess := gymRecords
 	if hasMore {
 		recordsToProcess = gymRecords[:limit]
@@ -112,7 +110,7 @@ func (r *gymRepository) Search(ctx context.Context, query gym.SearchQuery) (*gym
 // Create は新しいジムを作成する
 func (r *gymRepository) Create(ctx context.Context, gymEntity *gym.Gym) error {
 	gymRecord := FromGymEntity(gymEntity)
-	
+
 	if err := r.db.WithContext(ctx).Create(gymRecord).Error; err != nil {
 		return err
 	}
@@ -128,7 +126,7 @@ func (r *gymRepository) Create(ctx context.Context, gymEntity *gym.Gym) error {
 // Update は既存のジムを更新する
 func (r *gymRepository) Update(ctx context.Context, gymEntity *gym.Gym) error {
 	gymRecord := FromGymEntity(gymEntity)
-	
+
 	if err := r.db.WithContext(ctx).Save(gymRecord).Error; err != nil {
 		return err
 	}
