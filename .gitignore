@@ -43,3 +43,8 @@
 
 # Old reference code (development only)
 /gogym-old
+
+# Go build artifacts and temporary files
+apps/api/tmp/
+apps/api/build-errors.log
+*.log
