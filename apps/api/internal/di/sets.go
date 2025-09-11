@@ -91,6 +91,8 @@ var HandlerSet = wire.NewSet(
 	// Handler実装
 	handler.NewUserHandler,
 	handler.NewGymHandler,
+	handler.NewReviewHandler,
+	handler.NewFavoriteHandler,
 )
 
 // =============================================================================

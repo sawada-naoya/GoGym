@@ -132,3 +132,43 @@ func (h *GymHandler) GetRecommendedGyms(c echo.Context) error {
 	c.Response().Header().Set("Content-Type", "application/json; charset=utf-8")
 	return c.JSON(http.StatusOK, response)
 }
+
+// CreateGym handles POST /gyms request  
+func (h *GymHandler) CreateGym(c echo.Context) error {
+	// TODO: Create gym
+	return c.JSON(http.StatusCreated, map[string]string{
+		"message": "Gym created",
+	})
+}
+
+// UpdateGym handles PUT /gyms/:id request
+func (h *GymHandler) UpdateGym(c echo.Context) error {
+	// TODO: Update gym
+	return c.JSON(http.StatusOK, map[string]string{
+		"message": "Gym updated", 
+	})
+}
+
+// DeleteGym handles DELETE /gyms/:id request
+func (h *GymHandler) DeleteGym(c echo.Context) error {
+	// TODO: Delete gym
+	return c.JSON(http.StatusOK, map[string]string{
+		"message": "Gym deleted",
+	})
+}
+
+// GetGymImages handles GET /gyms/:id/images request
+func (h *GymHandler) GetGymImages(c echo.Context) error {
+	// TODO: Get gym images from reviews
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"images": []interface{}{},
+	})
+}
+
+// AutocompleteGyms handles GET /gyms/autocomplete request
+func (h *GymHandler) AutocompleteGyms(c echo.Context) error {
+	// TODO: Gym name autocomplete
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"suggestions": []interface{}{},
+	})
+}

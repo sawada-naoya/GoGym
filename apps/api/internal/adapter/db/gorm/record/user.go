@@ -1,38 +1,25 @@
-// internal/adapter/db/gorm/record/user.go
-// 役割: ユーザー関連のGORMレコード構造体（Infrastructure Layer）
-// DB行の形でGORMタグ付きstruct。ドメインエンティティとの変換はconverterで実行
 package record
 
 import (
 	"time"
+
+	"gorm.io/gorm"
 )
 
-// UserRecord はユーザーエンティティ用のGORMレコードを表す
+// UserRecord represents user table structure
 type UserRecord struct {
-	ID           int64     `gorm:"primaryKey;autoIncrement"`
-	Email        string    `gorm:"uniqueIndex;size:255;not null"`
-	PasswordHash string    `gorm:"size:255;not null"`
-	DisplayName  string    `gorm:"size:100;not null"`
-	CreatedAt    time.Time `gorm:"autoCreateTime"`
-	UpdatedAt    time.Time `gorm:"autoUpdateTime"`
+	ID              int64          `gorm:"primaryKey;autoIncrement"`
+	Email           string         `gorm:"unique;not null;index"`
+	CryptedPassword string         `gorm:"not null"`
+	Salt            string         `gorm:"not null"`
+	Name            string         `gorm:"not null"`
+	CreatedAt       time.Time      `gorm:"not null"`
+	UpdatedAt       time.Time      `gorm:"not null"`
+	DeletedAt       gorm.DeletedAt `gorm:"index"`
+
+	// TODO: Relations
 }
 
-// TableName はGORM用のテーブル名を返す
 func (UserRecord) TableName() string {
 	return "users"
-}
-
-// RefreshTokenRecord はリフレッシュトークンエンティティ用のGORMレコードを表す
-type RefreshTokenRecord struct {
-	ID        int64       `gorm:"primaryKey;autoIncrement"`
-	UserID    int64       `gorm:"not null;index"`
-	TokenHash string      `gorm:"uniqueIndex;size:255;not null"`
-	ExpiresAt time.Time   `gorm:"not null;index"`
-	CreatedAt time.Time   `gorm:"autoCreateTime"`
-	User      *UserRecord `gorm:"foreignKey:UserID"`
-}
-
-// TableName はGORM用のテーブル名を返す
-func (RefreshTokenRecord) TableName() string {
-	return "refresh_tokens"
 }

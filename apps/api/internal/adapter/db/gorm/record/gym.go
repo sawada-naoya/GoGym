@@ -4,8 +4,6 @@
 package record
 
 import (
-	"fmt"
-	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -37,24 +35,7 @@ func (GymRecord) TableName() string {
 
 // AfterFind はGORM後処理フック - POINT型から座標を抽出
 func (g *GymRecord) AfterFind(tx *gorm.DB) error {
-	// POINT型文字列から座標を抽出 (例: "POINT(35.6598 139.7016)" - latitude longitude順)
-	if g.Location != "" {
-		// POINT(lat lon) 形式をパース
-		locationStr := strings.TrimSpace(g.Location)
-		if strings.HasPrefix(locationStr, "POINT(") && strings.HasSuffix(locationStr, ")") {
-			coords := strings.TrimSuffix(strings.TrimPrefix(locationStr, "POINT("), ")")
-			parts := strings.Split(coords, " ")
-			if len(parts) == 2 {
-				var latitude, longitude float64
-				if _, err := fmt.Sscanf(parts[0], "%f", &latitude); err == nil {
-					g.LocationLatitude = latitude
-				}
-				if _, err := fmt.Sscanf(parts[1], "%f", &longitude); err == nil {
-					g.LocationLongitude = longitude
-				}
-			}
-		}
-	}
+	// TODO: POINT型文字列から座標を抽出
 	return nil
 }
 

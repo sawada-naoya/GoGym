@@ -87,11 +87,11 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 }
 
 // NewConfiguredEcho はルーティング設定済みのEchoサーバーを作成
-func NewConfiguredEcho(gymHandler *handler.GymHandler, userHandler *handler.UserHandler) *echo.Echo {
+func NewConfiguredEcho(gymHandler *handler.GymHandler, userHandler *handler.UserHandler, reviewHandler *handler.ReviewHandler, favoriteHandler *handler.FavoriteHandler) *echo.Echo {
 	e := NewBasicEcho()
 	
 	// ルーティング設定
-	router.NewRouter(e, gymHandler, userHandler)
+	router.NewRouter(e, gymHandler, userHandler, reviewHandler, favoriteHandler)
 	
 	return e
 }

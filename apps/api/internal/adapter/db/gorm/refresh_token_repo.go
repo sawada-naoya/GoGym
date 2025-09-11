@@ -1,75 +1,35 @@
-// internal/adapter/db/gorm/refresh_token_repo.go
-// 役割: リフレッシュトークンドメイン用リポジトリ実装（Infrastructure Layer）
-// record↔entity変換を行いDB操作する実装。ドメインエンティティとGORMレコード間の変換を担当
 package gorm
 
 import (
 	"context"
-	"gogym-api/internal/adapter/db/gorm/record"
-	"gogym-api/internal/domain/user"
-	userUsecase "gogym-api/internal/usecase/user"
+
 	"gorm.io/gorm"
-	"time"
 )
 
-// refreshTokenRepository はuser.RefreshTokenRepositoryインターフェースを実装する
-type refreshTokenRepository struct {
+type RefreshTokenRepository struct {
 	db *gorm.DB
 }
 
-// NewRefreshTokenRepository は新しいリフレッシュトークンリポジトリを作成する
-func NewRefreshTokenRepository(db *gorm.DB) userUsecase.RefreshTokenRepository {
-	return &refreshTokenRepository{db: db}
+func NewRefreshTokenRepository(db *gorm.DB) *RefreshTokenRepository {
+	return &RefreshTokenRepository{db: db}
 }
 
-// Create は新しいリフレッシュトークンを作成する
-func (r *refreshTokenRepository) Create(ctx context.Context, tokenEntity *user.RefreshToken) error {
-	tokenRecord := FromRefreshTokenEntity(tokenEntity)
-	
-	if err := r.db.WithContext(ctx).Create(tokenRecord).Error; err != nil {
-		return err
-	}
-
-	// 生成されたIDでエンティティを更新
-	tokenEntity.ID = user.ID(tokenRecord.ID)
-	tokenEntity.CreatedAt = tokenRecord.CreatedAt
-
+func (r *RefreshTokenRepository) Create(ctx context.Context) error {
+	// TODO: Create refresh token
 	return nil
 }
 
-// FindByTokenHash はトークンハッシュでリフレッシュトークンを検索する
-func (r *refreshTokenRepository) FindByTokenHash(ctx context.Context, tokenHash string) (*user.RefreshToken, error) {
-	var tokenRecord record.RefreshTokenRecord
-	if err := r.db.WithContext(ctx).Where("token_hash = ?", tokenHash).First(&tokenRecord).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, user.NewDomainError(user.ErrNotFound, "token_not_found", "refresh token not found")
-		}
-		return nil, err
-	}
-
-	return ToRefreshTokenEntity(&tokenRecord), nil
-}
-
-// DeleteByTokenHash はトークンハッシュでリフレッシュトークンを削除する
-func (r *refreshTokenRepository) DeleteByTokenHash(ctx context.Context, tokenHash string) error {
-	result := r.db.WithContext(ctx).Where("token_hash = ?", tokenHash).Delete(&record.RefreshTokenRecord{})
-	if result.Error != nil {
-		return result.Error
-	}
-
-	if result.RowsAffected == 0 {
-		return user.NewDomainError(user.ErrNotFound, "token_not_found", "refresh token not found")
-	}
-
+func (r *RefreshTokenRepository) FindByToken(ctx context.Context, token string) error {
+	// TODO: Find refresh token
 	return nil
 }
 
-// DeleteExpiredTokens は期限切れのすべてのリフレッシュトークンを削除する
-func (r *refreshTokenRepository) DeleteExpiredTokens(ctx context.Context) error {
-	return r.db.WithContext(ctx).Where("expires_at < ?", time.Now()).Delete(&record.RefreshTokenRecord{}).Error
+func (r *RefreshTokenRepository) Delete(ctx context.Context, token string) error {
+	// TODO: Delete refresh token
+	return nil
 }
 
-// DeleteAllByUserID は特定のユーザーのすべてのリフレッシュトークンを削除する
-func (r *refreshTokenRepository) DeleteAllByUserID(ctx context.Context, userID user.ID) error {
-	return r.db.WithContext(ctx).Where("user_id = ?", int64(userID)).Delete(&record.RefreshTokenRecord{}).Error
+func (r *RefreshTokenRepository) DeleteByUserID(ctx context.Context, userID int64) error {
+	// TODO: Delete all user's refresh tokens
+	return nil
 }

@@ -47,4 +47,6 @@
 # Go build artifacts and temporary files
 apps/api/tmp/
 apps/api/build-errors.log
+apps/api/api
+apps/api/cmd/api/api
 *.log

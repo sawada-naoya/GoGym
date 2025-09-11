@@ -56,7 +56,9 @@ func InitServer(ctx context.Context, config *configs.Config, logger *slog.Logger
 	useCase := gym.NewUseCase(repository, tagRepository, logger)
 	gymHandler := handler.NewGymHandler(useCase)
 	userHandler := handler.NewUserHandler()
-	echo := NewConfiguredEcho(gymHandler, userHandler)
+	reviewHandler := handler.NewReviewHandler()
+	favoriteHandler := handler.NewFavoriteHandler()
+	echo := NewConfiguredEcho(gymHandler, userHandler, reviewHandler, favoriteHandler)
 	server := &Server{
 		Echo:   echo,
 		Config: config,
@@ -95,9 +97,9 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 }
 
 // NewConfiguredEcho はルーティング設定済みのEchoサーバーを作成
-func NewConfiguredEcho(gymHandler *handler.GymHandler, userHandler *handler.UserHandler) *echo.Echo {
+func NewConfiguredEcho(gymHandler *handler.GymHandler, userHandler *handler.UserHandler, reviewHandler *handler.ReviewHandler, favoriteHandler *handler.FavoriteHandler) *echo.Echo {
 	e := NewBasicEcho()
-	router.NewRouter(e, gymHandler, userHandler)
+	router.NewRouter(e, gymHandler, userHandler, reviewHandler, favoriteHandler)
 
 	return e
 }
