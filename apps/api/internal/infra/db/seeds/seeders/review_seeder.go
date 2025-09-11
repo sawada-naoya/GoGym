@@ -73,7 +73,7 @@ type GymLookup struct {
 }
 
 func (s *ReviewSeeder) Run(ctx context.Context) error {
-	file, err := os.Open("infra/seeds/data/reviews.ndjson")
+	file, err := os.Open("internal/infra/db/seeds/data/reviews.ndjson")
 	if err != nil {
 		return fmt.Errorf("レビューシードファイルの読み込みに失敗: %w", err)
 	}

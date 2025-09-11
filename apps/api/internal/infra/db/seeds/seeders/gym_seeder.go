@@ -132,7 +132,7 @@ type GymPricingPlan struct {
 }
 
 func (s *GymSeeder) Run(ctx context.Context) error {
-	file, err := os.Open("infra/seeds/data/gyms.ndjson")
+	file, err := os.Open("internal/infra/db/seeds/data/gyms.ndjson")
 	if err != nil {
 		return fmt.Errorf("ジムシードファイルの読み込みに失敗: %w", err)
 	}
@@ -160,8 +160,6 @@ func (s *GymSeeder) Run(ctx context.Context) error {
 		gym := Gym{
 			Name:    seedData.Name,
 			Address: seedData.Address,
-			// POINT(経度 緯度) の順序でWKT形式
-			Location:  fmt.Sprintf("POINT(%f %f)", seedData.Location.Lng, seedData.Location.Lat),
 			IsActive:  true,
 		}
 
@@ -230,12 +228,35 @@ func (s *GymSeeder) Run(ctx context.Context) error {
 			gym.Photos = &photosStr
 		}
 
-		// ジムデータ挿入
-		if err := tx.Create(&gym).Error; err != nil {
+		// Raw SQLでジムデータを直接挿入（POINT型を含む、SRID 4326指定）
+		insertSQL := `INSERT INTO gyms (name, description, location, address, city, prefecture, postal_code, phone_number, website, access_info, parking_info, amenities, capacity, operator_name, brand_name, price_range_min, price_range_max, is_active, slug, meta_title, meta_description, main_photo_url, photos) VALUES (?, ?, ST_GeomFromText(?, 4326), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+		
+		pointWKT := fmt.Sprintf("POINT(%f %f)", seedData.Location.Lat, seedData.Location.Lng)
+		
+		result := tx.Exec(insertSQL,
+			gym.Name, gym.Description, pointWKT, gym.Address, gym.City, gym.Prefecture,
+			gym.PostalCode, gym.PhoneNumber, gym.Website, gym.AccessInfo, gym.ParkingInfo,
+			gym.Amenities, gym.Capacity, gym.OperatorName, gym.BrandName, 
+			gym.PriceRangeMin, gym.PriceRangeMax, gym.IsActive, gym.Slug,
+			gym.MetaTitle, gym.MetaDescription, gym.MainPhotoURL, gym.Photos)
+			
+		if result.Error != nil {
 			tx.Rollback()
-			s.logger.Error("ジム作成エラー", "name", seedData.Name, "error", err)
+			s.logger.Error("ジム作成エラー", "name", seedData.Name, "error", result.Error)
 			continue
 		}
+		
+		// 挿入されたジムのIDを取得
+		var insertedGym struct {
+			ID int64 `gorm:"column:id"`
+		}
+		if err := tx.Raw("SELECT id FROM gyms WHERE slug = ? OR (name = ? AND address = ?)", 
+			gym.Slug, gym.Name, gym.Address).Scan(&insertedGym).Error; err != nil {
+			tx.Rollback()
+			s.logger.Error("挿入されたジムID取得エラー", "name", seedData.Name, "error", err)
+			continue
+		}
+		gym.ID = insertedGym.ID
 
 		// 営業時間データ挿入
 		for _, hour := range seedData.Hours {
@@ -251,7 +272,7 @@ func (s *GymSeeder) Run(ctx context.Context) error {
 				gymHour.CloseTime = hour.CloseTime
 			}
 			
-			if err := tx.Create(&gymHour).Error; err != nil {
+			if err := tx.Table("gym_hours").Create(&gymHour).Error; err != nil {
 				tx.Rollback()
 				s.logger.Error("営業時間作成エラー", "gym", seedData.Name, "error", err)
 				break

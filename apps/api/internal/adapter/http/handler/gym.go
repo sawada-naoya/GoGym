@@ -128,5 +128,7 @@ func (h *GymHandler) GetRecommendedGyms(c echo.Context) error {
 	// レスポンシに変換
 	response := ToRecommendResponse(result)
 
+	// UTF-8の文字エンコーディングを明示的に設定
+	c.Response().Header().Set("Content-Type", "application/json; charset=utf-8")
 	return c.JSON(http.StatusOK, response)
 }

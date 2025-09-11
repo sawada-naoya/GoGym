@@ -56,7 +56,7 @@ type User struct {
 
 func (s *UserSeeder) Run(ctx context.Context) error {
 	// NDJSONファイルを開く
-	file, err := os.Open("infra/seeds/data/users.ndjson")
+	file, err := os.Open("internal/infra/db/seeds/data/users.ndjson")
 	if err != nil {
 		return fmt.Errorf("ユーザーシードファイルの読み込みに失敗: %w", err)
 	}
