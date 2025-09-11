@@ -1,8 +1,10 @@
+// internal/usecase/user/user.go
+// 役割: ユーザーユースケースとRepository interface（Application Layer）
+// ビジネスロジックを実装し、ドメインエンティティとインターフェースにのみ依存する
 package user
 
 import (
 	"context"
-	"gogym-api/internal/domain/common"
 	"gogym-api/internal/domain/user"
 	"log/slog"
 	"time"
@@ -10,11 +12,11 @@ import (
 
 // Repository interface for user data access
 type Repository interface {
-	FindByID(ctx context.Context, id common.ID) (*user.User, error)
+	FindByID(ctx context.Context, id user.ID) (*user.User, error)
 	FindByEmail(ctx context.Context, email string) (*user.User, error)
 	Create(ctx context.Context, user *user.User) error
 	Update(ctx context.Context, user *user.User) error
-	Delete(ctx context.Context, id common.ID) error
+	Delete(ctx context.Context, id user.ID) error
 }
 
 // RefreshTokenRepository interface for refresh token data access
@@ -23,7 +25,7 @@ type RefreshTokenRepository interface {
 	FindByTokenHash(ctx context.Context, tokenHash string) (*user.RefreshToken, error)
 	DeleteByTokenHash(ctx context.Context, tokenHash string) error
 	DeleteExpiredTokens(ctx context.Context) error
-	DeleteAllByUserID(ctx context.Context, userID common.ID) error
+	DeleteAllByUserID(ctx context.Context, userID user.ID) error
 }
 
 // PasswordService interface for password operations
@@ -34,9 +36,9 @@ type PasswordService interface {
 
 // TokenService interface for JWT operations
 type TokenService interface {
-	GenerateTokens(userID common.ID, email string) (accessToken, refreshToken string, err error)
-	ValidateAccessToken(token string) (userID common.ID, email string, err error)
-	ValidateRefreshToken(token string) (userID common.ID, tokenHash string, err error)
+	GenerateTokens(userID user.ID, email string) (accessToken, refreshToken string, err error)
+	ValidateAccessToken(token string) (userID user.ID, email string, err error)
+	ValidateRefreshToken(token string) (userID user.ID, tokenHash string, err error)
 }
 
 // UseCase represents user use cases
@@ -100,14 +102,14 @@ func (uc *UseCase) Signup(ctx context.Context, req SignupRequest) (*AuthResponse
 	existingUser, err := uc.userRepo.FindByEmail(ctx, req.Email)
 	if err == nil && existingUser != nil {
 		uc.logger.WarnContext(ctx, "signup attempt with existing email", "email", req.Email)
-		return nil, common.NewDomainError(common.ErrAlreadyExists, "email_exists", "email already registered")
+		return nil, user.NewDomainError(user.ErrAlreadyExists, "email_exists", "email already registered")
 	}
 
 	// Create user entity
 	email, err := user.NewEmail(req.Email)
 	if err != nil {
 		uc.logger.ErrorContext(ctx, "invalid email", "error", err)
-		return nil, common.NewDomainError(common.ErrInvalidEmail, "invalid_email", "invalid email format")
+		return nil, user.NewDomainError(user.ErrInvalidEmail, "invalid_email", "invalid email format")
 	}
 	
 	newUser, err := user.NewUser(email, req.DisplayName)
@@ -120,21 +122,21 @@ func (uc *UseCase) Signup(ctx context.Context, req SignupRequest) (*AuthResponse
 	hashedPassword, err := uc.passwordService.HashPassword(req.Password)
 	if err != nil {
 		uc.logger.ErrorContext(ctx, "failed to hash password", "error", err)
-		return nil, common.NewDomainError(common.ErrInternal, "password_hash_failed", "failed to secure password")
+		return nil, user.NewDomainError(user.ErrInternal, "password_hash_failed", "failed to secure password")
 	}
 	newUser.PasswordHash = hashedPassword
 
 	// Save user
 	if err := uc.userRepo.Create(ctx, newUser); err != nil {
 		uc.logger.ErrorContext(ctx, "failed to create user", "email", req.Email, "error", err)
-		return nil, common.NewDomainErrorWithCause(err, "user_creation_failed", "failed to create user")
+		return nil, user.NewDomainErrorWithCause(err, "user_creation_failed", "failed to create user")
 	}
 
 	// Generate tokens
 	accessToken, refreshToken, err := uc.tokenService.GenerateTokens(newUser.ID, newUser.Email.String())
 	if err != nil {
 		uc.logger.ErrorContext(ctx, "failed to generate tokens", "user_id", newUser.ID, "error", err)
-		return nil, common.NewDomainError(common.ErrInternal, "token_generation_failed", "failed to generate authentication tokens")
+		return nil, user.NewDomainError(user.ErrInternal, "token_generation_failed", "failed to generate authentication tokens")
 	}
 
 	// Save refresh token
@@ -161,20 +163,20 @@ func (uc *UseCase) Login(ctx context.Context, req LoginRequest) (*AuthResponse, 
 	foundUser, err := uc.userRepo.FindByEmail(ctx, req.Email)
 	if err != nil || foundUser == nil {
 		uc.logger.WarnContext(ctx, "login attempt with non-existent email", "email", req.Email)
-		return nil, common.NewDomainError(common.ErrUnauthorized, "invalid_credentials", "invalid email or password")
+		return nil, user.NewDomainError(user.ErrUnauthorized, "invalid_credentials", "invalid email or password")
 	}
 
 	// Verify password
 	if err := uc.passwordService.VerifyPassword(req.Password, foundUser.PasswordHash); err != nil {
 		uc.logger.WarnContext(ctx, "login attempt with invalid password", "email", req.Email)
-		return nil, common.NewDomainError(common.ErrUnauthorized, "invalid_credentials", "invalid email or password")
+		return nil, user.NewDomainError(user.ErrUnauthorized, "invalid_credentials", "invalid email or password")
 	}
 
 	// Generate new tokens
 	accessToken, refreshToken, err := uc.tokenService.GenerateTokens(foundUser.ID, foundUser.Email.String())
 	if err != nil {
 		uc.logger.ErrorContext(ctx, "failed to generate tokens", "user_id", foundUser.ID, "error", err)
-		return nil, common.NewDomainError(common.ErrInternal, "token_generation_failed", "failed to generate authentication tokens")
+		return nil, user.NewDomainError(user.ErrInternal, "token_generation_failed", "failed to generate authentication tokens")
 	}
 
 	// Revoke existing refresh tokens and save new one
@@ -205,35 +207,35 @@ func (uc *UseCase) RefreshToken(ctx context.Context, refreshTokenStr string) (*A
 	userID, tokenHash, err := uc.tokenService.ValidateRefreshToken(refreshTokenStr)
 	if err != nil {
 		uc.logger.WarnContext(ctx, "invalid refresh token", "error", err)
-		return nil, common.NewDomainError(common.ErrUnauthorized, "invalid_refresh_token", "invalid refresh token")
+		return nil, user.NewDomainError(user.ErrUnauthorized, "invalid_refresh_token", "invalid refresh token")
 	}
 
 	// Find refresh token in database
 	storedToken, err := uc.refreshTokenRepo.FindByTokenHash(ctx, tokenHash)
 	if err != nil || storedToken == nil {
 		uc.logger.WarnContext(ctx, "refresh token not found in database", "user_id", userID)
-		return nil, common.NewDomainError(common.ErrUnauthorized, "invalid_refresh_token", "refresh token not found")
+		return nil, user.NewDomainError(user.ErrUnauthorized, "invalid_refresh_token", "refresh token not found")
 	}
 
 	// Check if token is expired
 	if storedToken.IsExpired() {
 		uc.logger.WarnContext(ctx, "expired refresh token", "user_id", userID)
 		uc.refreshTokenRepo.DeleteByTokenHash(ctx, tokenHash) // Clean up expired token
-		return nil, common.NewDomainError(common.ErrUnauthorized, "expired_refresh_token", "refresh token expired")
+		return nil, user.NewDomainError(user.ErrUnauthorized, "expired_refresh_token", "refresh token expired")
 	}
 
 	// Get user
 	foundUser, err := uc.userRepo.FindByID(ctx, userID)
 	if err != nil || foundUser == nil {
 		uc.logger.ErrorContext(ctx, "user not found during token refresh", "user_id", userID)
-		return nil, common.NewDomainError(common.ErrUnauthorized, "user_not_found", "user not found")
+		return nil, user.NewDomainError(user.ErrUnauthorized, "user_not_found", "user not found")
 	}
 
 	// Generate new tokens
 	newAccessToken, newRefreshToken, err := uc.tokenService.GenerateTokens(foundUser.ID, foundUser.Email.String())
 	if err != nil {
 		uc.logger.ErrorContext(ctx, "failed to generate new tokens", "user_id", userID, "error", err)
-		return nil, common.NewDomainError(common.ErrInternal, "token_generation_failed", "failed to generate new tokens")
+		return nil, user.NewDomainError(user.ErrInternal, "token_generation_failed", "failed to generate new tokens")
 	}
 
 	// Delete old refresh token and save new one
@@ -257,24 +259,24 @@ func (uc *UseCase) RefreshToken(ctx context.Context, refreshTokenStr string) (*A
 }
 
 // GetProfile retrieves user profile by ID
-func (uc *UseCase) GetProfile(ctx context.Context, userID common.ID) (*user.User, error) {
+func (uc *UseCase) GetProfile(ctx context.Context, userID user.ID) (*user.User, error) {
 	uc.logger.InfoContext(ctx, "getting user profile", "user_id", userID)
 
 	foundUser, err := uc.userRepo.FindByID(ctx, userID)
 	if err != nil || foundUser == nil {
 		uc.logger.ErrorContext(ctx, "user not found", "user_id", userID)
-		return nil, common.NewDomainError(common.ErrNotFound, "user_not_found", "user not found")
+		return nil, user.NewDomainError(user.ErrNotFound, "user_not_found", "user not found")
 	}
 
 	return foundUser, nil
 }
 
 // saveRefreshToken saves a refresh token to the database
-func (uc *UseCase) saveRefreshToken(ctx context.Context, userID common.ID, refreshToken string) error {
+func (uc *UseCase) saveRefreshToken(ctx context.Context, userID user.ID, refreshToken string) error {
 	// Extract token hash from refresh token (this depends on your token service implementation)
 	_, tokenHash, err := uc.tokenService.ValidateRefreshToken(refreshToken)
 	if err != nil {
-		return common.NewDomainError(common.ErrInternal, "invalid_token", "invalid refresh token format")
+		return user.NewDomainError(user.ErrInternal, "invalid_token", "invalid refresh token format")
 	}
 
 	refreshTokenEntity := &user.RefreshToken{
@@ -284,7 +286,7 @@ func (uc *UseCase) saveRefreshToken(ctx context.Context, userID common.ID, refre
 	}
 
 	if err := uc.refreshTokenRepo.Create(ctx, refreshTokenEntity); err != nil {
-		return common.NewDomainErrorWithCause(err, "token_save_failed", "failed to save refresh token")
+		return user.NewDomainErrorWithCause(err, "token_save_failed", "failed to save refresh token")
 	}
 
 	return nil

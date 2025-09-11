@@ -1,8 +1,0 @@
-<% content_for(:title, @tag.name) %>
-<% breadcrumb :tag, @tag %>
-<div class="wrapper mt-5">
-  <%= render "/shared/gym" %>
-  <div class="pagination d-flex justify-content-center">
-    <%= paginate @gyms %>
-  </div>
-</div>

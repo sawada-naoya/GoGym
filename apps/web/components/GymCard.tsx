@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { Gym } from '@/types/gym'
+import FavoriteButton from './FavoriteButton'
 
-interface GymCardProps {
+type GymCardProps = {
   gym: Gym
 }
 
@@ -20,15 +21,7 @@ const GymCard = ({ gym }: GymCardProps) => {
           </div>
           
           {/* お気に入りボタン */}
-          <button 
-            className="absolute top-3 right-3 px-3 py-1 bg-white/80 hover:bg-white rounded text-sm font-medium text-gray-800 shadow-sm transition-colors"
-            onClick={(e) => {
-              e.preventDefault()
-              console.log('Toggle favorite')
-            }}
-          >
-            ♡
-          </button>
+          <FavoriteButton gymId={gym.id} />
 
           {/* エリアバッジ */}
           <div className="absolute bottom-3 left-3 bg-white/90 px-2 py-1 rounded-md text-sm font-medium text-gray-800">

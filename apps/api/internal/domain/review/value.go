@@ -1,6 +1,6 @@
 // internal/domain/review/value.go
-// 役割: レビュードメインのバリューオブジェクト
-// Rating(1..5保証)、PhotoURL等のレビュー関連バリューオブジェクトの定義と検証
+// 役割: レビュードメインのValue Object（Domain Layer）
+// 不変性と検証ロジックを持つ純粋なドメインバリューオブジェクト。GORM/JSONタグは一切なし
 package review
 
 import (
@@ -39,8 +39,8 @@ func (r Rating) Int() int {
 
 // PhotoURL represents a photo URL value object
 type PhotoURL struct {
-	URL         string `json:"url"`
-	Description string `json:"description,omitempty"`
+	URL         string
+	Description string
 }
 
 // NewPhotoURL creates a new photo URL with validation

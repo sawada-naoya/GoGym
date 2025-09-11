@@ -12,7 +12,7 @@ func SetupHealthRoutes(e *echo.Echo) {
 
 func HealthCheck(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{
-		"status": "ok",
+		"status":  "ok",
 		"service": "gogym-api",
 	})
 }

@@ -1,14 +1,19 @@
-// internal/di/sets.go
-// 役割: 依存性注入のためのwire.NewSetを定義
+// di/sets.go
+// 役割: 依存性注入のためのwire.NewSetを定義（API Layer）
 // Clean Architectureの依存フローに従って各層のプロバイダーを整理
 package di
 
 import (
 	"github.com/google/wire"
 
+	"gogym-api/configs"
 	"gogym-api/internal/adapter/auth"
 	gormAdapter "gogym-api/internal/adapter/db/gorm"
+	"gogym-api/internal/adapter/http/handler"
+	"gogym-api/internal/adapter/http/router"
+	"gogym-api/internal/infra/db"
 	userUC "gogym-api/internal/usecase/user"
+	gymUC "gogym-api/internal/usecase/gym"
 )
 
 // =============================================================================
@@ -19,8 +24,11 @@ import (
 // InfrastructureSet は外部サービスとの接続を提供
 // データベース接続、認証サービス、将来のRedis/S3等
 var InfrastructureSet = wire.NewSet(
+	// 設定から各コンポーネント用の設定を抽出
+	ProvideDatabaseConfig,
+	
 	// データベース接続
-	gormAdapter.NewGormDB,
+	db.NewGormDB,
 	
 	// 認証サービス（パスワードハッシュ化、JWT生成）
 	auth.NewPasswordService,
@@ -35,6 +43,11 @@ var InfrastructureSet = wire.NewSet(
 	// s3.NewS3Service,
 )
 
+// ProvideDatabaseConfig は設定からデータベース設定を提供
+func ProvideDatabaseConfig(cfg *configs.Config) configs.DatabaseConfig {
+	return cfg.Database
+}
+
 // =============================================================================
 // 2. Repository Set (データアクセス層)
 // Infrastructure → Repository implementations (GORM/Redis/S3)
@@ -43,12 +56,11 @@ var InfrastructureSet = wire.NewSet(
 // RepositorySet はデータアクセス層の実装を提供
 // GORM実装、Redis実装、S3実装等
 var RepositorySet = wire.NewSet(
-	// TODO: Repository実装を追加
-	// gormAdapter.NewUserRepository,
-	// gormAdapter.NewRefreshTokenRepository,
-	// gormAdapter.NewGymRepository,
-	// gormAdapter.NewTagRepository,
-	// gormAdapter.NewFavoriteRepository,
+	// Repository実装
+	gormAdapter.NewUserRepository,
+	gormAdapter.NewRefreshTokenRepository,
+	gormAdapter.NewGymRepository,
+	gormAdapter.NewTagRepository,
 	
 	// 将来の拡張
 	// redisAdapter.NewCacheRepository,
@@ -63,9 +75,9 @@ var RepositorySet = wire.NewSet(
 // UseCaseSet はビジネスロジック層を提供
 // ドメインロジックを実装するユースケース群
 var UseCaseSet = wire.NewSet(
-	// TODO: UseCase実装を追加（Repository実装完了後）
-	// userUC.NewUseCase,
-	// gymUC.NewUseCase,
+	// UseCase実装
+	userUC.NewUseCase,
+	gymUC.NewUseCase,
 )
 
 // =============================================================================
@@ -76,9 +88,11 @@ var UseCaseSet = wire.NewSet(
 // HandlerSet はHTTPハンドラー層を提供
 // HTTPリクエストを受け取りUseCaseに処理を委譲
 var HandlerSet = wire.NewSet(
-	// TODO: Handler実装を追加（UseCase実装完了後）
-	// handler.NewUserHandler,
-	// handler.NewGymHandler,
+	// Handler実装
+	handler.NewUserHandler,
+	handler.NewGymHandler,
+	handler.NewReviewHandler,
+	handler.NewFavoriteHandler,
 )
 
 // =============================================================================
@@ -103,8 +117,8 @@ var MiddlewareSet = wire.NewSet(
 // RouterSet はHTTPルーター層を提供
 // エンドポイントとハンドラーのマッピング
 var RouterSet = wire.NewSet(
-	// TODO: Router実装を追加
-	// router.NewRouter,
+	// Router実装
+	router.NewRouter,
 )
 
 // =============================================================================
@@ -126,18 +140,9 @@ var ServerSet = wire.NewSet(
 
 // InterfaceSet はインターフェースと実装の結合を定義
 // 依存性逆転の原則に従ったインターフェース結合
+// Wireでは、関数が直接インターフェースを返すため、明示的なBindは不要
+// RepositorySetで定義された関数が自動的に適切なインターフェースを返す
 var InterfaceSet = wire.NewSet(
-	// TODO: インターフェースバインディングを追加
-	
-	// User domain interfaces
-	// wire.Bind(new(userUC.Repository), new(*gormAdapter.UserRepository)),
-	// wire.Bind(new(userUC.RefreshTokenRepository), new(*gormAdapter.RefreshTokenRepository)),
-	
-	// Gym domain interfaces
-	// wire.Bind(new(gymUC.Repository), new(*gormAdapter.GymRepository)),
-	// wire.Bind(new(gymUC.TagRepository), new(*gormAdapter.TagRepository)),
-	// wire.Bind(new(gymUC.FavoriteRepository), new(*gormAdapter.FavoriteRepository)),
-	
 	// Service interfaces (認証サービス)
 	wire.Bind(new(userUC.PasswordService), new(*auth.PasswordService)),
 	wire.Bind(new(userUC.TokenService), new(*auth.TokenService)),

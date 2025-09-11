@@ -5,7 +5,7 @@ import (
 	"crypto/subtle"
 	"encoding/base64"
 	"fmt"
-	"gogym-api/internal/domain/common"
+	"gogym-api/internal/domain/user"
 	"strings"
 
 	"golang.org/x/crypto/argon2"
@@ -36,7 +36,7 @@ func (s *PasswordService) HashPassword(password string) (string, error) {
 	// Generate a random salt
 	salt := make([]byte, s.saltLength)
 	if _, err := rand.Read(salt); err != nil {
-		return "", common.NewDomainError(common.ErrInternal, "salt_generation_failed", "failed to generate salt")
+		return "", user.NewDomainError(user.ErrInternal, "salt_generation_failed", "failed to generate salt")
 	}
 
 	// Generate the hash
@@ -57,31 +57,31 @@ func (s *PasswordService) VerifyPassword(password, encodedHash string) error {
 	// Parse the encoded hash
 	parts := strings.Split(encodedHash, "$")
 	if len(parts) != 6 {
-		return common.NewDomainError(common.ErrInvalidInput, "invalid_hash_format", "invalid hash format")
+		return user.NewDomainError(user.ErrInvalidInput, "invalid_hash_format", "invalid hash format")
 	}
 
 	var version int
 	if _, err := fmt.Sscanf(parts[2], "v=%d", &version); err != nil {
-		return common.NewDomainError(common.ErrInvalidInput, "invalid_version", "invalid hash version")
+		return user.NewDomainError(user.ErrInvalidInput, "invalid_version", "invalid hash version")
 	}
 	if version != argon2.Version {
-		return common.NewDomainError(common.ErrInvalidInput, "incompatible_version", "incompatible hash version")
+		return user.NewDomainError(user.ErrInvalidInput, "incompatible_version", "incompatible hash version")
 	}
 
 	var memory, iterations uint32
 	var parallelism uint8
 	if _, err := fmt.Sscanf(parts[3], "m=%d,t=%d,p=%d", &memory, &iterations, &parallelism); err != nil {
-		return common.NewDomainError(common.ErrInvalidInput, "invalid_parameters", "invalid hash parameters")
+		return user.NewDomainError(user.ErrInvalidInput, "invalid_parameters", "invalid hash parameters")
 	}
 
 	salt, err := base64.RawStdEncoding.DecodeString(parts[4])
 	if err != nil {
-		return common.NewDomainError(common.ErrInvalidInput, "invalid_salt", "invalid salt encoding")
+		return user.NewDomainError(user.ErrInvalidInput, "invalid_salt", "invalid salt encoding")
 	}
 
 	decodedHash, err := base64.RawStdEncoding.DecodeString(parts[5])
 	if err != nil {
-		return common.NewDomainError(common.ErrInvalidInput, "invalid_hash", "invalid hash encoding")
+		return user.NewDomainError(user.ErrInvalidInput, "invalid_hash", "invalid hash encoding")
 	}
 
 	// Compute the hash of the provided password using the same parameters
@@ -92,5 +92,5 @@ func (s *PasswordService) VerifyPassword(password, encodedHash string) error {
 		return nil
 	}
 
-	return common.NewDomainError(common.ErrUnauthorized, "invalid_password", "password verification failed")
+	return user.NewDomainError(user.ErrUnauthorized, "invalid_password", "password verification failed")
 }

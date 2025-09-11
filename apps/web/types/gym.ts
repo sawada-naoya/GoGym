@@ -24,7 +24,7 @@ export interface Gym {
 }
 
 export interface SearchGymResponse {
-  gyms: Gym[];
+  gyms?: Gym[];
   next_cursor: string | null;
   has_more: boolean;
 }
