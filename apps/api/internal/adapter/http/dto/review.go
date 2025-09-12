@@ -1,9 +1,9 @@
-package model
+package dto
 
 import "time"
 
-// Review represents a gym review
-type Review struct {
+// ReviewResponse represents a gym review response
+type ReviewResponse struct {
 	ID        int64     `json:"id"`
 	Title     string    `json:"title"`
 	Content   string    `json:"content"`
@@ -15,6 +15,6 @@ type Review struct {
 	UpdatedAt time.Time `json:"updated_at"`
 
 	// Relations (TODO: implement)
-	User *User `json:"user,omitempty"`
-	Gym  *Gym  `json:"gym,omitempty"`
+	User *UserResponse `json:"user,omitempty"`
+	Gym  *GymResponse  `json:"gym,omitempty"` // 循環参照回避のため、必要に応じてGymSummaryResponse等を検討
 }

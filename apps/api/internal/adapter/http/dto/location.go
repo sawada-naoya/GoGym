@@ -1,9 +1,9 @@
-package model
+package dto
 
 import "time"
 
-// Location represents gym location with geocoding
-type Location struct {
+// LocationResponse represents gym location with geocoding response
+type LocationResponse struct {
 	ID        int64     `json:"id"`
 	Address   string    `json:"address"`
 	Latitude  float64   `json:"latitude"`
@@ -13,5 +13,5 @@ type Location struct {
 	UpdatedAt time.Time `json:"updated_at"`
 
 	// Relations (TODO: implement)
-	Gym *Gym `json:"gym,omitempty"`
+	Gym *GymResponse `json:"gym,omitempty"`
 }
