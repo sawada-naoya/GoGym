@@ -1,9 +1,9 @@
-package model
+package dto
 
 import "time"
 
-// Favorite represents a user's favorite gym
-type Favorite struct {
+// FavoriteResponse represents a user's favorite gym response
+type FavoriteResponse struct {
 	ID        int64     `json:"id"`
 	UserID    int64     `json:"user_id"`
 	GymID     int64     `json:"gym_id"`
@@ -11,6 +11,6 @@ type Favorite struct {
 	UpdatedAt time.Time `json:"updated_at"`
 
 	// Relations (TODO: implement)
-	User *User `json:"user,omitempty"`
-	Gym  *Gym  `json:"gym,omitempty"`
+	User *UserResponse `json:"user,omitempty"`
+	Gym  *GymResponse  `json:"gym,omitempty"`
 }
