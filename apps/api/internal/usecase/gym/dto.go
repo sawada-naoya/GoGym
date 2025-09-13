@@ -65,3 +65,12 @@ type GetFavoriteGymsResponse struct {
 	NextCursor *string
 	HasMore    bool
 }
+
+// GymDetailResponse represents detailed gym information for detail page
+type GymDetailResponse struct {
+	Gym gym.Gym
+	// Reviews    []gym.Review   // TODO: Add when review functionality is implemented
+	// Hours      []gym.Hour     // TODO: Add operating hours
+	// Amenities  []gym.Amenity  // TODO: Add amenities/facilities
+	// Images     []string       // Included in gym.Images field for now
+}

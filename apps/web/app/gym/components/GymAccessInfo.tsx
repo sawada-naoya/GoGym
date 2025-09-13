@@ -22,7 +22,7 @@ const GymAccessInfo = ({ gym }: GymAccessInfoProps) => {
         <div>
           <h3 className="font-semibold text-gray-900 mb-2">🗺️ 位置情報</h3>
           <p className="text-gray-700">
-            緯度: {gym.location.latitude}, 経度: {gym.location.longitude}
+            緯度: {gym.location.Latitude}, 経度: {gym.location.Longitude}
           </p>
         </div>
       </div>

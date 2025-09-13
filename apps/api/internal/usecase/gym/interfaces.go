@@ -28,6 +28,7 @@ func NewUseCase(gymRepo Repository, tagRepo TagRepository, logger *slog.Logger) 
 
 type Repository interface {
 	FindByID(ctx context.Context, id gym.ID) (*gym.Gym, error)
+	FindDetailByID(ctx context.Context, id gym.ID) (*gym.Gym, error) // With relations (reviews, amenities, etc.)
 	Search(ctx context.Context, query gym.SearchQuery) (*gym.PaginatedResult[gym.Gym], error)
 	Create(ctx context.Context, gym *gym.Gym) error
 	Update(ctx context.Context, gym *gym.Gym) error

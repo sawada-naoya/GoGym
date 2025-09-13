@@ -5,30 +5,57 @@ package gorm
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"gogym-api/internal/adapter/db/gorm/record"
 	"gogym-api/internal/domain/gym"
 	gymUsecase "gogym-api/internal/usecase/gym"
-	"gorm.io/gorm"
 	"strings"
+
+	"gorm.io/gorm"
 )
 
-// gymRepository はgym.Repositoryインターフェースを実装する
 type gymRepository struct {
 	db *gorm.DB
 }
 
-// NewGymRepository は新しいジムリポジトリを作成する
 func NewGymRepository(db *gorm.DB) gymUsecase.Repository {
 	return &gymRepository{db: db}
 }
 
-// FindByID はIDでジムを検索する
 func (r *gymRepository) FindByID(ctx context.Context, id gym.ID) (*gym.Gym, error) {
+	var rec record.GymRecord
+	id64 := int64(id)
+
+	err := r.db.WithContext(ctx).
+		Model(&record.GymRecord{}).
+		Where("id = ?", id64).
+		Preload("Tags").
+		First(&rec).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, gym.NewDomainError(gym.ErrNotFound, "gym_not_found", "gym not found")
+		}
+		return nil, err
+	}
+
+	return ToGymEntity(&rec), nil
+}
+
+// FindDetailByID はIDでジムを検索する（完全版 - レビュー、営業時間等含む）
+func (r *gymRepository) FindDetailByID(ctx context.Context, id gym.ID) (*gym.Gym, error) {
 	var gymRecord record.GymRecord
 
-	// 基本的なGORMクエリでテスト（location除外）
-	if err := r.db.WithContext(ctx).Omit("location").Preload("Tags").First(&gymRecord, id).Error; err != nil {
+	// 詳細情報込みでクエリ（将来的にはReviews, Hours等もPreload）
+	query := r.db.WithContext(ctx).Omit("location").
+		Preload("Tags")
+		// TODO: 以下を有効化予定
+		// Preload("Reviews").
+		// Preload("Reviews.User").
+		// Preload("Hours").
+		// Preload("Amenities")
+
+	if err := query.First(&gymRecord, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, gym.NewDomainError(gym.ErrNotFound, "gym_not_found", "gym not found")
 		}

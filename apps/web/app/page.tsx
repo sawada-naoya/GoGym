@@ -14,7 +14,6 @@ const fetchRecommendedGyms = async (): Promise<RecommendedGymsResponse> => {
   try {
     const res = await GET("/api/v1/gyms/recommended", {
       query: { limit: 6 },
-      cache: "no-store",
     });
     if (!res.ok) {
       throw new Error(`HTTP ${res.status}`);
