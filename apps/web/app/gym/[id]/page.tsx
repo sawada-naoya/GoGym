@@ -17,14 +17,13 @@ type PageProps = {
 
 const fetchGym = async (id: string): Promise<Gym | null> => {
   try {
-    const res = await GET(`/api/v1/gyms/${id}`, {
+    const res = await GET(`/api/v1/gym/${id}`, {
       cache: "no-store",
     });
     if (!res.ok) {
       throw new Error(`HTTP ${res.status}`);
     }
     const data = await res.json();
-    // バックエンドは直接GymResponseオブジェクトを返す
     return data || null;
   } catch (error) {
     console.error("Failed to fetch gym:", error);

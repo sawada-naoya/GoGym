@@ -8,7 +8,7 @@ type GymCardProps = {
 
 const GymCard = ({ gym }: GymCardProps) => {
   return (
-    <Link href={`/gyms/${gym.id}`}>
+    <Link href={`/gym/${gym.id}`}>
       <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group cursor-pointer">
         {/* 画像部分 */}
         <div className="relative h-64 bg-gray-200">
