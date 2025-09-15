@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import { Gym } from '@/types/gym';
-import { ReviewResponse } from '@/types/review';
+import { ReviewListResponse } from '@/types/review';
 import GymReviewModal from './GymReviewModal';
 
 type GymReviewProps = {
   gym: Gym;
-  reviews: ReviewResponse[];
+  reviews: ReviewListResponse | null;
 };
 
 const GymReview = ({ gym, reviews }: GymReviewProps) => {

@@ -11,21 +11,21 @@ import (
 
 // GymRecord はジムエンティティ用のGORMレコードを表す
 type GymRecord struct {
-	ID                int64       `gorm:"primaryKey;autoIncrement"`
-	Name              string      `gorm:"size:255;not null"`
-	Description       *string     `gorm:"type:text"`
-	Location          string      `gorm:"column:location;type:point"`
-	LocationLatitude  float64     `gorm:"-"` // 計算フィールド
-	LocationLongitude float64     `gorm:"-"` // 計算フィールド
-	Address           string      `gorm:"size:500;not null"`
-	City              *string     `gorm:"size:100"`
-	Prefecture        *string     `gorm:"size:100"`
-	PostalCode        *string     `gorm:"size:10"`
-	AverageRating     *float32    `gorm:"column:average_rating;type:decimal(3,2)"`
-	ReviewCount       int         `gorm:"column:review_count;default:0"`
-	CreatedAt         time.Time   `gorm:"autoCreateTime"`
-	UpdatedAt         time.Time   `gorm:"autoUpdateTime"`
-	Tags              []TagRecord `gorm:"many2many:gym_tags;foreignKey:ID;joinForeignKey:gym_id;References:ID;joinReferences:tag_id;"`
+	ID                int64          `gorm:"primaryKey;autoIncrement"`
+	Name              string         `gorm:"size:255;not null"`
+	Description       *string        `gorm:"type:text"`
+	Location          string         `gorm:"column:location;type:point"`
+	LocationLatitude  float64        `gorm:"-"` // 計算フィールド
+	LocationLongitude float64        `gorm:"-"` // 計算フィールド
+	Address           string         `gorm:"size:500;not null"`
+	City              *string        `gorm:"size:100"`
+	Prefecture        *string        `gorm:"size:100"`
+	PostalCode        *string        `gorm:"size:10"`
+	IsActive          bool           `gorm:"not null;default:true"`
+	CreatedAt         time.Time      `gorm:"autoCreateTime"`
+	UpdatedAt         time.Time      `gorm:"autoUpdateTime"`
+	DeletedAt         gorm.DeletedAt `gorm:"index"`
+	Tags              []TagRecord    `gorm:"many2many:gym_tags;foreignKey:ID;joinForeignKey:gym_id;References:ID;joinReferences:tag_id;"`
 }
 
 // TableName はGORM用のテーブル名を返す
@@ -72,7 +72,6 @@ type FavoriteRecord struct {
 	UserID    int64     `gorm:"not null;index;uniqueIndex:unique_user_gym_favorite,priority:1"`
 	GymID     int64     `gorm:"not null;index;uniqueIndex:unique_user_gym_favorite,priority:2"`
 	CreatedAt time.Time `gorm:"autoCreateTime"`
-	UpdatedAt time.Time `gorm:"autoUpdateTime"`
 }
 
 // TableName はGORM用のテーブル名を返す

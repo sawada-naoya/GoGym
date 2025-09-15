@@ -8,16 +8,13 @@ import (
 
 // UserRecord represents user table structure
 type UserRecord struct {
-	ID              int64          `gorm:"primaryKey;autoIncrement"`
-	Email           string         `gorm:"unique;not null;index"`
-	CryptedPassword string         `gorm:"not null"`
-	Salt            string         `gorm:"not null"`
-	Name            string         `gorm:"not null"`
-	CreatedAt       time.Time      `gorm:"not null"`
-	UpdatedAt       time.Time      `gorm:"not null"`
-	DeletedAt       gorm.DeletedAt `gorm:"index"`
-
-	// TODO: Relations
+	ID           int64          `gorm:"primaryKey;autoIncrement"`
+	Email        string         `gorm:"unique;not null;index"`
+	PasswordHash string         `gorm:"not null"`
+	DisplayName  string         `gorm:"not null"`
+	CreatedAt    time.Time      `gorm:"autoCreateTime"`
+	UpdatedAt    time.Time      `gorm:"autoUpdateTime"`
+	DeletedAt    gorm.DeletedAt `gorm:"index"`
 }
 
 func (UserRecord) TableName() string {

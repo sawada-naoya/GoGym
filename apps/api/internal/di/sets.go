@@ -14,6 +14,7 @@ import (
 	"gogym-api/internal/infra/db"
 	userUC "gogym-api/internal/usecase/user"
 	gymUC "gogym-api/internal/usecase/gym"
+	reviewUC "gogym-api/internal/usecase/review"
 )
 
 // =============================================================================
@@ -61,6 +62,7 @@ var RepositorySet = wire.NewSet(
 	gormAdapter.NewRefreshTokenRepository,
 	gormAdapter.NewGymRepository,
 	gormAdapter.NewTagRepository,
+	gormAdapter.NewReviewRepository,
 	
 	// 将来の拡張
 	// redisAdapter.NewCacheRepository,
@@ -78,6 +80,7 @@ var UseCaseSet = wire.NewSet(
 	// UseCase実装
 	userUC.NewUseCase,
 	gymUC.NewUseCase,
+	reviewUC.NewUseCase,
 )
 
 // =============================================================================

@@ -33,9 +33,10 @@ type GymResponse struct {
 	City          *string       `json:"city"`
 	Prefecture    *string       `json:"prefecture"`
 	PostalCode    *string       `json:"postal_code"`
+	IsActive      bool          `json:"is_active"`
 	Tags          []TagResponse `json:"tags"`
-	AverageRating *float32      `json:"average_rating"`
-	ReviewCount   int           `json:"review_count"`
+	AverageRating *float32      `json:"average_rating"` // 動的計算
+	ReviewCount   int           `json:"review_count"`   // 動的計算
 	CreatedAt     string        `json:"created_at"`
 	UpdatedAt     string        `json:"updated_at"`
 }

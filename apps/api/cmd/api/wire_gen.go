@@ -18,6 +18,7 @@ import (
 	"gogym-api/internal/di"
 	"gogym-api/internal/infra/db"
 	"gogym-api/internal/usecase/gym"
+	"gogym-api/internal/usecase/review"
 	"log/slog"
 )
 
@@ -56,7 +57,9 @@ func InitServer(ctx context.Context, config *configs.Config, logger *slog.Logger
 	useCase := gym.NewUseCase(repository, tagRepository, logger)
 	gymHandler := handler.NewGymHandler(useCase)
 	userHandler := handler.NewUserHandler()
-	reviewHandler := handler.NewReviewHandler()
+	reviewRepository := gorm.NewReviewRepository(gormDB)
+	reviewUseCase := review.NewUseCase(reviewRepository)
+	reviewHandler := handler.NewReviewHandler(reviewUseCase)
 	favoriteHandler := handler.NewFavoriteHandler()
 	echo := NewConfiguredEcho(gymHandler, userHandler, reviewHandler, favoriteHandler)
 	server := &Server{

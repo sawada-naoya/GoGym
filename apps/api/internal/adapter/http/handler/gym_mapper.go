@@ -89,8 +89,6 @@ func ToGymResponse(gym gym.Gym) dto.GymResponse {
 		Prefecture:    gym.Prefecture,
 		PostalCode:    gym.PostalCode,
 		Tags:          tags,
-		AverageRating: gym.AverageRating,
-		ReviewCount:   gym.ReviewCount,
 		CreatedAt:     gym.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:     gym.UpdatedAt.Format(time.RFC3339),
 	}

@@ -17,9 +17,8 @@ type Gym struct {
 	City         *string
 	Prefecture   *string
 	PostalCode   *string
+	IsActive     bool
 	Tags         []Tag
-	AverageRating *float32
-	ReviewCount   int
 }
 
 
@@ -29,6 +28,7 @@ func NewGym(name, address string, location Location) (*Gym, error) {
 		Name:     strings.TrimSpace(name),
 		Address:  strings.TrimSpace(address),
 		Location: location,
+		IsActive: true, // デフォルトで有効
 	}
 
 	if err := gym.Validate(); err != nil {

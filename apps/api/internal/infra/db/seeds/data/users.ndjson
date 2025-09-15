@@ -1,4 +1,4 @@
-{"email":"test1@example.com","display_name":"山田太郎","bio":"筋トレ歴3年。主にウェイトトレーニングをしています。","location":"東京都","birth_year":1990,"gender":"male"}
-{"email":"test2@example.com","display_name":"佐藤花子","bio":"ヨガとピラティス中心に週3回通っています。","location":"東京都","birth_year":1985,"gender":"female"}
-{"email":"test3@example.com","display_name":"田中健一","bio":"ダイエット目的で有酸素運動メイン。","location":"神奈川県","birth_year":1992,"gender":"male"}
-{"email":"admin@gogym.com","display_name":"管理者","bio":"GoGymの管理者アカウントです。","location":"東京都","birth_year":1980,"gender":"not_specified","is_verified":true}
+{"email":"test1@example.com","display_name":"山田太郎"}
+{"email":"test2@example.com","display_name":"佐藤花子"}
+{"email":"test3@example.com","display_name":"田中健一"}
+{"email":"admin@gogym.com","display_name":"管理者"}

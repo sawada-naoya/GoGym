@@ -22,8 +22,8 @@ func ToUserEntity(r *record.UserRecord) (*user.User, error) {
 			UpdatedAt: r.UpdatedAt,
 		},
 		Email:        email,
-		PasswordHash: r.CryptedPassword,
-		DisplayName:  r.Name,
+		PasswordHash: r.PasswordHash,
+		DisplayName:  r.DisplayName,
 	}
 
 	return userEntity, nil
@@ -32,12 +32,12 @@ func ToUserEntity(r *record.UserRecord) (*user.User, error) {
 // FromUserEntity はUserドメインエンティティをUserRecordに変換する
 func FromUserEntity(u *user.User) *record.UserRecord {
 	return &record.UserRecord{
-		ID:              int64(u.ID),
-		Email:           u.Email.String(),
-		CryptedPassword: u.PasswordHash,
-		Name:            u.DisplayName,
-		CreatedAt:       u.CreatedAt,
-		UpdatedAt:       u.UpdatedAt,
+		ID:           int64(u.ID),
+		Email:        u.Email.String(),
+		PasswordHash: u.PasswordHash,
+		DisplayName:  u.DisplayName,
+		CreatedAt:    u.CreatedAt,
+		UpdatedAt:    u.UpdatedAt,
 	}
 }
 

@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { Gym } from "@/types/gym";
-import { ReviewResponse } from "@/types/review";
+import { ReviewListResponse } from "@/types/review";
 
 type GymReviewModalProps = {
   gym: Gym;
-  reviews: ReviewResponse[];
+  reviews: ReviewListResponse | null;
   isOpen: boolean;
   onClose: () => void;
 };
@@ -65,13 +65,11 @@ const GymReviewModal = ({ gym, reviews, isOpen, onClose }: GymReviewModalProps) 
         {/* レビュー一覧 */}
         <div className="flex-1 overflow-y-auto p-6">
           <div className="space-y-6">
-            {reviews.map((review) => (
+            {reviews?.reviews.map((review) => (
               <div key={review.id} className="border-b border-gray-200 last:border-b-0 pb-6 last:pb-0">
                 <div className="flex items-start space-x-4">
                   {/* アバター */}
-                  <div className="w-10 h-10 bg-booking-600 rounded-full flex items-center justify-center text-white font-semibold">
-                    {review.user?.name?.charAt(0) || "?"}
-                  </div>
+                  <div className="w-10 h-10 bg-booking-600 rounded-full flex items-center justify-center text-white font-semibold">{review.user?.name?.charAt(0) || "?"}</div>
 
                   {/* レビュー内容 */}
                   <div className="flex-1">
@@ -82,9 +80,7 @@ const GymReviewModal = ({ gym, reviews, isOpen, onClose }: GymReviewModalProps) 
                       </div>
                       <div className="text-right">
                         <div className="flex items-center text-sm">{renderStars(review.rating)}</div>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {new Date(review.created_at).toLocaleDateString("ja-JP")}
-                        </p>
+                        <p className="text-xs text-gray-500 mt-1">{new Date(review.created_at).toLocaleDateString("ja-JP")}</p>
                       </div>
                     </div>
 
@@ -100,7 +96,7 @@ const GymReviewModal = ({ gym, reviews, isOpen, onClose }: GymReviewModalProps) 
         <div className="p-6 border-t border-gray-200">
           <div className="flex justify-between items-center">
             <p className="text-sm text-gray-600">
-              {reviews.length}件中{reviews.length}件を表示
+              {reviews?.reviews.length}件中{reviews?.reviews.length}件を表示
             </p>
             <a href={`/gym/${gym.id}/reviews`} className="bg-booking-600 hover:bg-booking-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors" onClick={onClose}>
               すべてのレビューページへ

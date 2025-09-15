@@ -13,8 +13,8 @@ func ToReviewEntity(r *record.ReviewRecord) *review.Review {
 	rating, _ := review.NewRating(r.Rating)
 
 	var comment *string
-	if r.Content != "" {
-		comment = &r.Content
+	if r.Comment != nil && *r.Comment != "" {
+		comment = r.Comment
 	}
 
 	entity := &review.Review{
@@ -35,19 +35,13 @@ func ToReviewEntity(r *record.ReviewRecord) *review.Review {
 
 // FromReviewEntity はReviewドメインエンティティをReviewRecordに変換する
 func FromReviewEntity(r *review.Review) *record.ReviewRecord {
-	// コメントの処理（nullable）
-	var content string
-	if r.Comment != nil {
-		content = *r.Comment
-	}
 
 	record := &record.ReviewRecord{
 		ID:      int64(r.ID),
-		Title:   "", // エンティティに存在しない - コメントから導出可能
-		Content: content,
-		Rating:  r.Rating.Int(),
-		GymID:   int64(r.GymID),
 		UserID:  int64(r.UserID),
+		GymID:   int64(r.GymID),
+		Rating:  r.Rating.Int(),
+		Comment: r.Comment,
 	}
 
 	return record

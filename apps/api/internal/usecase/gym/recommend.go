@@ -35,33 +35,9 @@ func (uc *UseCase) RecommendGyms(ctx context.Context, req RecommendGymRequest) (
 
 	gyms := result.Items
 
-	for i := range gyms {
-		if gyms[i].AverageRating == nil {
-			// Generate consistent rating based on gym ID
-			rating := 3.5 + float32((gyms[i].ID%10))*0.15
-			gyms[i].AverageRating = &rating
-		}
-		if gyms[i].ReviewCount == 0 {
-			// Generate consistent review count based on gym ID
-			gyms[i].ReviewCount = int(gyms[i].ID%50) + 10
-		}
-	}
-
-	// Sort by rating (highest first), then by review count
+	// Sort gyms by ID (or could be modified to sort by other criteria later)
 	sort.Slice(gyms, func(i, j int) bool {
-		ratingI := float32(0)
-		if gyms[i].AverageRating != nil {
-			ratingI = *gyms[i].AverageRating
-		}
-		ratingJ := float32(0)
-		if gyms[j].AverageRating != nil {
-			ratingJ = *gyms[j].AverageRating
-		}
-
-		if ratingI == ratingJ {
-			return gyms[i].ReviewCount > gyms[j].ReviewCount
-		}
-		return ratingI > ratingJ
+		return gyms[i].ID < gyms[j].ID
 	})
 
 	return &RecommendGymsResponse{
