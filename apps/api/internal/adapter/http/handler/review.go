@@ -23,7 +23,7 @@ func NewReviewHandler(ru *review.UseCase) *ReviewHandler {
 // GET /api/v1/gyms/:gym_id/reviews
 func (h *ReviewHandler) GetReviews(c echo.Context) error {
 	ctx := c.Request().Context()
-	gymID, err := strconv.ParseInt(c.Param("gym_id"), 10, 64)
+	gymID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
 		return c.NoContent(http.StatusBadRequest)
 	}

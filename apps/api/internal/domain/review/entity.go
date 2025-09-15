@@ -15,10 +15,8 @@ type Review struct {
 	GymID           gym.ID
 	Rating          Rating
 	Comment         *string
-	Photos          PhotoURLs
 	UserDisplayName *string
 }
-
 
 // NewReview creates a new review with validation
 func NewReview(userID, gymID gym.ID, rating Rating) (*Review, error) {
@@ -30,7 +28,6 @@ func NewReview(userID, gymID gym.ID, rating Rating) (*Review, error) {
 		UserID: userID,
 		GymID:  gymID,
 		Rating: rating,
-		Photos: make(PhotoURLs, 0),
 	}
 
 	if err := review.Validate(); err != nil {
@@ -69,45 +66,4 @@ func (r *Review) SetComment(comment string) {
 	} else {
 		r.Comment = &trimmed
 	}
-}
-
-// AddPhoto adds a photo URL to the review
-func (r *Review) AddPhoto(url PhotoURL) error {
-	if !url.IsValid() {
-		return gym.NewDomainError(gym.ErrInvalidInput, "invalid_photo_url", "invalid photo URL")
-	}
-
-	// Initialize Photos if nil
-	if r.Photos == nil {
-		r.Photos = make(PhotoURLs, 0)
-	}
-
-	// Check for duplicates
-	for _, existing := range r.Photos {
-		if existing.URL == url.URL {
-			return gym.NewDomainError(gym.ErrAlreadyExists, "photo_exists", "photo already exists in review")
-		}
-	}
-
-	r.Photos = append(r.Photos, url)
-	return nil
-}
-
-// RemovePhoto removes a photo URL from the review
-func (r *Review) RemovePhoto(url string) {
-	if r.Photos == nil {
-		return
-	}
-
-	for i, existing := range r.Photos {
-		if existing.URL == url {
-			r.Photos = append(r.Photos[:i], r.Photos[i+1:]...)
-			return
-		}
-	}
-}
-
-// HasPhotos returns true if the review has photos
-func (r *Review) HasPhotos() bool {
-	return r.Photos != nil && len(r.Photos) > 0
 }

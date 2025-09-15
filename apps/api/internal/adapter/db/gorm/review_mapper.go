@@ -17,13 +17,6 @@ func ToReviewEntity(r *record.ReviewRecord) *review.Review {
 		comment = &r.Content
 	}
 
-	photos := make(review.PhotoURLs, 0)
-	if r.ImageURL != nil && *r.ImageURL != "" {
-		if photoURL, err := review.NewPhotoURL(*r.ImageURL, ""); err == nil {
-			photos = append(photos, photoURL)
-		}
-	}
-
 	entity := &review.Review{
 		BaseEntity: gym.BaseEntity{
 			ID:        gym.ID(r.ID), // レビューIDを使用、ジムIDではない
@@ -34,7 +27,6 @@ func ToReviewEntity(r *record.ReviewRecord) *review.Review {
 		GymID:           gym.ID(r.GymID),
 		Rating:          rating,
 		Comment:         comment,
-		Photos:          photos,
 		UserDisplayName: nil, // レコードに存在しない
 	}
 
@@ -49,20 +41,13 @@ func FromReviewEntity(r *review.Review) *record.ReviewRecord {
 		content = *r.Comment
 	}
 
-	// PhotoURLsを単一のImageURLに変換（存在する場合は最初の写真を取得）
-	var imageURL *string
-	if r.Photos != nil && len(r.Photos) > 0 {
-		imageURL = &r.Photos[0].URL
-	}
-
 	record := &record.ReviewRecord{
-		ID:       int64(r.ID),
-		Title:    "", // エンティティに存在しない - コメントから導出可能
-		Content:  content,
-		Rating:   r.Rating.Int(),
-		ImageURL: imageURL,
-		GymID:    int64(r.GymID),
-		UserID:   int64(r.UserID),
+		ID:      int64(r.ID),
+		Title:   "", // エンティティに存在しない - コメントから導出可能
+		Content: content,
+		Rating:  r.Rating.Int(),
+		GymID:   int64(r.GymID),
+		UserID:  int64(r.UserID),
 	}
 
 	return record
