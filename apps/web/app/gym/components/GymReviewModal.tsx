@@ -1,77 +1,33 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Gym } from '@/types/gym';
-
-// レビューの型定義（モック用）
-type Review = {
-  id: number;
-  userName: string;
-  rating: number;
-  comment: string;
-  visitDate: string;
-  isVerified: boolean;
-};
+import { useState, useEffect } from "react";
+import { Gym } from "@/types/gym";
+import { ReviewResponse } from "@/types/review";
 
 type GymReviewModalProps = {
   gym: Gym;
+  reviews: ReviewResponse[];
   isOpen: boolean;
   onClose: () => void;
 };
 
-const GymReviewModal = ({ gym, isOpen, onClose }: GymReviewModalProps) => {
-  // モックレビューデータ
-  const mockReviews: Review[] = [
-    {
-      id: 1,
-      userName: "山田太郎",
-      rating: 5,
-      comment: "設備が非常に充実していて、スタッフの対応も素晴らしいです。24時間営業なので仕事帰りにも通いやすく、とても満足しています。",
-      visitDate: "2024-08-15",
-      isVerified: true
-    },
-    {
-      id: 2,
-      userName: "佐藤花子",
-      rating: 4,
-      comment: "マシンの種類が豊富で、混雑時でも待ち時間が少ないのが良いです。更衣室も清潔で使いやすいです。",
-      visitDate: "2024-08-10",
-      isVerified: true
-    },
-    {
-      id: 3,
-      userName: "田中健一",
-      rating: 5,
-      comment: "パーソナルトレーナーのアドバイスが的確で、効率よくトレーニングできています。立地も良く通いやすいです。",
-      visitDate: "2024-08-05",
-      isVerified: false
-    },
-    {
-      id: 4,
-      userName: "鈴木美咲",
-      rating: 4,
-      comment: "女性専用エリアがあるので安心してトレーニングできます。プロテインバーのメニューも豊富で便利です。",
-      visitDate: "2024-07-28",
-      isVerified: true
-    },
-  ];
-
+const GymReviewModal = ({ gym, reviews, isOpen, onClose }: GymReviewModalProps) => {
   // ESCキーでモーダルを閉じる
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         onClose();
       }
     };
 
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
+      document.addEventListener("keydown", handleEscape);
+      document.body.style.overflow = "hidden";
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "unset";
     };
   }, [isOpen, onClose]);
 
@@ -88,11 +44,8 @@ const GymReviewModal = ({ gym, isOpen, onClose }: GymReviewModalProps) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* オーバーレイ */}
-      <div 
-        className="absolute inset-0 bg-black bg-opacity-50"
-        onClick={onClose}
-      />
-      
+      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose} />
+
       {/* モーダル本体 */}
       <div className="relative bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] m-4 flex flex-col">
         {/* ヘッダー */}
@@ -100,18 +53,11 @@ const GymReviewModal = ({ gym, isOpen, onClose }: GymReviewModalProps) => {
           <div>
             <h2 className="text-2xl font-bold text-gray-900">{gym.name}のレビュー</h2>
             <div className="flex items-center mt-2">
-              <div className="bg-booking-600 text-white px-3 py-1 rounded font-bold">
-                {gym.average_rating?.toFixed(1) || "0.0"}
-              </div>
-              <span className="ml-3 text-gray-600">
-                {gym.review_count}件のレビュー
-              </span>
+              <div className="bg-booking-600 text-white px-3 py-1 rounded font-bold">{gym.average_rating?.toFixed(1) || "0.0"}</div>
+              <span className="ml-3 text-gray-600">{gym.review_count}件のレビュー</span>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-3xl font-light"
-          >
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-3xl font-light">
             ×
           </button>
         </div>
@@ -119,38 +65,30 @@ const GymReviewModal = ({ gym, isOpen, onClose }: GymReviewModalProps) => {
         {/* レビュー一覧 */}
         <div className="flex-1 overflow-y-auto p-6">
           <div className="space-y-6">
-            {mockReviews.map((review) => (
+            {reviews.map((review) => (
               <div key={review.id} className="border-b border-gray-200 last:border-b-0 pb-6 last:pb-0">
                 <div className="flex items-start space-x-4">
                   {/* アバター */}
                   <div className="w-10 h-10 bg-booking-600 rounded-full flex items-center justify-center text-white font-semibold">
-                    {review.userName.charAt(0)}
+                    {review.user?.name?.charAt(0) || "?"}
                   </div>
-                  
+
                   {/* レビュー内容 */}
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-2">
                       <div>
-                        <h4 className="font-semibold text-gray-900">{review.userName}</h4>
-                        {review.isVerified && (
-                          <span className="text-sm text-green-600 flex items-center mt-1">
-                            ✓ 認証済み
-                          </span>
-                        )}
+                        <h4 className="font-semibold text-gray-900">{review.user?.name || "匿名ユーザー"}</h4>
+                        <span className="text-sm text-green-600 flex items-center mt-1">✓ 認証済み</span>
                       </div>
                       <div className="text-right">
-                        <div className="flex items-center text-sm">
-                          {renderStars(review.rating)}
-                        </div>
+                        <div className="flex items-center text-sm">{renderStars(review.rating)}</div>
                         <p className="text-xs text-gray-500 mt-1">
-                          {new Date(review.visitDate).toLocaleDateString('ja-JP')}
+                          {new Date(review.created_at).toLocaleDateString("ja-JP")}
                         </p>
                       </div>
                     </div>
-                    
-                    <p className="text-gray-700 leading-relaxed">
-                      {review.comment}
-                    </p>
+
+                    <p className="text-gray-700 leading-relaxed">{review.content}</p>
                   </div>
                 </div>
               </div>
@@ -162,13 +100,9 @@ const GymReviewModal = ({ gym, isOpen, onClose }: GymReviewModalProps) => {
         <div className="p-6 border-t border-gray-200">
           <div className="flex justify-between items-center">
             <p className="text-sm text-gray-600">
-              {mockReviews.length}件中{mockReviews.length}件を表示
+              {reviews.length}件中{reviews.length}件を表示
             </p>
-            <a
-              href={`/gym/${gym.id}/reviews`}
-              className="bg-booking-600 hover:bg-booking-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-              onClick={onClose}
-            >
+            <a href={`/gym/${gym.id}/reviews`} className="bg-booking-600 hover:bg-booking-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors" onClick={onClose}>
               すべてのレビューページへ
             </a>
           </div>

@@ -1,4 +1,5 @@
 import { Gym } from "@/types/gym";
+import { ReviewResponse } from "@/types/review";
 import { GET } from "@/lib/api";
 import Header from "@/components/Header";
 import { notFound } from "next/navigation";
@@ -31,10 +32,30 @@ const fetchGym = async (id: string): Promise<Gym | null> => {
   }
 };
 
+const fetchGymReviews = async (id: string): Promise<ReviewResponse[] | null> => {
+  try {
+    const res = await GET(`/api/v1/gyms/${id}/reviews`, {
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    return data || [];
+  } catch (error) {
+    console.error("Failed to fetch gym reviews:", error);
+    return [];
+  }
+};
+
 const GymPage = async ({ params }: PageProps) => {
   const gym = await fetchGym(params.id);
   if (!gym) {
     notFound();
+  }
+  const reviews = await fetchGymReviews(params.id);
+  if (!reviews) {
+    console.error("No reviews found for this gym");
   }
   return (
     <div className="min-h-screen bg-gray-50">
@@ -46,7 +67,7 @@ const GymPage = async ({ params }: PageProps) => {
             <GymBasicInfo gym={gym} />
             <GymAmenities gym={gym} />
             <GymAccessInfo gym={gym} />
-            <GymReview gym={gym} />
+            <GymReview gym={gym} reviews={reviews || []} />
           </div>
           <GymContactSidebar gym={gym} />
         </div>
