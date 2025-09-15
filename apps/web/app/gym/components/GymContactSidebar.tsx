@@ -16,8 +16,8 @@ const GymContactSidebar = ({ gym }: GymContactSidebarProps) => {
       <div className="text-center mb-4">
         <div className="text-2xl font-bold text-booking-600 mb-1">
           ¥{mockPriceMin.toLocaleString()}
-          {mockPriceMax && mockPriceMax !== mockPriceMin && (
-            <span className="text-lg">〜</span>
+          {mockPriceMax > mockPriceMin && (
+            <span className="text-lg">〜{mockPriceMax.toLocaleString()}</span>
           )}
         </div>
         <p className="text-sm text-gray-600">月額料金から</p>

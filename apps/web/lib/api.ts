@@ -41,12 +41,27 @@ const request = async (endpoint: string, method: HttpMethod, options: RequestOpt
 };
 
 // CRUDエイリアスを大文字関数で用意
-export const GET = <T>(endpoint: string, options?: RequestOptions) => request(endpoint, "GET", options);
+export const GET = async <T>(endpoint: string, options?: RequestOptions): Promise<T> => {
+  const response = await request(endpoint, "GET", options);
+  return response.json();
+};
 
-export const POST = <T>(endpoint: string, body?: unknown, options?: RequestOptions) => request(endpoint, "POST", { ...options, body });
+export const POST = async <T>(endpoint: string, body?: unknown, options?: RequestOptions): Promise<T> => {
+  const response = await request(endpoint, "POST", { ...options, body });
+  return response.json();
+};
 
-export const PUT = <T>(endpoint: string, body?: unknown, options?: RequestOptions) => request(endpoint, "PUT", { ...options, body });
+export const PUT = async <T>(endpoint: string, body?: unknown, options?: RequestOptions): Promise<T> => {
+  const response = await request(endpoint, "PUT", { ...options, body });
+  return response.json();
+};
 
-export const PATCH = <T>(endpoint: string, body?: unknown, options?: RequestOptions) => request(endpoint, "PATCH", { ...options, body });
+export const PATCH = async <T>(endpoint: string, body?: unknown, options?: RequestOptions): Promise<T> => {
+  const response = await request(endpoint, "PATCH", { ...options, body });
+  return response.json();
+};
 
-export const DELETE = <T>(endpoint: string, options?: RequestOptions) => request(endpoint, "DELETE", options);
+export const DELETE = async <T>(endpoint: string, options?: RequestOptions): Promise<T> => {
+  const response = await request(endpoint, "DELETE", options);
+  return response.json();
+};
