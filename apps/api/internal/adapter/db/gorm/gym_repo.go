@@ -177,3 +177,72 @@ func (r *gymRepository) Delete(ctx context.Context, id gym.ID) error {
 
 	return nil
 }
+
+func (r *gymRepository) GetReviewStats(ctx context.Context, gymID gym.ID) (*gymUsecase.ReviewStats, error) {
+	var result struct {
+		AverageRating *float32
+		ReviewCount   int64
+	}
+
+	err := r.db.WithContext(ctx).
+		Model(&record.ReviewRecord{}).
+		Select("AVG(rating) as average_rating, COUNT(*) as review_count").
+		Where("gym_id = ? AND deleted_at IS NULL", gymID).
+		Scan(&result).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &gymUsecase.ReviewStats{
+		AverageRating: result.AverageRating,
+		ReviewCount:   int(result.ReviewCount),
+	}, nil
+}
+
+func (r *gymRepository) GetReviewStatsForGyms(ctx context.Context, gymIDs []gym.ID) (map[gym.ID]*gymUsecase.ReviewStats, error) {
+	if len(gymIDs) == 0 {
+		return make(map[gym.ID]*gymUsecase.ReviewStats), nil
+	}
+
+	var results []struct {
+		GymID         int64
+		AverageRating *float32
+		ReviewCount   int64
+	}
+
+	int64IDs := make([]int64, len(gymIDs))
+	for i, id := range gymIDs {
+		int64IDs[i] = int64(id)
+	}
+
+	err := r.db.WithContext(ctx).
+		Model(&record.ReviewRecord{}).
+		Select("gym_id, AVG(rating) as average_rating, COUNT(*) as review_count").
+		Where("gym_id IN ? AND deleted_at IS NULL", int64IDs).
+		Group("gym_id").
+		Scan(&results).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	statsMap := make(map[gym.ID]*gymUsecase.ReviewStats)
+	for _, result := range results {
+		statsMap[gym.ID(result.GymID)] = &gymUsecase.ReviewStats{
+			AverageRating: result.AverageRating,
+			ReviewCount:   int(result.ReviewCount),
+		}
+	}
+
+	for _, id := range gymIDs {
+		if _, exists := statsMap[id]; !exists {
+			statsMap[id] = &gymUsecase.ReviewStats{
+				AverageRating: nil,
+				ReviewCount:   0,
+			}
+		}
+	}
+
+	return statsMap, nil
+}

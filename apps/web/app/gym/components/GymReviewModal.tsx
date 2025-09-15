@@ -12,7 +12,6 @@ type GymReviewModalProps = {
 };
 
 const GymReviewModal = ({ gym, reviews, isOpen, onClose }: GymReviewModalProps) => {
-  // ESCキーでモーダルを閉じる
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {

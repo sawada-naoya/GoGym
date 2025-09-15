@@ -7,6 +7,9 @@ type GymCardProps = {
 };
 
 const GymCard = ({ gym }: GymCardProps) => {
+  const averageRating = gym.average_rating ? gym.average_rating.toFixed(1) : "0.0";
+  const reviewCount = gym.review_count;
+
   return (
     <Link href={`/gym/${gym.id}`}>
       <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group cursor-pointer">
@@ -41,8 +44,8 @@ const GymCard = ({ gym }: GymCardProps) => {
           <div className="flex items-center mb-2">
             <div className="flex items-center">
               <span className="text-yellow-400 mr-1">★</span>
-              <span className="text-sm font-medium text-gray-900">{gym.average_rating?.toFixed(1) || "N/A"}</span>
-              <span className="ml-1 text-sm text-gray-600">({gym.review_count}件のレビュー)</span>
+              <span className="text-sm font-medium text-gray-900">{averageRating}</span>
+              <span className="ml-1 text-sm text-gray-600">({reviewCount}件のレビュー)</span>
             </div>
           </div>
 

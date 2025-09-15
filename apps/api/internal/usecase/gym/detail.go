@@ -18,5 +18,13 @@ func (uc *UseCase) GetGym(ctx context.Context, id gym.ID) (*gym.Gym, error) {
 		return nil, gym.NewDomainErrorWithCause(err, "gym_not_found", "gym not found")
 	}
 
+	reviewStats, err := uc.gymRepo.GetReviewStats(ctx, id)
+	if err != nil {
+		uc.logger.ErrorContext(ctx, "failed to get review stats", "gym_id", id, "error", err)
+	} else {
+		foundGym.AverageRating = reviewStats.AverageRating
+		foundGym.ReviewCount = reviewStats.ReviewCount
+	}
+
 	return foundGym, nil
 }

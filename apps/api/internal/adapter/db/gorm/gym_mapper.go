@@ -4,7 +4,6 @@
 package gorm
 
 import (
-	"fmt"
 	"gogym-api/internal/adapter/db/gorm/record"
 	"gogym-api/internal/domain/gym"
 )
@@ -43,14 +42,10 @@ func ToGymEntity(r *record.GymRecord) *gym.Gym {
 
 // FromGymEntity はGymドメインエンティティをGymRecordに変換する
 func FromGymEntity(g *gym.Gym) *record.GymRecord {
-	// POINT型文字列を生成 (latitude longitude順)
-	locationStr := fmt.Sprintf("POINT(%f %f)", g.Location.Latitude, g.Location.Longitude)
-
 	gymRecord := &record.GymRecord{
 		ID:                int64(g.ID),
 		Name:              g.Name,
 		Description:       g.Description,
-		Location:          locationStr,
 		LocationLatitude:  g.Location.Latitude,
 		LocationLongitude: g.Location.Longitude,
 		Address:           g.Address,

@@ -10,15 +10,17 @@ import (
 // Gym はジムの集約ルートを表す
 type Gym struct {
 	BaseEntity
-	Name         string               `validate:"required,max=255"`
-	Description  *string
-	Location     Location
-	Address      string               `validate:"required,max=500"`
-	City         *string
-	Prefecture   *string
-	PostalCode   *string
-	IsActive     bool
-	Tags         []Tag
+	Name          string               `validate:"required,max=255"`
+	Description   *string
+	Location      Location
+	Address       string               `validate:"required,max=500"`
+	City          *string
+	Prefecture    *string
+	PostalCode    *string
+	IsActive      bool
+	Tags          []Tag
+	AverageRating *float32
+	ReviewCount   int
 }
 
 

@@ -28,11 +28,18 @@ func NewUseCase(gymRepo Repository, tagRepo TagRepository, logger *slog.Logger) 
 
 type Repository interface {
 	FindByID(ctx context.Context, id gym.ID) (*gym.Gym, error)
-	FindDetailByID(ctx context.Context, id gym.ID) (*gym.Gym, error) // With relations (reviews, amenities, etc.)
+	FindDetailByID(ctx context.Context, id gym.ID) (*gym.Gym, error)
 	Search(ctx context.Context, query gym.SearchQuery) (*gym.PaginatedResult[gym.Gym], error)
 	Create(ctx context.Context, gym *gym.Gym) error
 	Update(ctx context.Context, gym *gym.Gym) error
 	Delete(ctx context.Context, id gym.ID) error
+	GetReviewStats(ctx context.Context, gymID gym.ID) (*ReviewStats, error)
+	GetReviewStatsForGyms(ctx context.Context, gymIDs []gym.ID) (map[gym.ID]*ReviewStats, error)
+}
+
+type ReviewStats struct {
+	AverageRating *float32
+	ReviewCount   int
 }
 
 type TagRepository interface {

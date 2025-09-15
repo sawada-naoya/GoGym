@@ -14,9 +14,8 @@ type GymRecord struct {
 	ID                int64          `gorm:"primaryKey;autoIncrement"`
 	Name              string         `gorm:"size:255;not null"`
 	Description       *string        `gorm:"type:text"`
-	Location          string         `gorm:"column:location;type:point"`
-	LocationLatitude  float64        `gorm:"-"` // 計算フィールド
-	LocationLongitude float64        `gorm:"-"` // 計算フィールド
+	LocationLatitude  float64        `gorm:"type:decimal(10,8);not null"`
+	LocationLongitude float64        `gorm:"type:decimal(11,8);not null"`
 	Address           string         `gorm:"size:500;not null"`
 	City              *string        `gorm:"size:100"`
 	Prefecture        *string        `gorm:"size:100"`
@@ -33,11 +32,6 @@ func (GymRecord) TableName() string {
 	return "gyms"
 }
 
-// AfterFind はGORM後処理フック - POINT型から座標を抽出
-func (g *GymRecord) AfterFind(tx *gorm.DB) error {
-	// TODO: POINT型文字列から座標を抽出
-	return nil
-}
 
 // TagRecord はタグエンティティ用のGORMレコードを表す
 type TagRecord struct {

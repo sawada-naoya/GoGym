@@ -1,4 +1,4 @@
-{"email":"test1@example.com","display_name":"山田太郎"}
-{"email":"test2@example.com","display_name":"佐藤花子"}
-{"email":"test3@example.com","display_name":"田中健一"}
-{"email":"admin@gogym.com","display_name":"管理者"}
+{"email":"test1@example.com","password_hash":"$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi","display_name":"山田太郎"}
+{"email":"test2@example.com","password_hash":"$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi","display_name":"佐藤花子"}
+{"email":"test3@example.com","password_hash":"$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi","display_name":"田中健一"}
+{"email":"admin@gogym.com","password_hash":"$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi","display_name":"管理者"}

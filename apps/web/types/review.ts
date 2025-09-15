@@ -2,7 +2,6 @@ import { UserResponse } from "./user";
 
 export interface ReviewResponse {
   id: number;
-  title: string;
   content: string;
   rating: number;
   gym_id: number;

@@ -16,6 +16,7 @@ export interface Gym {
   city: string | null;
   prefecture: string | null;
   postal_code: string | null;
+  is_active: boolean;
   tags: Tag[];
   average_rating: number | null;
   review_count: number;

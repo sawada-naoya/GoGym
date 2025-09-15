@@ -5,20 +5,21 @@
 -- Users
 CREATE TABLE users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    email VARCHAR(255) NOT NULL UNIQUE COLLATE utf8mb4_0900_ai_ci,
+    email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     display_name VARCHAR(100) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- Gyms
 CREATE TABLE gyms (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    location POINT NOT NULL SRID 4326,
+    location_latitude DECIMAL(10,8) NOT NULL,
+    location_longitude DECIMAL(11,8) NOT NULL,
     address VARCHAR(500) NOT NULL,
     city VARCHAR(100),
     prefecture VARCHAR(100),
@@ -26,8 +27,9 @@ CREATE TABLE gyms (
     is_active BOOLEAN NOT NULL DEFAULT TRUE COMMENT '公開/非公開',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULL
-);
+    deleted_at TIMESTAMP NULL,
+    INDEX idx_gyms_location (location_latitude, location_longitude)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 
 -- Tags
@@ -36,7 +38,7 @@ CREATE TABLE tags (
     name VARCHAR(50) NOT NULL UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- Gym-Tag map
 CREATE TABLE gym_tags (
@@ -47,7 +49,7 @@ CREATE TABLE gym_tags (
     FOREIGN KEY (gym_id) REFERENCES gyms(id) ON DELETE CASCADE,
     FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE,
     INDEX idx_gym_tags_tag_id (tag_id)
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- Reviews
 CREATE TABLE reviews (
@@ -62,7 +64,7 @@ CREATE TABLE reviews (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (gym_id) REFERENCES gyms(id) ON DELETE CASCADE,
     UNIQUE KEY unique_user_gym_review (user_id, gym_id)
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- Favorites
 CREATE TABLE favorites (
@@ -73,7 +75,7 @@ CREATE TABLE favorites (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (gym_id) REFERENCES gyms(id) ON DELETE CASCADE,
     UNIQUE KEY unique_user_gym_favorite (user_id, gym_id)
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 
 -- +goose Down

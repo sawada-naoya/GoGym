@@ -57,6 +57,7 @@ const GymPage = async ({ params }: PageProps) => {
   if (!reviews) {
     console.error("No reviews found for this gym");
   }
+  
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
