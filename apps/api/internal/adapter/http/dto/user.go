@@ -2,8 +2,13 @@ package dto
 
 import "time"
 
-// UserResponse represents a system user response
-type UserResponse struct {
+type RegisterUserRequest struct {
+	Email       string `json:"email"`
+	Password    string `json:"password"`
+	DisplayName string `json:"display_name"`
+}
+
+type RegisterUserResponse struct {
 	ID          int64     `json:"id"`
 	Email       string    `json:"email"`
 	DisplayName string    `json:"display_name"`

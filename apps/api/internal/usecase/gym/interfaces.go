@@ -9,7 +9,7 @@ import (
 	"log/slog"
 )
 
-type UseCase struct {
+type GymUseCase struct {
 	gymRepo      Repository
 	tagRepo      TagRepository
 	favoriteRepo FavoriteRepository
@@ -17,8 +17,8 @@ type UseCase struct {
 }
 
 
-func NewUseCase(gymRepo Repository, tagRepo TagRepository, logger *slog.Logger) *UseCase {
-	return &UseCase{
+func NewUseCase(gymRepo Repository, tagRepo TagRepository, logger *slog.Logger) *GymUseCase {
+	return &GymUseCase{
 		gymRepo:      gymRepo,
 		tagRepo:      tagRepo,
 		favoriteRepo: nil, // TODO: Add favorite repository when implemented

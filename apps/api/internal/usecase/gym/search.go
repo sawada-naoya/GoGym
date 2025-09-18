@@ -6,8 +6,8 @@ import (
 )
 
 // SearchGyms searches gyms based on criteria
-func (uc *UseCase) SearchGyms(ctx context.Context, req SearchGymRequest) (*SearchGymsResponse, error) {
-	uc.logger.InfoContext(ctx, "searching gyms",
+func (gu *GymUseCase) SearchGyms(ctx context.Context, req SearchGymRequest) (*SearchGymsResponse, error) {
+	gu.logger.InfoContext(ctx, "searching gyms",
 		"query", req.Query,
 		"location", req.Location,
 		"radius_m", req.RadiusM,
@@ -35,9 +35,9 @@ func (uc *UseCase) SearchGyms(ctx context.Context, req SearchGymRequest) (*Searc
 		},
 	}
 
-	result, err := uc.gymRepo.Search(ctx, searchQuery)
+	result, err := gu.gymRepo.Search(ctx, searchQuery)
 	if err != nil {
-		uc.logger.ErrorContext(ctx, "failed to search gyms", "error", err)
+		gu.logger.ErrorContext(ctx, "failed to search gyms", "error", err)
 		return nil, gym.NewDomainErrorWithCause(err, "search_failed", "failed to search gyms")
 	}
 

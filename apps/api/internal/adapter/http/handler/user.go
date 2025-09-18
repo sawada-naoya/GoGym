@@ -3,11 +3,14 @@ package handler
 import (
 	"net/http"
 
+	"gogym-api/internal/adapter/http/dto"
+	"gogym-api/internal/usecase/user"
+
 	"github.com/labstack/echo/v4"
 )
 
 type UserHandler struct {
-	// TODO: Add user usecase
+	uu user.UserUseCase
 }
 
 func NewUserHandler() *UserHandler {
@@ -16,10 +19,14 @@ func NewUserHandler() *UserHandler {
 
 // POST /api/v1/users/register
 func (h *UserHandler) Register(c echo.Context) error {
-	// TODO: User registration
-	return c.JSON(http.StatusCreated, map[string]string{
-		"message": "User registered",
-	})
+	var req dto.RegisterUserRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	
+
+	return c.JSON(http.StatusCreated, err.Erros())
 }
 
 // POST /api/v1/users/login

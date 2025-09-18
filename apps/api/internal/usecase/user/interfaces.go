@@ -6,7 +6,6 @@ import (
 
 // UserUseCase defines the interface for user business logic
 type UserUseCase interface {
-	// TODO: User registration
 	Register(ctx context.Context, req RegisterUserRequest) (*UserResponse, error)
 	// TODO: User login
 	Login(ctx context.Context, req LoginUserRequest) (*LoginUserResponse, error)

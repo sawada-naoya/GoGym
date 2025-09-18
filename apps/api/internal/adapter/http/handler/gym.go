@@ -12,10 +12,10 @@ import (
 )
 
 type GymHandler struct {
-	gu *gymUsecase.UseCase
+	gu *gymUsecase.GymUseCase
 }
 
-func NewGymHandler(gu *gymUsecase.UseCase) *GymHandler {
+func NewGymHandler(gu *gymUsecase.GymUseCase) *GymHandler {
 	return &GymHandler{
 		gu: gu,
 	}

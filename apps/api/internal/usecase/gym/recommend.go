@@ -7,8 +7,8 @@ import (
 )
 
 // RecommendGyms returns recommended gyms based on various criteria
-func (uc *UseCase) RecommendGyms(ctx context.Context, req RecommendGymRequest) (*RecommendGymsResponse, error) {
-	uc.logger.InfoContext(ctx, "getting recommended gyms",
+func (gu *GymUseCase) RecommendGyms(ctx context.Context, req RecommendGymRequest) (*RecommendGymsResponse, error) {
+	gu.logger.InfoContext(ctx, "getting recommended gyms",
 		"user_location", req.UserLocation,
 		"limit", req.Limit,
 	)
@@ -27,9 +27,9 @@ func (uc *UseCase) RecommendGyms(ctx context.Context, req RecommendGymRequest) (
 		},
 	}
 
-	result, err := uc.gymRepo.Search(ctx, searchQuery)
+	result, err := gu.gymRepo.Search(ctx, searchQuery)
 	if err != nil {
-		uc.logger.ErrorContext(ctx, "failed to get recommended gyms", "error", err)
+		gu.logger.ErrorContext(ctx, "failed to get recommended gyms", "error", err)
 		return nil, err
 	}
 
@@ -40,9 +40,9 @@ func (uc *UseCase) RecommendGyms(ctx context.Context, req RecommendGymRequest) (
 		gymIDs[i] = g.ID
 	}
 
-	reviewStats, err := uc.gymRepo.GetReviewStatsForGyms(ctx, gymIDs)
+	reviewStats, err := gu.gymRepo.GetReviewStatsForGyms(ctx, gymIDs)
 	if err != nil {
-		uc.logger.ErrorContext(ctx, "failed to get review stats", "error", err)
+		gu.logger.ErrorContext(ctx, "failed to get review stats", "error", err)
 	} else {
 		for i := range gyms {
 			if stats, exists := reviewStats[gyms[i].ID]; exists {
