@@ -11,10 +11,10 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    
+
     // TODO: API呼び出しを実装
     console.log('Login attempt:', { email, password })
-    
+
     // モック処理
     setTimeout(() => {
       setLoading(false)
@@ -35,7 +35,7 @@ export default function LoginPage() {
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             アカウントをお持ちでない方は{' '}
-            <Link href="/register" className="font-medium text-booking-600 hover:text-booking-500">
+            <Link href="/signup" className="font-medium text-booking-600 hover:text-booking-500">
               新規登録
             </Link>
           </p>
