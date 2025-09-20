@@ -56,7 +56,7 @@ func (s *TokenService) GenerateTokens(userID user.ID, email string) (string, str
 			IssuedAt:  jwt.NewNumericDate(now),
 			NotBefore: jwt.NewNumericDate(now),
 			Issuer:    s.issuer,
-			Subject:   fmt.Sprintf("user:%d", userID),
+			Subject:   fmt.Sprintf("user:%s", string(userID)),
 		},
 	}
 
@@ -77,7 +77,7 @@ func (s *TokenService) GenerateTokens(userID user.ID, email string) (string, str
 			IssuedAt:  jwt.NewNumericDate(now),
 			NotBefore: jwt.NewNumericDate(now),
 			Issuer:    s.issuer,
-			Subject:   fmt.Sprintf("user:%d", userID),
+			Subject:   fmt.Sprintf("user:%s", string(userID)),
 		},
 	}
 
@@ -100,16 +100,16 @@ func (s *TokenService) ValidateAccessToken(tokenString string) (user.ID, string,
 	})
 
 	if err != nil {
-		return 0, "", user.NewDomainError(user.ErrUnauthorized, "invalid_access_token", "invalid access token")
+		return "", "", user.NewDomainError(user.ErrUnauthorized, "invalid_access_token", "invalid access token")
 	}
 
 	claims, ok := token.Claims.(*Claims)
 	if !ok || !token.Valid {
-		return 0, "", user.NewDomainError(user.ErrUnauthorized, "invalid_access_token", "invalid access token claims")
+		return "", "", user.NewDomainError(user.ErrUnauthorized, "invalid_access_token", "invalid access token claims")
 	}
 
 	if claims.Type != "access" {
-		return 0, "", user.NewDomainError(user.ErrUnauthorized, "wrong_token_type", "wrong token type")
+		return "", "", user.NewDomainError(user.ErrUnauthorized, "wrong_token_type", "wrong token type")
 	}
 
 	return claims.UserID, claims.Email, nil
@@ -125,16 +125,16 @@ func (s *TokenService) ValidateRefreshToken(tokenString string) (user.ID, string
 	})
 
 	if err != nil {
-		return 0, "", user.NewDomainError(user.ErrUnauthorized, "invalid_refresh_token", "invalid refresh token")
+		return "", "", user.NewDomainError(user.ErrUnauthorized, "invalid_refresh_token", "invalid refresh token")
 	}
 
 	claims, ok := token.Claims.(*Claims)
 	if !ok || !token.Valid {
-		return 0, "", user.NewDomainError(user.ErrUnauthorized, "invalid_refresh_token", "invalid refresh token claims")
+		return "", "", user.NewDomainError(user.ErrUnauthorized, "invalid_refresh_token", "invalid refresh token claims")
 	}
 
 	if claims.Type != "refresh" {
-		return 0, "", user.NewDomainError(user.ErrUnauthorized, "wrong_token_type", "wrong token type")
+		return "", "", user.NewDomainError(user.ErrUnauthorized, "wrong_token_type", "wrong token type")
 	}
 
 	// Create token hash from JTI for database storage/lookup
@@ -157,12 +157,12 @@ func (s *TokenService) ExtractUserFromToken(tokenString string) (user.ID, string
 	})
 
 	if err != nil {
-		return 0, "", err
+		return "", "", err
 	}
 
 	claims, ok := token.Claims.(*Claims)
 	if !ok {
-		return 0, "", fmt.Errorf("invalid token claims")
+		return "", "", fmt.Errorf("invalid token claims")
 	}
 
 	return claims.UserID, claims.Email, nil

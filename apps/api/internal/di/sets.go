@@ -36,6 +36,7 @@ var InfrastructureSet = wire.NewSet(
 	auth.NewTokenService,
 	
 	// インターフェースバインディング（最小限）
+	wire.Bind(new(userUC.PasswordHasher), new(*auth.PasswordService)),
 	wire.Bind(new(userUC.PasswordService), new(*auth.PasswordService)),
 	wire.Bind(new(userUC.TokenService), new(*auth.TokenService)),
 	
@@ -78,7 +79,7 @@ var RepositorySet = wire.NewSet(
 // ドメインロジックを実装するユースケース群
 var UseCaseSet = wire.NewSet(
 	// UseCase実装
-	userUC.NewUseCase,
+	userUC.NewInteractor,
 	gymUC.NewUseCase,
 	reviewUC.NewUseCase,
 )
@@ -147,6 +148,7 @@ var ServerSet = wire.NewSet(
 // RepositorySetで定義された関数が自動的に適切なインターフェースを返す
 var InterfaceSet = wire.NewSet(
 	// Service interfaces (認証サービス)
+	wire.Bind(new(userUC.PasswordHasher), new(*auth.PasswordService)),
 	wire.Bind(new(userUC.PasswordService), new(*auth.PasswordService)),
 	wire.Bind(new(userUC.TokenService), new(*auth.TokenService)),
 )

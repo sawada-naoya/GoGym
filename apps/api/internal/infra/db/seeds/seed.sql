@@ -1,10 +1,10 @@
 -- Seed data for development (simplified schema)
--- Insert sample users
-INSERT INTO users (email, password_hash, display_name) VALUES
-('test1@example.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '山田太郎'),
-('test2@example.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '佐藤花子'),
-('test3@example.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '田中健一'),
-('admin@gogym.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '管理者');
+-- Insert sample users (ULID形式のIDを使用)
+INSERT INTO users (id, email, password_hash, name) VALUES
+('01J8G5NQYV1C2D3E4F5G6H7J8K', 'test1@example.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '山田太郎'),
+('01J8G5NQYV2M3N4P5Q6R7S8T9U', 'test2@example.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '佐藤花子'),
+('01J8G5NQYV3V4W5X6Y7Z8A9B1C', 'test3@example.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '田中健一'),
+('01J8G5NQYV4D5E6F7G8H9J1K2L', 'admin@gogym.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '管理者');
 
 -- Insert sample tags
 INSERT INTO tags (name) VALUES
@@ -106,14 +106,14 @@ INSERT INTO gym_tags (gym_id, tag_id) VALUES
 
 -- Insert sample reviews
 INSERT INTO reviews (user_id, gym_id, rating, comment) VALUES
-(1, 1, 5, '設備が充実していて、トレーナーの方も親切です。フリーウェイトエリアが広くて使いやすい。'),
-(2, 1, 4, '施設は綺麗ですが、混雑時は待ち時間が長いことがあります。スタッフの対応は良いです。'),
-(3, 2, 4, '24時間利用できるのが便利。マシンの種類も豊富で満足しています。'),
-(1, 2, 3, 'マシン中心なのでフリーウェイトをしたい人には物足りないかも。でも清潔で使いやすいです。');
+('01J8G5NQYV1C2D3E4F5G6H7J8K', 1, 5, '設備が充実していて、トレーナーの方も親切です。フリーウェイトエリアが広くて使いやすい。'),
+('01J8G5NQYV2M3N4P5Q6R7S8T9U', 1, 4, '施設は綺麗ですが、混雑時は待ち時間が長いことがあります。スタッフの対応は良いです。'),
+('01J8G5NQYV3V4W5X6Y7Z8A9B1C', 2, 4, '24時間利用できるのが便利。マシンの種類も豊富で満足しています。'),
+('01J8G5NQYV1C2D3E4F5G6H7J8K', 2, 3, 'マシン中心なのでフリーウェイトをしたい人には物足りないかも。でも清潔で使いやすいです。');
 
 -- Insert sample favorites
 INSERT INTO favorites (user_id, gym_id) VALUES
-(1, 1),
-(1, 2),
-(2, 1),
-(3, 3);
+('01J8G5NQYV1C2D3E4F5G6H7J8K', 1),
+('01J8G5NQYV1C2D3E4F5G6H7J8K', 2),
+('01J8G5NQYV2M3N4P5Q6R7S8T9U', 1),
+('01J8G5NQYV3V4W5X6Y7Z8A9B1C', 3);

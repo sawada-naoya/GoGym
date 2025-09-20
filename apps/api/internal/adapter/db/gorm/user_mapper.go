@@ -16,14 +16,12 @@ func ToUserEntity(r *record.UserRecord) (*user.User, error) {
 	}
 
 	userEntity := &user.User{
-		BaseEntity: user.BaseEntity{
-			ID:        user.ID(r.ID),
-			CreatedAt: r.CreatedAt,
-			UpdatedAt: r.UpdatedAt,
-		},
+		ID:           user.ID(r.ID), // ULID文字列をそのまま変換
+		Name:         r.Name,
 		Email:        email,
 		PasswordHash: r.PasswordHash,
-		DisplayName:  r.DisplayName,
+		CreatedAt:    r.CreatedAt,
+		UpdatedAt:    r.UpdatedAt,
 	}
 
 	return userEntity, nil
@@ -32,10 +30,10 @@ func ToUserEntity(r *record.UserRecord) (*user.User, error) {
 // FromUserEntity はUserドメインエンティティをUserRecordに変換する
 func FromUserEntity(u *user.User) *record.UserRecord {
 	return &record.UserRecord{
-		ID:           int64(u.ID),
+		ID:           string(u.ID), // ULIDをそのまま文字列として格納
 		Email:        u.Email.String(),
 		PasswordHash: u.PasswordHash,
-		DisplayName:  u.DisplayName,
+		Name:         u.Name, // DisplayName→Nameに統一
 		CreatedAt:    u.CreatedAt,
 		UpdatedAt:    u.UpdatedAt,
 	}
@@ -44,8 +42,8 @@ func FromUserEntity(u *user.User) *record.UserRecord {
 // ToRefreshTokenEntity はRefreshTokenRecordをRefreshTokenドメインエンティティに変換する
 func ToRefreshTokenEntity(r *record.RefreshTokenRecord) *user.RefreshToken {
 	entity := &user.RefreshToken{
-		ID:        user.ID(r.ID),
-		UserID:    user.ID(r.UserID),
+		ID:        user.ID(r.ID),        // ULID文字列をそのまま変換
+		UserID:    user.ID(r.UserID),    // ULID文字列をそのまま変換
 		TokenHash: r.TokenHash,
 		ExpiresAt: r.ExpiresAt,
 		CreatedAt: r.CreatedAt,
@@ -63,8 +61,8 @@ func ToRefreshTokenEntity(r *record.RefreshTokenRecord) *user.RefreshToken {
 // FromRefreshTokenEntity はRefreshTokenドメインエンティティをRefreshTokenRecordに変換する
 func FromRefreshTokenEntity(rt *user.RefreshToken) *record.RefreshTokenRecord {
 	tokenRecord := &record.RefreshTokenRecord{
-		ID:        int64(rt.ID),
-		UserID:    int64(rt.UserID),
+		ID:        string(rt.ID),     // ULIDをそのまま文字列として格納
+		UserID:    string(rt.UserID), // ULIDをそのまま文字列として格納
 		TokenHash: rt.TokenHash,
 		ExpiresAt: rt.ExpiresAt,
 		CreatedAt: rt.CreatedAt,

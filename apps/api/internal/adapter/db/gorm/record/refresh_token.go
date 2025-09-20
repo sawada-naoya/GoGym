@@ -6,10 +6,10 @@ import (
 	"gorm.io/gorm"
 )
 
-// RefreshTokenRecord represents refresh_tokens table structure
+// RefreshTokenRecord represents refresh_tokens table structure（ULID対応）
 type RefreshTokenRecord struct {
-	ID        int64          `gorm:"primaryKey;autoIncrement"`
-	UserID    int64          `gorm:"not null;index"`
+	ID        string         `gorm:"primaryKey;type:char(26)"` // ULID用
+	UserID    string         `gorm:"not null;index;type:char(26)"` // User IDもULID
 	TokenHash string         `gorm:"not null"`
 	ExpiresAt time.Time      `gorm:"not null"`
 	CreatedAt time.Time      `gorm:"not null"`

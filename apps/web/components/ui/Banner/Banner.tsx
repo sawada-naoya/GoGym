@@ -30,7 +30,7 @@ const icons: Record<BannerVariant, JSX.Element> = {
   ),
 };
 
-export function Banner({ variant, message, onClose }: BannerProps) {
+export const Banner = ({ variant, message, onClose }: BannerProps) => {
   const { bg, border, text, icon } = colors[variant];
 
   return (
@@ -61,4 +61,4 @@ export function Banner({ variant, message, onClose }: BannerProps) {
       </div>
     </div>
   );
-}
+};

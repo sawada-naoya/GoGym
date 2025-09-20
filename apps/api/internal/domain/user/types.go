@@ -4,18 +4,26 @@
 package user
 
 import (
+	"crypto/rand"
 	"fmt"
 	"time"
+	"github.com/oklog/ulid/v2"
 )
 
-// ID はエンティティの一意識別子を表す
-type ID int64
+// ID はULIDベースのエンティティ識別子
+type ID string
 
-// BaseEntity はすべてのエンティティに共通するフィールドを提供する
-type BaseEntity struct {
-	ID        ID
-	CreatedAt time.Time
-	UpdatedAt time.Time
+// GenerateID は新しいULIDを生成する
+func GenerateID() ID {
+	return ID(ulid.MustNew(ulid.Timestamp(time.Now()), rand.Reader).String())
+}
+
+// ParseID はULID文字列からIDを作成する（バリデーション付き）
+func ParseID(s string) (ID, error) {
+	if _, err := ulid.Parse(s); err != nil {
+		return "", NewDomainError(ErrInvalidInput, "invalid_id", "invalid ULID format")
+	}
+	return ID(s), nil
 }
 
 // DomainError represents a domain-specific error

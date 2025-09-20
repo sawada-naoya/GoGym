@@ -47,6 +47,16 @@ func (r *userRepository) FindByEmail(ctx context.Context, email string) (*user.U
 	return ToUserEntity(&userRecord)
 }
 
+// ExistsByEmail はメールアドレスでユーザーの存在確認を行う
+func (r *userRepository) ExistsByEmail(ctx context.Context, email user.Email) (bool, error) {
+	var count int64
+	err := r.db.WithContext(ctx).Model(&record.UserRecord{}).Where("email = ?", email.String()).Count(&count).Error
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
 // Create は新しいユーザーを作成する
 func (r *userRepository) Create(ctx context.Context, userEntity *user.User) error {
 	userRecord := FromUserEntity(userEntity)
