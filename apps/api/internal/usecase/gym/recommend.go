@@ -2,56 +2,51 @@ package gym
 
 import (
 	"context"
-	"gogym-api/internal/domain/gym"
+	"log/slog"
 	"sort"
+
+	"gogym-api/internal/domain/gym"
 )
 
-// RecommendGyms returns recommended gyms based on various criteria
-func (gu *GymUseCase) RecommendGyms(ctx context.Context, req RecommendGymRequest) (*RecommendGymsResponse, error) {
-	gu.logger.InfoContext(ctx, "getting recommended gyms",
-		"user_location", req.UserLocation,
-		"limit", req.Limit,
-	)
+// RecommendGyms returns recommended gyms for top page
+func (i *interactor) RecommendGyms(ctx context.Context) ([]gym.Gym, error) {
+	slog.InfoContext(ctx, "RecommendGyms UseCase")
 
-	if req.Limit <= 0 || req.Limit > 50 {
-		req.Limit = 10
-	}
-
+	// トップページ用の固定パラメータ
 	searchQuery := gym.SearchQuery{
 		Query:    "",
-		Location: req.UserLocation,
+		Location: nil,
 		RadiusM:  nil,
 		Pagination: gym.Pagination{
-			Cursor: req.Cursor,
-			Limit:  req.Limit,
+			Cursor: "",
+			Limit:  10, // トップページ用に10件固定
 		},
 	}
 
-	result, err := gu.gymRepo.Search(ctx, searchQuery)
+	result, err := i.repo.Search(ctx, searchQuery)
 	if err != nil {
-		gu.logger.ErrorContext(ctx, "failed to get recommended gyms", "error", err)
 		return nil, err
 	}
 
 	gyms := result.Items
 
+	// レビュー統計を取得してソート
 	gymIDs := make([]gym.ID, len(gyms))
-	for i, g := range gyms {
-		gymIDs[i] = g.ID
+	for j, g := range gyms {
+		gymIDs[j] = g.ID
 	}
 
-	reviewStats, err := gu.gymRepo.GetReviewStatsForGyms(ctx, gymIDs)
-	if err != nil {
-		gu.logger.ErrorContext(ctx, "failed to get review stats", "error", err)
-	} else {
-		for i := range gyms {
-			if stats, exists := reviewStats[gyms[i].ID]; exists {
-				gyms[i].AverageRating = stats.AverageRating
-				gyms[i].ReviewCount = stats.ReviewCount
+	reviewStats, err := i.repo.GetReviewStatsForGyms(ctx, gymIDs)
+	if err == nil {
+		for k := range gyms {
+			if stats, exists := reviewStats[gyms[k].ID]; exists {
+				gyms[k].AverageRating = stats.AverageRating
+				gyms[k].ReviewCount = stats.ReviewCount
 			}
 		}
 	}
 
+	// 評価順でソート
 	sort.Slice(gyms, func(i, j int) bool {
 		if gyms[i].AverageRating != nil && gyms[j].AverageRating != nil {
 			if *gyms[i].AverageRating != *gyms[j].AverageRating {
@@ -68,9 +63,5 @@ func (gu *GymUseCase) RecommendGyms(ctx context.Context, req RecommendGymRequest
 		return gyms[i].ID < gyms[j].ID
 	})
 
-	return &RecommendGymsResponse{
-		Gyms:       gyms,
-		NextCursor: &result.NextCursor,
-		HasMore:    result.HasMore,
-	}, nil
+	return gyms, nil
 }

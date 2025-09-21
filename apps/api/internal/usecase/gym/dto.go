@@ -4,73 +4,34 @@ import (
 	"gogym-api/internal/domain/gym"
 )
 
-// SearchGymRequest represents search gym input
-type SearchGymRequest struct {
-	Query      string
-	Location   *gym.Location
-	RadiusM    *int
-	Cursor     string
-	Limit      int
+type GymResponse struct {
+	ID            int      `json:"id"`
+	Name          string   `json:"name"`
+	Description   string   `json:"description"`
+	Location      string   `json:"location"`
+	AverageRating *float32 `json:"average_rating,omitempty"`
+	ReviewCount   int      `json:"review_count"`
+	Tags          []string `json:"tags"`
 }
 
-// SearchGymsResponse represents search gym output
-type SearchGymsResponse struct {
-	Gyms       []gym.Gym
-	NextCursor *string
-	HasMore    bool
-}
+func ToGymResponse(g gym.Gym) GymResponse {
+	description := ""
+	if g.Description != nil {
+		description = *g.Description
+	}
 
-// CreateGymRequest represents create gym input
-type CreateGymRequest struct {
-	Name        string
-	Description *string
-	Location    gym.Location
-	Address     string
-	City        *string
-	Prefecture  *string
-	PostalCode  *string
-	TagNames    []string
-}
+	var tagNames []string
+	for _, tag := range g.Tags {
+		tagNames = append(tagNames, tag.Name)
+	}
 
-// RecommendGymRequest represents recommend gym input
-type RecommendGymRequest struct {
-	UserLocation *gym.Location
-	Limit        int
-	Cursor       string
-}
-
-// RecommendGymsResponse represents recommend gym output
-type RecommendGymsResponse struct {
-	Gyms       []gym.Gym
-	NextCursor *string
-	HasMore    bool
-}
-
-// FavoriteGymRequest represents favorite gym input
-type FavoriteGymRequest struct {
-	UserID gym.ID
-	GymID  gym.ID
-}
-
-// GetFavoriteGymsRequest represents get favorite gyms input
-type GetFavoriteGymsRequest struct {
-	UserID gym.ID
-	Limit  int
-	Cursor string
-}
-
-// GetFavoriteGymsResponse represents get favorite gyms output
-type GetFavoriteGymsResponse struct {
-	Gyms       []gym.Gym
-	NextCursor *string
-	HasMore    bool
-}
-
-// GymDetailResponse represents detailed gym information for detail page
-type GymDetailResponse struct {
-	Gym gym.Gym
-	// Reviews    []gym.Review   // TODO: Add when review functionality is implemented
-	// Hours      []gym.Hour     // TODO: Add operating hours
-	// Amenities  []gym.Amenity  // TODO: Add amenities/facilities
-	// Images     []string       // Included in gym.Images field for now
+	return GymResponse{
+		ID:            int(g.ID),
+		Name:          g.Name,
+		Description:   description,
+		Location:      g.Location.String(),
+		AverageRating: g.AverageRating,
+		ReviewCount:   g.ReviewCount,
+		Tags:          tagNames,
+	}
 }

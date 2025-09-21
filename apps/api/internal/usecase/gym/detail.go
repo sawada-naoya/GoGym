@@ -2,28 +2,31 @@ package gym
 
 import (
 	"context"
-	"gogym-api/internal/domain/gym"
+	"log/slog"
+
+	dom "gogym-api/internal/domain/gym"
 )
 
-func (gu *GymUseCase) GetGym(ctx context.Context, id gym.ID) (*gym.Gym, error) {
-	gu.logger.InfoContext(ctx, "getting gym for search/preview", "gym_id", id)
+// GetGym returns gym detail by ID
+func (i *interactor) GetGym(ctx context.Context, id dom.ID) (*dom.Gym, error) {
+	slog.InfoContext(ctx, "GetGym UseCase", "gym_id", id)
 
 	if id == 0 {
-		return nil, gym.NewDomainError(gym.ErrInvalidInput, "invalid_gym_id", "gym ID is required")
+		return nil, dom.NewDomainError(dom.ErrInvalidInput, "invalid_gym_id", "gym ID is required")
 	}
 
-	foundGym, err := gu.gymRepo.FindByID(ctx, id)
+	foundGym, err := i.repo.FindByID(ctx, id)
 	if err != nil {
-		gu.logger.ErrorContext(ctx, "failed to get gym", "gym_id", id, "error", err)
-		return nil, gym.NewDomainErrorWithCause(err, "gym_not_found", "gym not found")
+		return nil, dom.NewDomainErrorWithCause(err, "gym_not_found", "gym not found")
 	}
 
-	reviewStats, err := gu.gymRepo.GetReviewStats(ctx, id)
-	if err != nil {
-		gu.logger.ErrorContext(ctx, "failed to get review stats", "gym_id", id, "error", err)
-	} else {
-		foundGym.AverageRating = reviewStats.AverageRating
-		foundGym.ReviewCount = reviewStats.ReviewCount
+	// レビュー統計を取得
+	reviewStats, err := i.repo.GetReviewStatsForGyms(ctx, []dom.ID{id})
+	if err == nil {
+		if stats, exists := reviewStats[id]; exists {
+			foundGym.AverageRating = stats.AverageRating
+			foundGym.ReviewCount = stats.ReviewCount
+		}
 	}
 
 	return foundGym, nil

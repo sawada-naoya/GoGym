@@ -13,16 +13,7 @@ func SetupGymRoutes(e *echo.Echo, g *handler.GymHandler) {
 	// おすすめジム取得
 	api.GET("/gyms/recommended", g.GetRecommendedGyms)
 
-	// ジム検索・オートコンプリート
-	api.GET("/gyms", g.SearchGyms)
-	api.GET("/gyms/autocomplete", g.AutocompleteGyms)
-
 	// 特定ジム取得
 	api.GET("/gym/:id", g.GetGym)
-	api.GET("/gyms/:id/images", g.GetGymImages)
 
-	// ジム管理（認証必要）
-	api.POST("/gyms", g.CreateGym)
-	api.PUT("/gyms/:id", g.UpdateGym)
-	api.DELETE("/gyms/:id", g.DeleteGym)
 }

@@ -7,16 +7,7 @@ import (
 	"time"
 )
 
-type interactor struct {
-	repo       Repository
-	hasher     PasswordHasher
-	iDProvider IDProvider
-}
-
-func NewInteractor(r Repository, h PasswordHasher, i IDProvider) UseCase {
-	return &interactor{repo: r, hasher: h, iDProvider: i}
-}
-
+// SignUp handles user registration
 func (i *interactor) SignUp(ctx context.Context, req SignUpRequest) error {
 	slog.InfoContext(ctx, "SignUp UseCase", "Name", req.Name, "Email", req.Email)
 	// emailのバリデーション
@@ -41,7 +32,7 @@ func (i *interactor) SignUp(ctx context.Context, req SignUpRequest) error {
 	}
 
 	// ユーザーIDの生成
-	id := i.iDProvider.NewUserID()
+	id := i.idProvider.NewUserID()
 
 	now := time.Now()
 

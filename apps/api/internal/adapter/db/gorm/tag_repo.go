@@ -7,17 +7,17 @@ import (
 	"context"
 	"gogym-api/internal/adapter/db/gorm/record"
 	"gogym-api/internal/domain/gym"
-	gymUsecase "gogym-api/internal/usecase/gym"
+	tagUsecase "gogym-api/internal/usecase/tag"
 	"gorm.io/gorm"
 )
 
-// tagRepository はgym.TagRepositoryインターフェースを実装する
+// tagRepository はtag.Repositoryインターフェースを実装する
 type tagRepository struct {
 	db *gorm.DB
 }
 
 // NewTagRepository は新しいタグリポジトリを作成する
-func NewTagRepository(db *gorm.DB) gymUsecase.TagRepository {
+func NewTagRepository(db *gorm.DB) tagUsecase.Repository {
 	return &tagRepository{db: db}
 }
 

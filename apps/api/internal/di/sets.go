@@ -148,6 +148,9 @@ var ServerSet = wire.NewSet(
 var InterfaceSet = wire.NewSet(
 	// Service interfaces (認証サービス)
 	wire.Bind(new(userUC.TokenService), new(*auth.TokenService)),
+
+	// Repository interfaces (データアクセス)
+	// tagRepositoryは小文字なので、バインディング不要（自動的に適切なインターフェースを返す）
 )
 
 // =============================================================================
