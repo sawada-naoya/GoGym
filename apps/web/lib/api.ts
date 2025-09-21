@@ -4,15 +4,17 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 export type Query = Record<string, string | number | boolean | undefined>;
 
-export interface RequestOptions {
-  query?: Query; // クエリパラメータ
-  headers?: Record<string, string>;
+export type RequestOptions = Omit<RequestInit, "method" | "body"> & {
   body?: unknown;
-  cache?: RequestCache; // 'no-store' | 'force-cache' など
-}
+  query?: Query;
+};
 
-// queryパラメータをURLエンコードして文字列に変換するヘルパー関数
-// 例: { search: "gym", page: 2 } → "search=gym&page=2"
+export type ApiResponse<T> = {
+  ok: boolean;
+  status: number;
+  data: T | null;
+};
+
 const buildQueryParams = (query?: Query): string => {
   if (!query) return "";
   const params = new URLSearchParams();
@@ -23,45 +25,50 @@ const buildQueryParams = (query?: Query): string => {
   return params.toString();
 };
 
-const request = async (endpoint: string, method: HttpMethod, options: RequestOptions = {}): Promise<Response> => {
-  let url = `${API_BASE_URL}${endpoint}`;
-  const queryParams = buildQueryParams(options.query);
-  if (queryParams) url += (url.includes("?") ? "&" : "?") + queryParams;
-  const init: RequestInit & { next?: NextFetchRequestConfig } = {
+const parseJsonIfAny = async (res: Response): Promise<unknown | undefined> => {
+  const ct = res.headers.get("Content-Type") || "";
+  if (!ct.includes("application/json")) return undefined;
+  try {
+    const text = await res.text();
+    if (!text) return undefined;
+    return JSON.parse(text);
+  } catch {
+    return undefined;
+  }
+};
+
+const request = async <T>(endpoint: string, method: HttpMethod, options: RequestOptions = {}): Promise<ApiResponse<T>> => {
+  let url = endpoint;
+  const qs = buildQueryParams(options.query);
+  if (qs) url += (url.includes("?") ? "&" : "?") + qs;
+
+  const res = await fetch(url, {
+    ...options,
     method,
     headers: {
       "Content-Type": "application/json",
       ...(options.headers ?? {}),
     },
-    cache: options.cache ?? "no-store",
-    ...(method !== "GET" && options.body ? { body: JSON.stringify(options.body) } : {}),
-  };
-  const res = await fetch(url, init);
-  return res;
+    body: method !== "GET" && options.body !== undefined ? JSON.stringify(options.body) : undefined,
+  });
+
+  let data: T | null = null;
+  try {
+    data = await res.json();
+  } catch {
+    data = null;
+  }
+
+  return { ok: res.ok, status: res.status, data };
 };
 
-// CRUDエイリアスを大文字関数で用意
-export const GET = async <T>(endpoint: string, options?: RequestOptions): Promise<T> => {
-  const response = await request(endpoint, "GET", options);
-  return response.json();
-};
+// CRUDエイリアス
+export const GET = <T>(endpoint: string, options?: RequestOptions) => request<T>(endpoint, "GET", options);
 
-export const POST = async <T>(endpoint: string, body?: unknown, options?: RequestOptions): Promise<T> => {
-  const response = await request(endpoint, "POST", { ...options, body });
-  return response.json();
-};
+export const POST = <T>(endpoint: string, options?: RequestOptions) => request<T>(endpoint, "POST", options);
 
-export const PUT = async <T>(endpoint: string, body?: unknown, options?: RequestOptions): Promise<T> => {
-  const response = await request(endpoint, "PUT", { ...options, body });
-  return response.json();
-};
+export const PUT = <T>(endpoint: string, options?: RequestOptions) => request<T>(endpoint, "PUT", options);
 
-export const PATCH = async <T>(endpoint: string, body?: unknown, options?: RequestOptions): Promise<T> => {
-  const response = await request(endpoint, "PATCH", { ...options, body });
-  return response.json();
-};
+export const PATCH = <T>(endpoint: string, options?: RequestOptions) => request<T>(endpoint, "PATCH", options);
 
-export const DELETE = async <T>(endpoint: string, options?: RequestOptions): Promise<T> => {
-  const response = await request(endpoint, "DELETE", options);
-  return response.json();
-};
+export const DELETE_ = <T>(endpoint: string, options?: RequestOptions) => request<T>(endpoint, "DELETE", options);

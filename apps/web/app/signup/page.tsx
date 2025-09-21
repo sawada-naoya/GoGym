@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { POST } from "@/lib/api";
-import { ErrorBanner } from "../../components/ui/Banner";
-import { ApiError, normalizeError } from "../../lib/errors";
+import { ErrorBanner, SuccessBanner } from "../../components/ui/Banner";
 
 const SignUpSchema = z
   .object({
@@ -22,6 +22,7 @@ const SignUpSchema = z
 type FieldErrors = Record<string, string>;
 
 const SignUpPage = () => {
+  const router = useRouter();
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -30,20 +31,21 @@ const SignUpPage = () => {
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
-  const [apiError, setApiError] = useState<ApiError | null>(null);
-  const [done, setDone] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     if (errors[e.target.name]) {
       setErrors({ ...errors, [e.target.name]: "" });
     }
+    // 入力開始時にエラーメッセージをクリア
+    if (apiError) setApiError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setApiError(null);
     setErrors({});
+    setApiError(null);
 
     const parsed = SignUpSchema.safeParse(form);
     if (!parsed.success) {
@@ -67,50 +69,17 @@ const SignUpPage = () => {
       });
 
       if (!res.ok) {
-        const error = await normalizeError(res as Response);
-        setApiError(error);
-        setLoading(false);
+        setApiError("このメールアドレスは既に使用されています");
         return;
       }
 
-      setDone(true);
+      router.push("/login?success=signup");
     } catch (error) {
-      setApiError({
-        kind: "network",
-        message: "ネットワークエラーが発生しました。時間を置いて再度お試しください。",
-      });
+      setApiError("ネットワークエラーが発生しました。時間を置いて再度お試しください。");
     } finally {
       setLoading(false);
     }
   };
-
-  if (done) {
-    return (
-      <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          <div className="text-center">
-            <div className="flex justify-center">
-              <h1 className="text-4xl font-bold text-gray-900">GoGym</h1>
-            </div>
-            <div className="mt-6 p-6 bg-green-50 border border-green-200 rounded-md">
-              <div className="flex items-center justify-center w-12 h-12 mx-auto bg-green-100 rounded-full">
-                <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <h2 className="mt-4 text-lg font-semibold text-green-900">登録完了</h2>
-              <p className="mt-2 text-sm text-green-700">アカウントの作成が完了しました。</p>
-            </div>
-            <div className="mt-6">
-              <Link href="/login" className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-booking-600 hover:bg-booking-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-booking-500">
-                ログインページへ
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -129,7 +98,7 @@ const SignUpPage = () => {
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit} noValidate>
-          <ErrorBanner error={apiError} />
+          {apiError && <ErrorBanner message={apiError} />}
 
           <div className="space-y-4">
             <div>

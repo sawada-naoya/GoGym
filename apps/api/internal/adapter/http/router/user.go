@@ -9,5 +9,5 @@ import (
 func SetupUserRoutes(e *echo.Echo, uh *handler.UserHandler) {
 	userGroup := e.Group("/api/v1/users")
 
-	userGroup.POST("/user", uh.SignUp)
+	userGroup.POST("", uh.SignUp)
 }

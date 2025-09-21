@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	uc "gogym-api/internal/usecase/user"
+	httpError "gogym-api/internal/adapter/http/error"
 
 	"github.com/labstack/echo/v4"
 )
@@ -26,8 +27,11 @@ func (h *UserHandler) SignUp(c echo.Context) error {
 
 	err := h.uc.SignUp(ctx, req)
 	if err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, map[string]string{"error": err.Error()})
+		return c.JSON(http.StatusConflict, httpError.ErrorResponse{
+			Code:    "email_already_exists",
+			Message: err.Error(),
+		})
 	}
 
-	return c.JSON(http.StatusCreated, map[string]string{"message": "User created successfully"})
+	return c.NoContent(http.StatusCreated)
 }
