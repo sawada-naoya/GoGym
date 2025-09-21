@@ -5,30 +5,57 @@ package gorm
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"gogym-api/internal/adapter/db/gorm/record"
 	"gogym-api/internal/domain/gym"
 	gymUsecase "gogym-api/internal/usecase/gym"
-	"gorm.io/gorm"
 	"strings"
+
+	"gorm.io/gorm"
 )
 
-// gymRepository はgym.Repositoryインターフェースを実装する
 type gymRepository struct {
 	db *gorm.DB
 }
 
-// NewGymRepository は新しいジムリポジトリを作成する
 func NewGymRepository(db *gorm.DB) gymUsecase.Repository {
 	return &gymRepository{db: db}
 }
 
-// FindByID はIDでジムを検索する
 func (r *gymRepository) FindByID(ctx context.Context, id gym.ID) (*gym.Gym, error) {
+	var rec record.GymRecord
+	id64 := int64(id)
+
+	err := r.db.WithContext(ctx).
+		Model(&record.GymRecord{}).
+		Where("id = ?", id64).
+		Preload("Tags").
+		First(&rec).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, gym.NewDomainError(gym.ErrNotFound, "gym_not_found", "gym not found")
+		}
+		return nil, err
+	}
+
+	return ToGymEntity(&rec), nil
+}
+
+// FindDetailByID はIDでジムを検索する（完全版 - レビュー、営業時間等含む）
+func (r *gymRepository) FindDetailByID(ctx context.Context, id gym.ID) (*gym.Gym, error) {
 	var gymRecord record.GymRecord
 
-	// 基本的なGORMクエリでテスト（location除外）
-	if err := r.db.WithContext(ctx).Omit("location").Preload("Tags").First(&gymRecord, id).Error; err != nil {
+	// 詳細情報込みでクエリ（将来的にはReviews, Hours等もPreload）
+	query := r.db.WithContext(ctx).Omit("location").
+		Preload("Tags")
+		// TODO: 以下を有効化予定
+		// Preload("Reviews").
+		// Preload("Reviews.User").
+		// Preload("Hours").
+		// Preload("Amenities")
+
+	if err := query.First(&gymRecord, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, gym.NewDomainError(gym.ErrNotFound, "gym_not_found", "gym not found")
 		}
@@ -149,4 +176,73 @@ func (r *gymRepository) Delete(ctx context.Context, id gym.ID) error {
 	}
 
 	return nil
+}
+
+func (r *gymRepository) GetReviewStats(ctx context.Context, gymID gym.ID) (*gymUsecase.ReviewStats, error) {
+	var result struct {
+		AverageRating *float32
+		ReviewCount   int64
+	}
+
+	err := r.db.WithContext(ctx).
+		Model(&record.ReviewRecord{}).
+		Select("AVG(rating) as average_rating, COUNT(*) as review_count").
+		Where("gym_id = ? AND deleted_at IS NULL", gymID).
+		Scan(&result).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &gymUsecase.ReviewStats{
+		AverageRating: result.AverageRating,
+		ReviewCount:   int(result.ReviewCount),
+	}, nil
+}
+
+func (r *gymRepository) GetReviewStatsForGyms(ctx context.Context, gymIDs []gym.ID) (map[gym.ID]*gymUsecase.ReviewStats, error) {
+	if len(gymIDs) == 0 {
+		return make(map[gym.ID]*gymUsecase.ReviewStats), nil
+	}
+
+	var results []struct {
+		GymID         int64
+		AverageRating *float32
+		ReviewCount   int64
+	}
+
+	int64IDs := make([]int64, len(gymIDs))
+	for i, id := range gymIDs {
+		int64IDs[i] = int64(id)
+	}
+
+	err := r.db.WithContext(ctx).
+		Model(&record.ReviewRecord{}).
+		Select("gym_id, AVG(rating) as average_rating, COUNT(*) as review_count").
+		Where("gym_id IN ? AND deleted_at IS NULL", int64IDs).
+		Group("gym_id").
+		Scan(&results).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	statsMap := make(map[gym.ID]*gymUsecase.ReviewStats)
+	for _, result := range results {
+		statsMap[gym.ID(result.GymID)] = &gymUsecase.ReviewStats{
+			AverageRating: result.AverageRating,
+			ReviewCount:   int(result.ReviewCount),
+		}
+	}
+
+	for _, id := range gymIDs {
+		if _, exists := statsMap[id]; !exists {
+			statsMap[id] = &gymUsecase.ReviewStats{
+				AverageRating: nil,
+				ReviewCount:   0,
+			}
+		}
+	}
+
+	return statsMap, nil
 }

@@ -1,20 +1,35 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { SuccessBanner } from '../../components/ui/Banner'
 
 export default function LoginPage() {
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false)
+
+  useEffect(() => {
+    const success = searchParams.get('success')
+    if (success === 'signup') {
+      setShowSuccessMessage(true)
+      // 5秒後に成功メッセージを非表示
+      setTimeout(() => {
+        setShowSuccessMessage(false)
+      }, 5000)
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    
+
     // TODO: API呼び出しを実装
     console.log('Login attempt:', { email, password })
-    
+
     // モック処理
     setTimeout(() => {
       setLoading(false)
@@ -35,11 +50,19 @@ export default function LoginPage() {
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             アカウントをお持ちでない方は{' '}
-            <Link href="/register" className="font-medium text-booking-600 hover:text-booking-500">
+            <Link href="/signup" className="font-medium text-booking-600 hover:text-booking-500">
               新規登録
             </Link>
           </p>
         </div>
+
+        {/* 成功メッセージ */}
+        {showSuccessMessage && (
+          <SuccessBanner
+            message="アカウントの作成に成功しました。ログインしてください。"
+            onClose={() => setShowSuccessMessage(false)}
+          />
+        )}
 
         {/* ログインフォーム */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>

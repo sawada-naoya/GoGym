@@ -1,8 +1,10 @@
--- Seed data for development
--- Insert sample users
-INSERT INTO users (email, password_hash, display_name) VALUES
-('john@example.com', '$argon2id$v=19$m=65536,t=3,p=2$c29tZXNhbHQ$xyz123hash', 'John Doe'),
-('jane@example.com', '$argon2id$v=19$m=65536,t=3,p=2$c29tZXNhbHQ$abc456hash', 'Jane Smith');
+-- Seed data for development (simplified schema)
+-- Insert sample users (ULID形式のIDを使用)
+INSERT INTO users (id, email, password_hash, name) VALUES
+('01J8G5NQYV1C2D3E4F5G6H7J8K', 'test1@example.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '山田太郎'),
+('01J8G5NQYV2M3N4P5Q6R7S8T9U', 'test2@example.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '佐藤花子'),
+('01J8G5NQYV3V4W5X6Y7Z8A9B1C', 'test3@example.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '田中健一'),
+('01J8G5NQYV4D5E6F7G8H9J1K2L', 'admin@gogym.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '管理者');
 
 -- Insert sample tags
 INSERT INTO tags (name) VALUES
@@ -16,91 +18,102 @@ INSERT INTO tags (name) VALUES
 ('マシン豊富'),
 ('駅近');
 
--- Insert sample gyms with spatial data (Tokyo locations)
-INSERT INTO gyms (name, description, location, address, city, prefecture, postal_code) VALUES
+-- Insert sample gyms (simplified schema - no spatial data for now)
+INSERT INTO gyms (name, description, location_latitude, location_longitude, address, city, prefecture, postal_code, is_active) VALUES
 (
-    'フィットネスクラブ渋谷',
-    '最新設備を備えた総合フィットネスクラブです。プールやサウナも完備。',
-    ST_SRID(POINT(139.7016, 35.6598), 4326),
-    '東京都渋谷区渋谷1-2-3 渋谷ビル5F',
+    'ゴールドジム 原宿東京',
+    '本格的なウェイトトレーニングの聖地。豊富なフリーウェイトとマシンで、初心者から上級者まで満足できる設備。24時間営業で忙しい方にも最適。',
+    35.6705,
+    139.7026,
+    '東京都渋谷区神宮前6-31-17 ベロックスビル B1F',
     '渋谷区',
     '東京都',
-    '150-0002'
+    '150-0001',
+    true
 ),
 (
-    'ジム新宿24',
-    '24時間営業のマシン特化型ジムです。駅から徒歩2分の好立地。',
-    ST_SRID(POINT(139.7006, 35.6895), 4326),
-    '東京都新宿区新宿3-1-1 新宿駅前ビル3F',
-    '新宿区',
+    'ゴールドジム 原宿ANNEX',
+    '原宿東京の姉妹店として、よりスペシャライズされたトレーニング環境を提供。コンパクトながら充実した設備で集中してトレーニングが可能。',
+    35.6698,
+    139.7038,
+    '東京都渋谷区神宮前6-28-6 Q PLAZA HARAJUKU 4F',
+    '渋谷区',
     '東京都',
-    '160-0022'
+    '150-0001',
+    true
 ),
 (
-    'パワーハウス池袋',
-    'フリーウェイトに特化した本格派トレーニングジム。',
-    ST_SRID(POINT(139.7111, 35.7295), 4326),
-    '東京都豊島区南池袋1-28-1 西武百貨店12F',
-    '豊島区',
+    'ゴールドジム 表参道東京',
+    '表参道の中心地にある都市型フィットネスクラブ。洗練された空間で本格的なトレーニングを。ビジネスマンや美意識の高い女性に人気。',
+    35.6654,
+    139.7106,
+    '東京都港区北青山3-6-19 三和実業表参道ビル B1F',
+    '港区',
     '東京都',
-    '171-8569'
+    '107-0061',
+    true
+),
+(
+    'ゴールドジム 渋谷東京',
+    '渋谷の中心部にありアクセス抜群。若い世代から年配の方まで幅広い層に愛される老舗店舗。充実した設備とフレンドリーなスタッフが魅力。',
+    35.6581,
+    139.7016,
+    '東京都渋谷区渋谷1-23-16 cocoti SHIBUYA 6F',
+    '渋谷区',
+    '東京都',
+    '150-0002',
+    true
+),
+(
+    'ゴールドジム 南青山東京',
+    '青山エリアの高級感あふれる立地で、質の高いトレーニング環境を提供。女性向け設備も充実し、美意識の高い会員が多く集まる。',
+    35.6627,
+    139.7172,
+    '東京都港区南青山2-27-20 植竹ビル B1F',
+    '港区',
+    '東京都',
+    '107-0062',
+    true
 );
 
 -- Associate gyms with tags
 INSERT INTO gym_tags (gym_id, tag_id) VALUES
--- フィットネスクラブ渋谷
-(1, 3), -- プール
-(1, 4), -- サウナ
-(1, 5), -- 駐車場あり
-(1, 6), -- シャワー
-(1, 7), -- 女性専用エリア
+-- ゴールドジム 原宿東京
+(1, 1), -- 24時間営業
+(1, 8), -- マシン豊富
 (1, 9), -- 駅近
 
--- ジム新宿24
-(2, 1), -- 24時間営業
-(2, 6), -- シャワー
+-- ゴールドジム 原宿ANNEX
 (2, 8), -- マシン豊富
 (2, 9), -- 駅近
 
--- パワーハウス池袋
+-- ゴールドジム 表参道東京
+(3, 2), -- パーソナルトレーニング
 (3, 6), -- シャワー
-(3, 8), -- マシン豊富
-(3, 9); -- 駅近
+(3, 7), -- 女性専用エリア
+(3, 9), -- 駅近
+
+-- ゴールドジム 渋谷東京
+(4, 6), -- シャワー
+(4, 8), -- マシン豊富
+(4, 9), -- 駅近
+
+-- ゴールドジム 南青山東京
+(5, 2), -- パーソナルトレーニング
+(5, 6), -- シャワー
+(5, 7), -- 女性専用エリア
+(5, 9); -- 駅近
 
 -- Insert sample reviews
-INSERT INTO reviews (user_id, gym_id, rating, comment, photos) VALUES
-(
-    1, 
-    1, 
-    4, 
-    '設備が充実していて清潔感もあります。プールでの水泳も楽しめました。',
-    JSON_ARRAY('https://example.com/photos/gym1-1.jpg', 'https://example.com/photos/gym1-2.jpg')
-),
-(
-    2, 
-    1, 
-    5, 
-    '女性専用エリアがあるので安心してトレーニングできます。スタッフの対応も親切です。',
-    JSON_ARRAY('https://example.com/photos/gym1-3.jpg')
-),
-(
-    1, 
-    2, 
-    5, 
-    '24時間営業なので仕事帰りでも利用できて便利です。マシンも新しくて使いやすい。',
-    JSON_ARRAY()
-),
-(
-    2, 
-    3, 
-    4, 
-    'フリーウェイトが充実している本格派のジム。本気でトレーニングしたい人におすすめ。',
-    JSON_ARRAY('https://example.com/photos/gym3-1.jpg')
-);
+INSERT INTO reviews (user_id, gym_id, rating, comment) VALUES
+('01J8G5NQYV1C2D3E4F5G6H7J8K', 1, 5, '設備が充実していて、トレーナーの方も親切です。フリーウェイトエリアが広くて使いやすい。'),
+('01J8G5NQYV2M3N4P5Q6R7S8T9U', 1, 4, '施設は綺麗ですが、混雑時は待ち時間が長いことがあります。スタッフの対応は良いです。'),
+('01J8G5NQYV3V4W5X6Y7Z8A9B1C', 2, 4, '24時間利用できるのが便利。マシンの種類も豊富で満足しています。'),
+('01J8G5NQYV1C2D3E4F5G6H7J8K', 2, 3, 'マシン中心なのでフリーウェイトをしたい人には物足りないかも。でも清潔で使いやすいです。');
 
 -- Insert sample favorites
 INSERT INTO favorites (user_id, gym_id) VALUES
-(1, 1),
-(1, 2),
-(2, 1),
-(2, 3);
+('01J8G5NQYV1C2D3E4F5G6H7J8K', 1),
+('01J8G5NQYV1C2D3E4F5G6H7J8K', 2),
+('01J8G5NQYV2M3N4P5Q6R7S8T9U', 1),
+('01J8G5NQYV3V4W5X6Y7Z8A9B1C', 3);

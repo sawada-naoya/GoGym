@@ -1,4 +1,3 @@
-// internal/domain/user/entity.go
 // 役割: ユーザードメインのEntity/VO（Domain Layer）
 // ビジネスルールと不変条件を持つ純粋なドメインオブジェクト。GORM/JSONタグは一切なし
 package user
@@ -8,85 +7,52 @@ import (
 	"time"
 )
 
-// User はユーザーの集約ルートを表す
 type User struct {
-	BaseEntity
-	Email        Email
-	PasswordHash string
-	DisplayName  string `validate:"required,max=100"`
+	ID           string    // ULID識別子
+	Name         string    // 表示名
+	Email        Email     // メールアドレス（バリューオブジェクト）
+	PasswordHash string    // パスワードハッシュ
+	CreatedAt    time.Time // 作成日時
+	UpdatedAt    time.Time // 更新日時
 }
 
-
-// NewUser は検証付きで新しいユーザーを作成する
-func NewUser(email Email, displayName string) (*User, error) {
-	if !email.IsValid() {
-		return nil, NewDomainError(ErrInvalidEmail, "invalid_email", "invalid email format")
+// NewUser: 不変条件を満たすユーザーを生成（IDは自動生成）
+func NewUser(id string, name string, email Email, passwordHash string, now time.Time) (*User, error) {
+	n := strings.TrimSpace(name)
+	if n == "" || len(n) > 100 {
+		return nil, NewDomainError(ErrInvalidInput, "invalid_name", "name required and <=100 chars")
+	}
+	if strings.TrimSpace(passwordHash) == "" {
+		return nil, NewDomainError(ErrInvalidInput, "invalid_password_hash", "password hash required")
 	}
 
-	user := &User{
-		Email:       email,
-		DisplayName: strings.TrimSpace(displayName),
-	}
-
-	if err := user.Validate(); err != nil {
-		return nil, err
-	}
-
-	return user, nil
+	return &User{
+		ID:           id,
+		Name:         n,
+		Email:        email,
+		PasswordHash: passwordHash,
+		CreatedAt:    now,
+		UpdatedAt:    now,
+	}, nil
 }
 
-// Validate はユーザーデータを検証する
-func (u *User) Validate() error {
-	if !u.Email.IsValid() {
-		return NewDomainError(ErrInvalidEmail, "invalid_email", "invalid email format")
+// Rename: 表示名を変更（不変条件を再度満たすこと）
+func (u *User) Rename(newName string) error {
+	n := strings.TrimSpace(newName)
+	if n == "" || len(n) > 100 {
+		return NewDomainError(ErrInvalidInput, "invalid_name", "name required and <=100 chars")
 	}
-
-	if err := u.validateDisplayName(); err != nil {
-		return err
-	}
-
+	u.Name = n
+	u.UpdatedAt = time.Now() // 更新時刻を更新
 	return nil
 }
 
-// validateDisplayName は表示名を検証する
-func (u *User) validateDisplayName() error {
-	if u.DisplayName == "" {
-		return NewDomainError(ErrInvalidInput, "invalid_display_name", "display name is required")
+// RotatePasswordHash: パスワードハッシュを安全に更新（rawは扱わない）
+func (u *User) RotatePasswordHash(newHash string) error {
+	if strings.TrimSpace(newHash) == "" {
+		return NewDomainError(ErrInvalidInput, "invalid_password_hash", "password hash required")
 	}
-
-	if len(u.DisplayName) > 100 {
-		return NewDomainError(ErrInvalidInput, "invalid_display_name", "display name too long")
-	}
-
+	u.PasswordHash = newHash
+	u.UpdatedAt = time.Now() // 更新時刻を更新
 	return nil
-}
-
-// SetPasswordHash はハッシュ化されたパスワードを設定する
-func (u *User) SetPasswordHash(hash string) {
-	u.PasswordHash = hash
-}
-
-// RefreshToken はリフレッシュトークンエンティティを表す
-type RefreshToken struct {
-	ID        ID
-	UserID    ID
-	TokenHash string
-	ExpiresAt time.Time
-	CreatedAt time.Time
-	User      *User
-}
-
-
-// NewRefreshToken は新しいリフレッシュトークンを作成する
-func NewRefreshToken(userID ID, tokenHash string, expiresAt time.Time) *RefreshToken {
-	return &RefreshToken{
-		UserID:    userID,
-		TokenHash: tokenHash,
-		ExpiresAt: expiresAt,
-	}
-}
-
-// IsExpired はトークンが期限切れかどうかをチェックする
-func (rt *RefreshToken) IsExpired() bool {
-	return time.Now().After(rt.ExpiresAt)
 }

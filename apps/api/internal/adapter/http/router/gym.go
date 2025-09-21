@@ -18,7 +18,7 @@ func SetupGymRoutes(e *echo.Echo, g *handler.GymHandler) {
 	api.GET("/gyms/autocomplete", g.AutocompleteGyms)
 
 	// 特定ジム取得
-	api.GET("/gyms/:id", g.GetGym)
+	api.GET("/gym/:id", g.GetGym)
 	api.GET("/gyms/:id/images", g.GetGymImages)
 
 	// ジム管理（認証必要）

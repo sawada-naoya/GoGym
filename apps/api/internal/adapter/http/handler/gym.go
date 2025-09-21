@@ -11,19 +11,16 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// GymHandler handles gym-related HTTP requests
 type GymHandler struct {
-	gu *gymUsecase.UseCase
+	gu *gymUsecase.GymUseCase
 }
 
-// NewGymHandler creates a new GymHandler instance
-func NewGymHandler(gu *gymUsecase.UseCase) *GymHandler {
+func NewGymHandler(gu *gymUsecase.GymUseCase) *GymHandler {
 	return &GymHandler{
 		gu: gu,
 	}
 }
 
-// SearchGyms handles GET /gyms request
 func (h *GymHandler) SearchGyms(c echo.Context) error {
 	var req dto.SearchGymRequest
 
@@ -69,35 +66,25 @@ func (h *GymHandler) SearchGyms(c echo.Context) error {
 	// ジム検索実行
 	result, err := h.gu.SearchGyms(c.Request().Context(), usecaseReq)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error":   "search_failed",
-			"message": "Failed to search gyms",
-		})
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	// レスポンシに変換
 	response := ToSearchResponse(result)
 
 	return c.JSON(http.StatusOK, response)
 }
 
-// GetGym handles GET /gyms/:id request
 func (h *GymHandler) GetGym(c echo.Context) error {
-	idParam := c.Param("id")
-	id, err := strconv.ParseInt(idParam, 10, 64)
+	ctx := c.Request().Context()
+	param := c.Param("id")
+	id, err := strconv.Atoi(param)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error":   "invalid_gym_id",
-			"message": "Invalid gym ID format",
-		})
+		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	gym, err := h.gu.GetGym(c.Request().Context(), gym.ID(id))
+	gym, err := h.gu.GetGym(ctx, gym.ID(id))
 	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{
-			"error":   "gym_not_found",
-			"message": "Gym not found",
-		})
+		return c.JSON(http.StatusNotFound, err.Error())
 	}
 
 	response := ToGymResponse(*gym)
@@ -133,7 +120,7 @@ func (h *GymHandler) GetRecommendedGyms(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-// CreateGym handles POST /gyms request  
+// CreateGym handles POST /gyms request
 func (h *GymHandler) CreateGym(c echo.Context) error {
 	// TODO: Create gym
 	return c.JSON(http.StatusCreated, map[string]string{
@@ -145,7 +132,7 @@ func (h *GymHandler) CreateGym(c echo.Context) error {
 func (h *GymHandler) UpdateGym(c echo.Context) error {
 	// TODO: Update gym
 	return c.JSON(http.StatusOK, map[string]string{
-		"message": "Gym updated", 
+		"message": "Gym updated",
 	})
 }
 

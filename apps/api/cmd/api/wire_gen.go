@@ -12,12 +12,15 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"gogym-api/configs"
+	"gogym-api/internal/adapter/auth"
 	"gogym-api/internal/adapter/db/gorm"
 	"gogym-api/internal/adapter/http/handler"
 	"gogym-api/internal/adapter/http/router"
 	"gogym-api/internal/di"
 	"gogym-api/internal/infra/db"
 	"gogym-api/internal/usecase/gym"
+	"gogym-api/internal/usecase/review"
+	"gogym-api/internal/usecase/user"
 	"log/slog"
 )
 
@@ -53,10 +56,15 @@ func InitServer(ctx context.Context, config *configs.Config, logger *slog.Logger
 	}
 	repository := gorm.NewGymRepository(gormDB)
 	tagRepository := gorm.NewTagRepository(gormDB)
-	useCase := gym.NewUseCase(repository, tagRepository, logger)
-	gymHandler := handler.NewGymHandler(useCase)
-	userHandler := handler.NewUserHandler()
-	reviewHandler := handler.NewReviewHandler()
+	gymUseCase := gym.NewUseCase(repository, tagRepository, logger)
+	gymHandler := handler.NewGymHandler(gymUseCase)
+	userRepository := gorm.NewUserRepository(gormDB)
+	passwordService := auth.NewPasswordService()
+	useCase := user.NewInteractor(userRepository, passwordService)
+	userHandler := handler.NewUserHandler(useCase)
+	reviewRepository := gorm.NewReviewRepository(gormDB)
+	reviewUseCase := review.NewUseCase(reviewRepository)
+	reviewHandler := handler.NewReviewHandler(reviewUseCase)
 	favoriteHandler := handler.NewFavoriteHandler()
 	echo := NewConfiguredEcho(gymHandler, userHandler, reviewHandler, favoriteHandler)
 	server := &Server{

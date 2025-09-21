@@ -4,7 +4,6 @@
 package gorm
 
 import (
-	"fmt"
 	"gogym-api/internal/adapter/db/gorm/record"
 	"gogym-api/internal/domain/gym"
 )
@@ -23,12 +22,11 @@ func ToGymEntity(r *record.GymRecord) *gym.Gym {
 			Latitude:  r.LocationLatitude,
 			Longitude: r.LocationLongitude,
 		},
-		Address:       r.Address,
-		City:          r.City,
-		Prefecture:    r.Prefecture,
-		PostalCode:    r.PostalCode,
-		AverageRating: r.AverageRating,
-		ReviewCount:   r.ReviewCount,
+		Address:    r.Address,
+		City:       r.City,
+		Prefecture: r.Prefecture,
+		PostalCode: r.PostalCode,
+		IsActive:   r.IsActive,
 	}
 
 	// タグが存在する場合は変換する
@@ -44,22 +42,17 @@ func ToGymEntity(r *record.GymRecord) *gym.Gym {
 
 // FromGymEntity はGymドメインエンティティをGymRecordに変換する
 func FromGymEntity(g *gym.Gym) *record.GymRecord {
-	// POINT型文字列を生成 (latitude longitude順)
-	locationStr := fmt.Sprintf("POINT(%f %f)", g.Location.Latitude, g.Location.Longitude)
-	
 	gymRecord := &record.GymRecord{
 		ID:                int64(g.ID),
 		Name:              g.Name,
 		Description:       g.Description,
-		Location:          locationStr,
 		LocationLatitude:  g.Location.Latitude,
 		LocationLongitude: g.Location.Longitude,
 		Address:           g.Address,
 		City:              g.City,
 		Prefecture:        g.Prefecture,
 		PostalCode:        g.PostalCode,
-		AverageRating:     g.AverageRating,
-		ReviewCount:       g.ReviewCount,
+		IsActive:          g.IsActive,
 		CreatedAt:         g.CreatedAt,
 		UpdatedAt:         g.UpdatedAt,
 	}
@@ -103,7 +96,6 @@ func ToFavoriteEntity(r *record.FavoriteRecord) *gym.Favorite {
 		BaseEntity: gym.BaseEntity{
 			ID:        gym.ID(r.ID),
 			CreatedAt: r.CreatedAt,
-			UpdatedAt: r.UpdatedAt,
 		},
 		UserID: gym.ID(r.UserID),
 		GymID:  gym.ID(r.GymID),
@@ -117,6 +109,5 @@ func FromFavoriteEntity(f *gym.Favorite) *record.FavoriteRecord {
 		UserID:    int64(f.UserID),
 		GymID:     int64(f.GymID),
 		CreatedAt: f.CreatedAt,
-		UpdatedAt: f.UpdatedAt,
 	}
 }

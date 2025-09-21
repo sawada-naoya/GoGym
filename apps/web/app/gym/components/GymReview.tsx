@@ -1,14 +1,16 @@
 'use client'
 
 import { useState } from 'react';
-import { Gym } from "@/types/gym";
+import { Gym } from '@/types/gym';
+import { ReviewListResponse } from '@/types/review';
 import GymReviewModal from './GymReviewModal';
 
 type GymReviewProps = {
   gym: Gym;
+  reviews: ReviewListResponse | null;
 };
 
-const GymReview = ({ gym }: GymReviewProps) => {
+const GymReview = ({ gym, reviews }: GymReviewProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleOpenModal = () => {
@@ -34,8 +36,8 @@ const GymReview = ({ gym }: GymReviewProps) => {
             </div>
           </div>
         </div>
-        
-        <button 
+
+        <button
           onClick={handleOpenModal}
           className="w-full text-booking-600 hover:text-booking-700 font-semibold py-2 border-t border-gray-200 transition-colors"
         >
@@ -43,8 +45,9 @@ const GymReview = ({ gym }: GymReviewProps) => {
         </button>
       </div>
 
-      <GymReviewModal 
+      <GymReviewModal
         gym={gym}
+        reviews={reviews}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
       />

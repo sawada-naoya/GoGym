@@ -7,8 +7,8 @@ import (
 )
 
 // RecommendGyms returns recommended gyms based on various criteria
-func (uc *UseCase) RecommendGyms(ctx context.Context, req RecommendGymRequest) (*RecommendGymsResponse, error) {
-	uc.logger.InfoContext(ctx, "getting recommended gyms",
+func (gu *GymUseCase) RecommendGyms(ctx context.Context, req RecommendGymRequest) (*RecommendGymsResponse, error) {
+	gu.logger.InfoContext(ctx, "getting recommended gyms",
 		"user_location", req.UserLocation,
 		"limit", req.Limit,
 	)
@@ -27,41 +27,45 @@ func (uc *UseCase) RecommendGyms(ctx context.Context, req RecommendGymRequest) (
 		},
 	}
 
-	result, err := uc.gymRepo.Search(ctx, searchQuery)
+	result, err := gu.gymRepo.Search(ctx, searchQuery)
 	if err != nil {
-		uc.logger.ErrorContext(ctx, "failed to get recommended gyms", "error", err)
+		gu.logger.ErrorContext(ctx, "failed to get recommended gyms", "error", err)
 		return nil, err
 	}
 
 	gyms := result.Items
 
-	for i := range gyms {
-		if gyms[i].AverageRating == nil {
-			// Generate consistent rating based on gym ID
-			rating := 3.5 + float32((gyms[i].ID%10))*0.15
-			gyms[i].AverageRating = &rating
-		}
-		if gyms[i].ReviewCount == 0 {
-			// Generate consistent review count based on gym ID
-			gyms[i].ReviewCount = int(gyms[i].ID%50) + 10
+	gymIDs := make([]gym.ID, len(gyms))
+	for i, g := range gyms {
+		gymIDs[i] = g.ID
+	}
+
+	reviewStats, err := gu.gymRepo.GetReviewStatsForGyms(ctx, gymIDs)
+	if err != nil {
+		gu.logger.ErrorContext(ctx, "failed to get review stats", "error", err)
+	} else {
+		for i := range gyms {
+			if stats, exists := reviewStats[gyms[i].ID]; exists {
+				gyms[i].AverageRating = stats.AverageRating
+				gyms[i].ReviewCount = stats.ReviewCount
+			}
 		}
 	}
 
-	// Sort by rating (highest first), then by review count
 	sort.Slice(gyms, func(i, j int) bool {
-		ratingI := float32(0)
-		if gyms[i].AverageRating != nil {
-			ratingI = *gyms[i].AverageRating
-		}
-		ratingJ := float32(0)
-		if gyms[j].AverageRating != nil {
-			ratingJ = *gyms[j].AverageRating
-		}
-
-		if ratingI == ratingJ {
+		if gyms[i].AverageRating != nil && gyms[j].AverageRating != nil {
+			if *gyms[i].AverageRating != *gyms[j].AverageRating {
+				return *gyms[i].AverageRating > *gyms[j].AverageRating
+			}
 			return gyms[i].ReviewCount > gyms[j].ReviewCount
 		}
-		return ratingI > ratingJ
+		if gyms[i].AverageRating != nil && gyms[j].AverageRating == nil {
+			return true
+		}
+		if gyms[i].AverageRating == nil && gyms[j].AverageRating != nil {
+			return false
+		}
+		return gyms[i].ID < gyms[j].ID
 	})
 
 	return &RecommendGymsResponse{

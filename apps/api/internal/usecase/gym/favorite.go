@@ -6,8 +6,8 @@ import (
 )
 
 // AddFavorite adds a gym to user's favorites
-func (uc *UseCase) AddFavorite(ctx context.Context, req FavoriteGymRequest) error {
-	uc.logger.InfoContext(ctx, "adding favorite gym",
+func (gu *GymUseCase) AddFavorite(ctx context.Context, req FavoriteGymRequest) error {
+	gu.logger.InfoContext(ctx, "adding favorite gym",
 		"user_id", req.UserID,
 		"gym_id", req.GymID,
 	)
@@ -21,19 +21,19 @@ func (uc *UseCase) AddFavorite(ctx context.Context, req FavoriteGymRequest) erro
 	}
 
 	// Check if gym exists
-	_, err := uc.gymRepo.FindByID(ctx, req.GymID)
+	_, err := gu.gymRepo.FindByID(ctx, req.GymID)
 	if err != nil {
-		uc.logger.ErrorContext(ctx, "gym not found", "gym_id", req.GymID, "error", err)
+		gu.logger.ErrorContext(ctx, "gym not found", "gym_id", req.GymID, "error", err)
 		return gym.NewDomainErrorWithCause(err, "gym_not_found", "gym not found")
 	}
 
 	// Add to favorites
-	if err := uc.favoriteRepo.AddFavorite(ctx, req.UserID, req.GymID); err != nil {
-		uc.logger.ErrorContext(ctx, "failed to add favorite", "error", err)
+	if err := gu.favoriteRepo.AddFavorite(ctx, req.UserID, req.GymID); err != nil {
+		gu.logger.ErrorContext(ctx, "failed to add favorite", "error", err)
 		return gym.NewDomainErrorWithCause(err, "favorite_add_failed", "failed to add favorite")
 	}
 
-	uc.logger.InfoContext(ctx, "favorite gym added successfully",
+	gu.logger.InfoContext(ctx, "favorite gym added successfully",
 		"user_id", req.UserID,
 		"gym_id", req.GymID,
 	)
@@ -42,8 +42,8 @@ func (uc *UseCase) AddFavorite(ctx context.Context, req FavoriteGymRequest) erro
 }
 
 // RemoveFavorite removes a gym from user's favorites
-func (uc *UseCase) RemoveFavorite(ctx context.Context, req FavoriteGymRequest) error {
-	uc.logger.InfoContext(ctx, "removing favorite gym",
+func (gu *GymUseCase) RemoveFavorite(ctx context.Context, req FavoriteGymRequest) error {
+	gu.logger.InfoContext(ctx, "removing favorite gym",
 		"user_id", req.UserID,
 		"gym_id", req.GymID,
 	)
@@ -57,12 +57,12 @@ func (uc *UseCase) RemoveFavorite(ctx context.Context, req FavoriteGymRequest) e
 	}
 
 	// Remove from favorites
-	if err := uc.favoriteRepo.RemoveFavorite(ctx, req.UserID, req.GymID); err != nil {
-		uc.logger.ErrorContext(ctx, "failed to remove favorite", "error", err)
+	if err := gu.favoriteRepo.RemoveFavorite(ctx, req.UserID, req.GymID); err != nil {
+		gu.logger.ErrorContext(ctx, "failed to remove favorite", "error", err)
 		return gym.NewDomainErrorWithCause(err, "favorite_remove_failed", "failed to remove favorite")
 	}
 
-	uc.logger.InfoContext(ctx, "favorite gym removed successfully",
+	gu.logger.InfoContext(ctx, "favorite gym removed successfully",
 		"user_id", req.UserID,
 		"gym_id", req.GymID,
 	)
@@ -71,8 +71,8 @@ func (uc *UseCase) RemoveFavorite(ctx context.Context, req FavoriteGymRequest) e
 }
 
 // GetFavoriteGyms retrieves user's favorite gyms
-func (uc *UseCase) GetFavoriteGyms(ctx context.Context, req GetFavoriteGymsRequest) (*GetFavoriteGymsResponse, error) {
-	uc.logger.InfoContext(ctx, "getting favorite gyms",
+func (gu *GymUseCase) GetFavoriteGyms(ctx context.Context, req GetFavoriteGymsRequest) (*GetFavoriteGymsResponse, error) {
+	gu.logger.InfoContext(ctx, "getting favorite gyms",
 		"user_id", req.UserID,
 		"limit", req.Limit,
 	)
@@ -91,9 +91,9 @@ func (uc *UseCase) GetFavoriteGyms(ctx context.Context, req GetFavoriteGymsReque
 		Limit:  req.Limit,
 	}
 
-	result, err := uc.favoriteRepo.GetFavoriteGyms(ctx, req.UserID, pagination)
+	result, err := gu.favoriteRepo.GetFavoriteGyms(ctx, req.UserID, pagination)
 	if err != nil {
-		uc.logger.ErrorContext(ctx, "failed to get favorite gyms", "error", err)
+		gu.logger.ErrorContext(ctx, "failed to get favorite gyms", "error", err)
 		return nil, gym.NewDomainErrorWithCause(err, "favorites_fetch_failed", "failed to get favorite gyms")
 	}
 
@@ -105,10 +105,10 @@ func (uc *UseCase) GetFavoriteGyms(ctx context.Context, req GetFavoriteGymsReque
 }
 
 // IsFavorite checks if a gym is in user's favorites
-func (uc *UseCase) IsFavorite(ctx context.Context, userID gym.ID, gymID gym.ID) (bool, error) {
+func (gu *GymUseCase) IsFavorite(ctx context.Context, userID gym.ID, gymID gym.ID) (bool, error) {
 	if userID == 0 || gymID == 0 {
 		return false, gym.NewDomainError(gym.ErrInvalidInput, "invalid_ids", "user ID and gym ID are required")
 	}
 
-	return uc.favoriteRepo.IsFavorite(ctx, userID, gymID)
+	return gu.favoriteRepo.IsFavorite(ctx, userID, gymID)
 }

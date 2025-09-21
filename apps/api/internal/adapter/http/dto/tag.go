@@ -1,16 +1,16 @@
-package model
+package dto
 
 import "time"
 
-// Tag represents a gym tag/category
-type Tag struct {
+// TagResponseFull represents a gym tag/category response with relations
+type TagResponseFull struct {
 	ID        int64     `json:"id"`
 	Name      string    `json:"name"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 
 	// Relations (TODO: implement)
-	Gyms []Gym `json:"gyms,omitempty"`
+	Gyms []GymResponse `json:"gyms,omitempty"`
 }
 
 // GymTag represents many-to-many relationship between gyms and tags

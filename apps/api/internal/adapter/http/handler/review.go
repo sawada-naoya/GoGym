@@ -2,52 +2,59 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
+
+	"gogym-api/internal/adapter/http/dto"
+	"gogym-api/internal/usecase/review"
 
 	"github.com/labstack/echo/v4"
 )
 
 type ReviewHandler struct {
-	// TODO: Add review usecase
+	ru *review.UseCase
 }
 
-func NewReviewHandler() *ReviewHandler {
-	return &ReviewHandler{}
+func NewReviewHandler(ru *review.UseCase) *ReviewHandler {
+	return &ReviewHandler{
+		ru: ru,
+	}
 }
 
 // GET /api/v1/gyms/:gym_id/reviews
 func (h *ReviewHandler) GetReviews(c echo.Context) error {
-	// TODO: Get reviews for gym
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"reviews": []interface{}{},
-	})
-}
+	ctx := c.Request().Context()
+	gymID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		return c.NoContent(http.StatusBadRequest)
+	}
 
-// POST /api/v1/gyms/:gym_id/reviews
-func (h *ReviewHandler) CreateReview(c echo.Context) error {
-	// TODO: Create new review
-	return c.JSON(http.StatusCreated, map[string]string{
-		"message": "Review created",
-	})
-}
+	cursor := c.QueryParam("cursor")
+	limit := 10
+	if v := c.QueryParam("limit"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil {
+			limit = n
+		}
+	}
 
-// GET /api/v1/reviews/:id
-func (h *ReviewHandler) GetReview(c echo.Context) error {
-	// TODO: Get review by ID
-	return c.JSON(http.StatusOK, map[string]interface{}{})
-}
+	reviews, next, err := h.ru.GetReviewsByGymID(ctx, gymID, cursor, limit)
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
 
-// PUT /api/v1/reviews/:id
-func (h *ReviewHandler) UpdateReview(c echo.Context) error {
-	// TODO: Update review
-	return c.JSON(http.StatusOK, map[string]string{
-		"message": "Review updated",
-	})
-}
+	reviewDTOs := make([]dto.ReviewResponse, len(reviews))
+	for i, review := range reviews {
+		reviewDTOs[i] = dto.FromReviewEntity(&review)
+	}
 
-// DELETE /api/v1/reviews/:id
-func (h *ReviewHandler) DeleteReview(c echo.Context) error {
-	// TODO: Delete review
-	return c.JSON(http.StatusOK, map[string]string{
-		"message": "Review deleted",
-	})
+	var nextCursor *string
+	if next != "" {
+		nextCursor = &next
+	}
+
+	response := dto.ReviewListResponse{
+		Reviews:    reviewDTOs,
+		NextCursor: nextCursor,
+	}
+
+	return c.JSON(http.StatusOK, response)
 }

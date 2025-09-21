@@ -1,54 +1,74 @@
 // API base URL
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+export type Query = Record<string, string | number | boolean | undefined>;
 
-export interface RequestOptions {
-  query?: Record<string, string | number | boolean>;
-  headers?: Record<string, string>;
+export type RequestOptions = Omit<RequestInit, "method" | "body"> & {
   body?: unknown;
-  cache?: RequestCache; // 'no-store' | 'force-cache' など
-}
+  query?: Query;
+};
 
-// queryパラメータをURLエンコードして文字列に変換するヘルパー関数
-// 例: { search: "gym", page: 2 } → "search=gym&page=2"
-const buildQueryParams = (query?: RequestOptions["query"]): string => {
+export type ApiResponse<T> = {
+  ok: boolean;
+  status: number;
+  data: T | null;
+};
+
+const buildQueryParams = (query?: Query): string => {
   if (!query) return "";
   const params = new URLSearchParams();
-  Object.entries(query).forEach(([key, value]) => {
+  for (const [key, value] of Object.entries(query)) {
+    if (value === undefined) continue;
     params.append(key, String(value));
-  });
+  }
   return params.toString();
 };
 
-const request = async <T = any>(endpoint: string, method: HttpMethod, options: RequestOptions = {}): Promise<Response> => {
-  let url = `${API_BASE_URL}${endpoint}`;
-  const qs = buildQueryParams(options.query);
-  if (qs) url += `?${qs}`;
+const parseJsonIfAny = async (res: Response): Promise<unknown | undefined> => {
+  const ct = res.headers.get("Content-Type") || "";
+  if (!ct.includes("application/json")) return undefined;
+  try {
+    const text = await res.text();
+    if (!text) return undefined;
+    return JSON.parse(text);
+  } catch {
+    return undefined;
+  }
+};
 
-  const config: RequestInit = {
+const request = async <T>(endpoint: string, method: HttpMethod, options: RequestOptions = {}): Promise<ApiResponse<T>> => {
+  let url = endpoint;
+  const qs = buildQueryParams(options.query);
+  if (qs) url += (url.includes("?") ? "&" : "?") + qs;
+
+  const res = await fetch(url, {
+    ...options,
     method,
     headers: {
       "Content-Type": "application/json",
       ...(options.headers ?? {}),
     },
-    cache: options.cache ?? "no-store",
-  };
+    body: method !== "GET" && options.body !== undefined ? JSON.stringify(options.body) : undefined,
+  });
 
-  if (method !== "GET" && options.body) {
-    config.body = JSON.stringify(options.body);
+  let data: T | null = null;
+  try {
+    data = await res.json();
+  } catch {
+    data = null;
   }
 
-  return fetch(url, config);
+  return { ok: res.ok, status: res.status, data };
 };
 
-// CRUDエイリアスを大文字関数で用意
+// CRUDエイリアス
 export const GET = <T>(endpoint: string, options?: RequestOptions) => request<T>(endpoint, "GET", options);
 
-export const POST = <T>(endpoint: string, body?: unknown, options?: RequestOptions) => request<T>(endpoint, "POST", { ...options, body });
+export const POST = <T>(endpoint: string, options?: RequestOptions) => request<T>(endpoint, "POST", options);
 
-export const PUT = <T>(endpoint: string, body?: unknown, options?: RequestOptions) => request<T>(endpoint, "PUT", { ...options, body });
+export const PUT = <T>(endpoint: string, options?: RequestOptions) => request<T>(endpoint, "PUT", options);
 
-export const PATCH = <T>(endpoint: string, body?: unknown, options?: RequestOptions) => request<T>(endpoint, "PATCH", { ...options, body });
+export const PATCH = <T>(endpoint: string, options?: RequestOptions) => request<T>(endpoint, "PATCH", options);
 
-export const DELETE = <T>(endpoint: string, options?: RequestOptions) => request<T>(endpoint, "DELETE", options);
+export const DELETE_ = <T>(endpoint: string, options?: RequestOptions) => request<T>(endpoint, "DELETE", options);

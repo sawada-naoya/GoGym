@@ -6,13 +6,13 @@ import (
 )
 
 // CreateGym creates a new gym
-func (uc *UseCase) CreateGym(ctx context.Context, req CreateGymRequest) (*gym.Gym, error) {
-	uc.logger.InfoContext(ctx, "creating gym", "name", req.Name, "address", req.Address)
+func (gu *GymUseCase) CreateGym(ctx context.Context, req CreateGymRequest) (*gym.Gym, error) {
+	gu.logger.InfoContext(ctx, "creating gym", "name", req.Name, "address", req.Address)
 
 	// Create gym entity
 	newGym, err := gym.NewGym(req.Name, req.Address, req.Location)
 	if err != nil {
-		uc.logger.ErrorContext(ctx, "invalid gym data", "error", err)
+		gu.logger.ErrorContext(ctx, "invalid gym data", "error", err)
 		return nil, err
 	}
 
@@ -32,28 +32,28 @@ func (uc *UseCase) CreateGym(ctx context.Context, req CreateGymRequest) (*gym.Gy
 
 	// Handle tags
 	if len(req.TagNames) > 0 {
-		tags, err := uc.getOrCreateTags(ctx, req.TagNames)
+		tags, err := gu.getOrCreateTags(ctx, req.TagNames)
 		if err != nil {
-			uc.logger.ErrorContext(ctx, "failed to handle tags", "error", err)
+			gu.logger.ErrorContext(ctx, "failed to handle tags", "error", err)
 			return nil, err
 		}
 		newGym.Tags = tags
 	}
 
 	// Save gym
-	if err := uc.gymRepo.Create(ctx, newGym); err != nil {
-		uc.logger.ErrorContext(ctx, "failed to create gym", "error", err)
+	if err := gu.gymRepo.Create(ctx, newGym); err != nil {
+		gu.logger.ErrorContext(ctx, "failed to create gym", "error", err)
 		return nil, gym.NewDomainErrorWithCause(err, "create_failed", "failed to create gym")
 	}
 
-	uc.logger.InfoContext(ctx, "gym created successfully", "gym_id", newGym.ID)
+	gu.logger.InfoContext(ctx, "gym created successfully", "gym_id", newGym.ID)
 	return newGym, nil
 }
 
 // getOrCreateTags retrieves existing tags or creates new ones
-func (uc *UseCase) getOrCreateTags(ctx context.Context, tagNames []string) ([]gym.Tag, error) {
+func (gu *GymUseCase) getOrCreateTags(ctx context.Context, tagNames []string) ([]gym.Tag, error) {
 	// Find existing tags
-	existing, err := uc.tagRepo.FindByNames(ctx, tagNames)
+	existing, err := gu.tagRepo.FindByNames(ctx, tagNames)
 	if err != nil {
 		return nil, gym.NewDomainErrorWithCause(err, "tag_search_failed", "failed to search tags")
 	}
@@ -82,7 +82,7 @@ func (uc *UseCase) getOrCreateTags(ctx context.Context, tagNames []string) ([]gy
 
 	// Save new tags if any
 	if len(newTags) > 0 {
-		if err := uc.tagRepo.CreateMany(ctx, newTags); err != nil {
+		if err := gu.tagRepo.CreateMany(ctx, newTags); err != nil {
 			return nil, gym.NewDomainErrorWithCause(err, "tag_create_failed", "failed to create tags")
 		}
 	}
@@ -91,12 +91,12 @@ func (uc *UseCase) getOrCreateTags(ctx context.Context, tagNames []string) ([]gy
 }
 
 // GetAllTags retrieves all available tags
-func (uc *UseCase) GetAllTags(ctx context.Context) ([]gym.Tag, error) {
-	uc.logger.InfoContext(ctx, "getting all tags")
+func (gu *GymUseCase) GetAllTags(ctx context.Context) ([]gym.Tag, error) {
+	gu.logger.InfoContext(ctx, "getting all tags")
 
-	tags, err := uc.tagRepo.FindAll(ctx)
+	tags, err := gu.tagRepo.FindAll(ctx)
 	if err != nil {
-		uc.logger.ErrorContext(ctx, "failed to get tags", "error", err)
+		gu.logger.ErrorContext(ctx, "failed to get tags", "error", err)
 		return nil, gym.NewDomainErrorWithCause(err, "tags_fetch_failed", "failed to fetch tags")
 	}
 

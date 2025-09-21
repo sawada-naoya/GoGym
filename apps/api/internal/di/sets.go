@@ -14,6 +14,7 @@ import (
 	"gogym-api/internal/infra/db"
 	userUC "gogym-api/internal/usecase/user"
 	gymUC "gogym-api/internal/usecase/gym"
+	reviewUC "gogym-api/internal/usecase/review"
 )
 
 // =============================================================================
@@ -26,18 +27,19 @@ import (
 var InfrastructureSet = wire.NewSet(
 	// 設定から各コンポーネント用の設定を抽出
 	ProvideDatabaseConfig,
-	
+
 	// データベース接続
 	db.NewGormDB,
-	
+
 	// 認証サービス（パスワードハッシュ化、JWT生成）
 	auth.NewPasswordService,
 	auth.NewTokenService,
-	
+
 	// インターフェースバインディング（最小限）
+	wire.Bind(new(userUC.PasswordHasher), new(*auth.PasswordService)),
 	wire.Bind(new(userUC.PasswordService), new(*auth.PasswordService)),
 	wire.Bind(new(userUC.TokenService), new(*auth.TokenService)),
-	
+
 	// 将来の拡張: Redis, S3等
 	// redis.NewRedisClient,
 	// s3.NewS3Service,
@@ -61,7 +63,8 @@ var RepositorySet = wire.NewSet(
 	gormAdapter.NewRefreshTokenRepository,
 	gormAdapter.NewGymRepository,
 	gormAdapter.NewTagRepository,
-	
+	gormAdapter.NewReviewRepository,
+
 	// 将来の拡張
 	// redisAdapter.NewCacheRepository,
 	// s3Adapter.NewFileRepository,
@@ -76,12 +79,13 @@ var RepositorySet = wire.NewSet(
 // ドメインロジックを実装するユースケース群
 var UseCaseSet = wire.NewSet(
 	// UseCase実装
-	userUC.NewUseCase,
+	userUC.NewInteractor,
 	gymUC.NewUseCase,
+	reviewUC.NewUseCase,
 )
 
 // =============================================================================
-// 4. Handler Set (プレゼンテーション層)  
+// 4. Handler Set (プレゼンテーション層)
 // UseCase → HTTP Handlers
 // =============================================================================
 
@@ -100,7 +104,7 @@ var HandlerSet = wire.NewSet(
 // Auth + その他 → Middleware implementations
 // =============================================================================
 
-// MiddlewareSet はHTTPミドルウェア層を提供  
+// MiddlewareSet はHTTPミドルウェア層を提供
 //認証、ログ、CORS等のミドルウェア群
 var MiddlewareSet = wire.NewSet(
 	// TODO: Middleware実装を追加
@@ -144,6 +148,7 @@ var ServerSet = wire.NewSet(
 // RepositorySetで定義された関数が自動的に適切なインターフェースを返す
 var InterfaceSet = wire.NewSet(
 	// Service interfaces (認証サービス)
+	wire.Bind(new(userUC.PasswordHasher), new(*auth.PasswordService)),
 	wire.Bind(new(userUC.PasswordService), new(*auth.PasswordService)),
 	wire.Bind(new(userUC.TokenService), new(*auth.TokenService)),
 )
@@ -156,7 +161,7 @@ var InterfaceSet = wire.NewSet(
 // Clean Architectureの依存フローに従った順序で構築
 var AllSets = wire.NewSet(
 	InfrastructureSet, // 1. インフラ層
-	RepositorySet,     // 2. リポジトリ層  
+	RepositorySet,     // 2. リポジトリ層
 	UseCaseSet,        // 3. ユースケース層
 	HandlerSet,        // 4. ハンドラー層
 	MiddlewareSet,     // 5. ミドルウェア層

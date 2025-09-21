@@ -6,8 +6,8 @@ import (
 )
 
 // SearchGyms searches gyms based on criteria
-func (uc *UseCase) SearchGyms(ctx context.Context, req SearchGymRequest) (*SearchGymsResponse, error) {
-	uc.logger.InfoContext(ctx, "searching gyms",
+func (gu *GymUseCase) SearchGyms(ctx context.Context, req SearchGymRequest) (*SearchGymsResponse, error) {
+	gu.logger.InfoContext(ctx, "searching gyms",
 		"query", req.Query,
 		"location", req.Location,
 		"radius_m", req.RadiusM,
@@ -35,9 +35,9 @@ func (uc *UseCase) SearchGyms(ctx context.Context, req SearchGymRequest) (*Searc
 		},
 	}
 
-	result, err := uc.gymRepo.Search(ctx, searchQuery)
+	result, err := gu.gymRepo.Search(ctx, searchQuery)
 	if err != nil {
-		uc.logger.ErrorContext(ctx, "failed to search gyms", "error", err)
+		gu.logger.ErrorContext(ctx, "failed to search gyms", "error", err)
 		return nil, gym.NewDomainErrorWithCause(err, "search_failed", "failed to search gyms")
 	}
 
@@ -46,21 +46,4 @@ func (uc *UseCase) SearchGyms(ctx context.Context, req SearchGymRequest) (*Searc
 		NextCursor: &result.NextCursor,
 		HasMore:    result.HasMore,
 	}, nil
-}
-
-// GetGym retrieves a gym by ID
-func (uc *UseCase) GetGym(ctx context.Context, id gym.ID) (*gym.Gym, error) {
-	uc.logger.InfoContext(ctx, "getting gym", "gym_id", id)
-
-	if id == 0 {
-		return nil, gym.NewDomainError(gym.ErrInvalidInput, "invalid_gym_id", "gym ID is required")
-	}
-
-	foundGym, err := uc.gymRepo.FindByID(ctx, id)
-	if err != nil {
-		uc.logger.ErrorContext(ctx, "failed to get gym", "gym_id", id, "error", err)
-		return nil, gym.NewDomainErrorWithCause(err, "gym_not_found", "gym not found")
-	}
-
-	return foundGym, nil
 }

@@ -69,7 +69,7 @@ func ToRecommendResponse(result *gymUsecase.RecommendGymsResponse) dto.SearchGym
 	return response
 }
 
-// ToGymResponse はジムドメインエンティティをHTTP DTOに変換する
+// ToGymResponse はジムドメインエンティティをHTTP DTOに変換する（軽量版）
 func ToGymResponse(gym gym.Gym) dto.GymResponse {
 	tags := make([]dto.TagResponse, len(gym.Tags))
 	for i, tag := range gym.Tags {
@@ -88,10 +88,18 @@ func ToGymResponse(gym gym.Gym) dto.GymResponse {
 		City:          gym.City,
 		Prefecture:    gym.Prefecture,
 		PostalCode:    gym.PostalCode,
+		IsActive:      gym.IsActive,
 		Tags:          tags,
 		AverageRating: gym.AverageRating,
 		ReviewCount:   gym.ReviewCount,
 		CreatedAt:     gym.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:     gym.UpdatedAt.Format(time.RFC3339),
 	}
+}
+
+// ToGymDetailResponse はジム詳細用のHTTP DTOに変換する（完全版）
+func ToGymDetailResponse(detail gymUsecase.GymDetailResponse) dto.GymResponse {
+	// 詳細画面用のレスポンス - 将来的にはreviews, amenities等を含む専用DTOを作成予定
+	// 現在は基本のGymResponseを再利用
+	return ToGymResponse(detail.Gym)
 }

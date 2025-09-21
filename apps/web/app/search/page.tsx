@@ -77,7 +77,7 @@ const SearchResults = async ({ searchParams }: { searchParams: SearchGymParams }
           <h1 className="text-3xl font-bold text-gray-900 mb-2">{hasSearchQuery ? "検索結果" : "おすすめのジム"}</h1>
           <p className="text-gray-600">{hasSearchQuery ? "条件に合うジムが見つかりました" : "評価の高い順に表示しています"}</p>
         </div>
-        <div className="text-sm text-gray-600">{gyms.length}件のジムが見つかりました</div>
+        <div className="text-sm text-gray-600">{gyms?.length || 0}件のジムが見つかりました</div>
       </div>
 
       {/* フィルターバー（今後実装予定） */}
@@ -91,12 +91,12 @@ const SearchResults = async ({ searchParams }: { searchParams: SearchGymParams }
       </div>
 
       {/* ジム一覧 */}
-      {gyms.length > 0 ? (
+      {gyms && gyms.length > 0 ? (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {gyms.map((gym) => (
+            {gyms?.map((gym) => (
               <GymCard key={gym.id} gym={gym} />
-            ))}
+            )) || []}
           </div>
 
           {/* もっと見るボタン */}
