@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	dom "gogym-api/internal/domain/user"
+	"log/slog"
 	"time"
 )
 
@@ -17,6 +18,7 @@ func NewInteractor(r Repository, h PasswordHasher, i IDProvider) UseCase {
 }
 
 func (i *interactor) SignUp(ctx context.Context, req SignUpRequest) error {
+	slog.InfoContext(ctx, "SignUp UseCase", "Name", req.Name, "Email", req.Email)
 	// emailのバリデーション
 	email, err := dom.NewEmail(req.Email)
 	if err != nil {
