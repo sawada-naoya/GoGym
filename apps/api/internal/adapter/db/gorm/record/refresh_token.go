@@ -17,7 +17,7 @@ type RefreshTokenRecord struct {
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 
 	// Relations
-	User *UserRecord `gorm:"foreignKey:UserID"`
+	User *User `gorm:"foreignKey:UserID"`
 }
 
 func (RefreshTokenRecord) TableName() string {

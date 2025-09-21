@@ -6,8 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// UserRecord represents user table structure（ULID対応）
-type UserRecord struct {
+type User struct {
 	ID           string         `gorm:"primaryKey;type:char(26)"` // ULID用
 	Email        string         `gorm:"unique;not null;index"`
 	PasswordHash string         `gorm:"not null"`
@@ -15,8 +14,4 @@ type UserRecord struct {
 	CreatedAt    time.Time      `gorm:"autoCreateTime"`
 	UpdatedAt    time.Time      `gorm:"autoUpdateTime"`
 	DeletedAt    gorm.DeletedAt `gorm:"index"`
-}
-
-func (UserRecord) TableName() string {
-	return "users"
 }

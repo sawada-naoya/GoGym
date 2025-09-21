@@ -19,25 +19,15 @@ func NewUserHandler(usecase uc.UseCase) *UserHandler {
 // POST /api/v1/user
 func (h *UserHandler) SignUp(c echo.Context) error {
 	ctx := c.Request().Context()
-	var body struct {
-		Name     string `json:"name"`
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
-	if err := c.Bind(&body); err != nil {
+	var req uc.SignUpRequest
+	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	req := uc.SignUpRequest{
-		Name: body.Name, Email: body.Email, Password: body.Password,
-	}
-
-	res, err := h.uc.SignUp(ctx, req)
+	err := h.uc.SignUp(ctx, req)
 	if err != nil {
 		return c.JSON(http.StatusUnprocessableEntity, map[string]string{"error": err.Error()})
 	}
 
-	return c.JSON(http.StatusCreated, map[string]any{
-		"userId": res.UserID,
-	})
+	return c.JSON(http.StatusCreated, map[string]string{"message": "User created successfully"})
 }

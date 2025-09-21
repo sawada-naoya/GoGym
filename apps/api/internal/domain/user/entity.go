@@ -8,7 +8,7 @@ import (
 )
 
 type User struct {
-	ID           ID        // ULID識別子
+	ID           string    // ULID識別子
 	Name         string    // 表示名
 	Email        Email     // メールアドレス（バリューオブジェクト）
 	PasswordHash string    // パスワードハッシュ
@@ -17,7 +17,7 @@ type User struct {
 }
 
 // NewUser: 不変条件を満たすユーザーを生成（IDは自動生成）
-func NewUser(name string, email Email, passwordHash string) (*User, error) {
+func NewUser(id string, name string, email Email, passwordHash string, now time.Time) (*User, error) {
 	n := strings.TrimSpace(name)
 	if n == "" || len(n) > 100 {
 		return nil, NewDomainError(ErrInvalidInput, "invalid_name", "name required and <=100 chars")
@@ -26,11 +26,10 @@ func NewUser(name string, email Email, passwordHash string) (*User, error) {
 		return nil, NewDomainError(ErrInvalidInput, "invalid_password_hash", "password hash required")
 	}
 
-	now := time.Now()
 	return &User{
-		ID:           GenerateID(), // ULIDを自動生成
+		ID:           id,
 		Name:         n,
-		Email:        email, // Emailは既にバリデーション済み
+		Email:        email,
 		PasswordHash: passwordHash,
 		CreatedAt:    now,
 		UpdatedAt:    now,
