@@ -5,11 +5,12 @@ import (
 	"log/slog"
 	"sort"
 
+	"gogym-api/internal/adapter/http/dto"
 	"gogym-api/internal/domain/gym"
 )
 
 // RecommendGyms returns recommended gyms for top page
-func (i *interactor) RecommendGyms(ctx context.Context) ([]gym.Gym, error) {
+func (i *interactor) RecommendGyms(ctx context.Context) ([]dto.GymResponse, error) {
 	slog.InfoContext(ctx, "RecommendGyms UseCase")
 
 	// トップページ用の固定パラメータ
@@ -63,5 +64,11 @@ func (i *interactor) RecommendGyms(ctx context.Context) ([]gym.Gym, error) {
 		return gyms[i].ID < gyms[j].ID
 	})
 
-	return gyms, nil
+	// DTOに変換して返却
+	responses := make([]dto.GymResponse, len(gyms))
+	for i, gym := range gyms {
+		responses[i] = dto.ToGymResponse(gym)
+	}
+
+	return responses, nil
 }

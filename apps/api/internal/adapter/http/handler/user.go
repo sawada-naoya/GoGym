@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"gogym-api/internal/adapter/http/dto"
 	httpError "gogym-api/internal/adapter/http/error"
 	uc "gogym-api/internal/usecase/user"
 
@@ -22,7 +23,7 @@ func NewUserHandler(usecase uc.UseCase) *UserHandler {
 func (h *UserHandler) SignUp(c echo.Context) error {
 	ctx := c.Request().Context()
 	slog.InfoContext(ctx, "SignUp Handler")
-	var req uc.SignUpRequest
+	var req dto.SignUpRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}

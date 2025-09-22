@@ -31,12 +31,11 @@ func (h *GymHandler) GetGym(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	foundGym, err := h.gu.GetGym(ctx, gym.ID(id))
+	response, err := h.gu.GetGym(ctx, gym.ID(id))
 	if err != nil {
 		return c.JSON(http.StatusNotFound, err.Error())
 	}
 
-	response := gu.ToGymResponse(*foundGym)
 	return c.JSON(http.StatusOK, response)
 }
 
@@ -45,15 +44,10 @@ func (h *GymHandler) GetRecommendedGyms(c echo.Context) error {
 	ctx := c.Request().Context()
 	slog.InfoContext(ctx, "GetRecommendedGyms Handler")
 
-	gyms, err := h.gu.RecommendGyms(ctx)
+	responses, err := h.gu.RecommendGyms(ctx)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	response := make([]gu.GymResponse, len(gyms))
-	for i, gym := range gyms {
-		response[i] = gu.ToGymResponse(gym)
-	}
-
-	return c.JSON(http.StatusOK, response)
+	return c.JSON(http.StatusOK, responses)
 }

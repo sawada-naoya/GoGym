@@ -4,11 +4,12 @@ import (
 	"context"
 	"log/slog"
 
+	"gogym-api/internal/adapter/http/dto"
 	dom "gogym-api/internal/domain/gym"
 )
 
 // GetGym returns gym detail by ID
-func (i *interactor) GetGym(ctx context.Context, id dom.ID) (*dom.Gym, error) {
+func (i *interactor) GetGym(ctx context.Context, id dom.ID) (*dto.GymResponse, error) {
 	slog.InfoContext(ctx, "GetGym UseCase", "gym_id", id)
 
 	if id == 0 {
@@ -29,5 +30,7 @@ func (i *interactor) GetGym(ctx context.Context, id dom.ID) (*dom.Gym, error) {
 		}
 	}
 
-	return foundGym, nil
+	// DTOに変換して返却
+	response := dto.ToGymResponse(*foundGym)
+	return &response, nil
 }

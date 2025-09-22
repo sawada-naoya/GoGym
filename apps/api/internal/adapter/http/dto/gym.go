@@ -1,4 +1,4 @@
-package gym
+package dto
 
 import (
 	"gogym-api/internal/domain/gym"
@@ -14,6 +14,7 @@ type GymResponse struct {
 	Tags          []string `json:"tags"`
 }
 
+// ToGymResponse converts domain Gym to DTO GymResponse
 func ToGymResponse(g gym.Gym) GymResponse {
 	description := ""
 	if g.Description != nil {

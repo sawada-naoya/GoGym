@@ -16,7 +16,7 @@ type reviewRepository struct {
 	db *gorm.DB
 }
 
-func NewReviewRepository(db *gorm.DB) reviewUsecase.ReviewRepository {
+func NewReviewRepository(db *gorm.DB) reviewUsecase.Repository {
 	return &reviewRepository{db: db}
 }
 

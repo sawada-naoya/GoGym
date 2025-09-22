@@ -5,7 +5,7 @@ import (
 	"gogym-api/internal/domain/gym"
 )
 
-// usecase → repository
+// usecase → output (repository, external services, etc.)
 type Repository interface {
 	FindAll(ctx context.Context) ([]gym.Tag, error)
 	FindByIDs(ctx context.Context, ids []gym.ID) ([]gym.Tag, error)

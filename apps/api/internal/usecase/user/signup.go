@@ -2,13 +2,15 @@ package user
 
 import (
 	"context"
-	dom "gogym-api/internal/domain/user"
 	"log/slog"
 	"time"
+
+	"gogym-api/internal/adapter/http/dto"
+	dom "gogym-api/internal/domain/user"
 )
 
 // SignUp handles user registration
-func (i *interactor) SignUp(ctx context.Context, req SignUpRequest) error {
+func (i *interactor) SignUp(ctx context.Context, req dto.SignUpRequest) error {
 	slog.InfoContext(ctx, "SignUp UseCase", "Name", req.Name, "Email", req.Email)
 	// emailのバリデーション
 	email, err := dom.NewEmail(req.Email)
