@@ -42,33 +42,6 @@ func (r *gymRepository) FindByID(ctx context.Context, id gym.ID) (*gym.Gym, erro
 	return ToGymEntity(&rec), nil
 }
 
-// FindDetailByID はIDでジムを検索する（完全版 - レビュー、営業時間等含む）
-func (r *gymRepository) FindDetailByID(ctx context.Context, id gym.ID) (*gym.Gym, error) {
-	var gymRecord record.GymRecord
-
-	// 詳細情報込みでクエリ（将来的にはReviews, Hours等もPreload）
-	query := r.db.WithContext(ctx).Omit("location").
-		Preload("Tags")
-		// TODO: 以下を有効化予定
-		// Preload("Reviews").
-		// Preload("Reviews.User").
-		// Preload("Hours").
-		// Preload("Amenities")
-
-	if err := query.First(&gymRecord, id).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, gym.NewDomainError(gym.ErrNotFound, "gym_not_found", "gym not found")
-		}
-		return nil, err
-	}
-
-	// 座標をデフォルト値に設定（テスト用）
-	gymRecord.LocationLatitude = 35.6812
-	gymRecord.LocationLongitude = 139.7671
-
-	return ToGymEntity(&gymRecord), nil
-}
-
 // Search はクエリとページングでジムを検索する
 func (r *gymRepository) Search(ctx context.Context, query gym.SearchQuery) (*gym.PaginatedResult[gym.Gym], error) {
 	var gymRecords []record.GymRecord
@@ -131,72 +104,6 @@ func (r *gymRepository) Search(ctx context.Context, query gym.SearchQuery) (*gym
 		Items:      entities,
 		NextCursor: nextCursor,
 		HasMore:    hasMore,
-	}, nil
-}
-
-// Create は新しいジムを作成する
-func (r *gymRepository) Create(ctx context.Context, gymEntity *gym.Gym) error {
-	gymRecord := FromGymEntity(gymEntity)
-
-	if err := r.db.WithContext(ctx).Create(gymRecord).Error; err != nil {
-		return err
-	}
-
-	// 生成されたIDでエンティティを更新
-	gymEntity.ID = gym.ID(gymRecord.ID)
-	gymEntity.CreatedAt = gymRecord.CreatedAt
-	gymEntity.UpdatedAt = gymRecord.UpdatedAt
-
-	return nil
-}
-
-// Update は既存のジムを更新する
-func (r *gymRepository) Update(ctx context.Context, gymEntity *gym.Gym) error {
-	gymRecord := FromGymEntity(gymEntity)
-
-	if err := r.db.WithContext(ctx).Save(gymRecord).Error; err != nil {
-		return err
-	}
-
-	// 更新タイムスタンプでエンティティを更新
-	gymEntity.UpdatedAt = gymRecord.UpdatedAt
-
-	return nil
-}
-
-// Delete はIDでジムを削除する
-func (r *gymRepository) Delete(ctx context.Context, id gym.ID) error {
-	result := r.db.WithContext(ctx).Delete(&record.GymRecord{}, id)
-	if result.Error != nil {
-		return result.Error
-	}
-
-	if result.RowsAffected == 0 {
-		return gym.NewDomainError(gym.ErrNotFound, "gym_not_found", "gym not found")
-	}
-
-	return nil
-}
-
-func (r *gymRepository) GetReviewStats(ctx context.Context, gymID gym.ID) (*gymUsecase.ReviewStats, error) {
-	var result struct {
-		AverageRating *float32
-		ReviewCount   int64
-	}
-
-	err := r.db.WithContext(ctx).
-		Model(&record.ReviewRecord{}).
-		Select("AVG(rating) as average_rating, COUNT(*) as review_count").
-		Where("gym_id = ? AND deleted_at IS NULL", gymID).
-		Scan(&result).Error
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &gymUsecase.ReviewStats{
-		AverageRating: result.AverageRating,
-		ReviewCount:   int(result.ReviewCount),
 	}, nil
 }
 

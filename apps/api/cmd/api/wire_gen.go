@@ -12,7 +12,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"gogym-api/configs"
-	"gogym-api/internal/adapter/auth"
 	"gogym-api/internal/adapter/db/gorm"
 	"gogym-api/internal/adapter/http/handler"
 	"gogym-api/internal/adapter/http/router"
@@ -56,12 +55,13 @@ func InitServer(ctx context.Context, config *configs.Config, logger *slog.Logger
 	}
 	repository := gorm.NewGymRepository(gormDB)
 	tagRepository := gorm.NewTagRepository(gormDB)
-	gymUseCase := gym.NewUseCase(repository, tagRepository, logger)
-	gymHandler := handler.NewGymHandler(gymUseCase)
+	useCase := gym.NewUseCase(repository, tagRepository, logger)
+	gymHandler := handler.NewGymHandler(useCase)
 	userRepository := gorm.NewUserRepository(gormDB)
-	passwordService := auth.NewPasswordService()
-	useCase := user.NewInteractor(userRepository, passwordService)
-	userHandler := handler.NewUserHandler(useCase)
+	passwordHasher := di.NewPasswordHasher()
+	idProvider := di.NewIDProvider()
+	userUseCase := user.NewInteractor(userRepository, passwordHasher, idProvider)
+	userHandler := handler.NewUserHandler(userUseCase)
 	reviewRepository := gorm.NewReviewRepository(gormDB)
 	reviewUseCase := review.NewUseCase(reviewRepository)
 	reviewHandler := handler.NewReviewHandler(reviewUseCase)

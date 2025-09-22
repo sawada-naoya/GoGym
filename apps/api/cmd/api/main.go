@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"gogym-api/configs"
+	customLog "gogym-api/internal/infra/log"
 )
 
 func main() {
@@ -27,7 +28,11 @@ func main() {
 	}
 
 	// ログ初期化
-	logger := initLogger(config.Server.Env)
+	logger := customLog.New(config.Server.Env)
+
+	// デフォルトのslogハンドラーを設定（他のパッケージでslog.InfoContext等を使えるように）
+	slog.SetDefault(logger)
+
 	logger.Info("Starting GoGym API Server")
 
 	// 依存性注入とサーバー初期化
@@ -70,22 +75,3 @@ func main() {
 	logger.Info("Server shutdown complete")
 }
 
-// initLogger はログレベルと出力形式を設定
-func initLogger(env string) *slog.Logger {
-	var handler slog.Handler
-
-	opts := &slog.HandlerOptions{
-		Level: slog.LevelInfo,
-	}
-
-	// 開発環境では見やすいテキスト形式
-	// 本番環境ではJSON形式
-	if env == "development" {
-		opts.Level = slog.LevelDebug
-		handler = slog.NewTextHandler(os.Stdout, opts)
-	} else {
-		handler = slog.NewJSONHandler(os.Stdout, opts)
-	}
-
-	return slog.New(handler)
-}

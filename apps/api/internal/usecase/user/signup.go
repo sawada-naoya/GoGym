@@ -2,21 +2,16 @@ package user
 
 import (
 	"context"
-	dom "gogym-api/internal/domain/user"
+	"log/slog"
 	"time"
+
+	"gogym-api/internal/adapter/http/dto"
+	dom "gogym-api/internal/domain/user"
 )
 
-type interactor struct {
-	repo       Repository
-	hasher     PasswordHasher
-	iDProvider IDProvider
-}
-
-func NewInteractor(r Repository, h PasswordHasher, i IDProvider) UseCase {
-	return &interactor{repo: r, hasher: h, iDProvider: i}
-}
-
-func (i *interactor) SignUp(ctx context.Context, req SignUpRequest) error {
+// SignUp handles user registration
+func (i *interactor) SignUp(ctx context.Context, req dto.SignUpRequest) error {
+	slog.InfoContext(ctx, "SignUp UseCase", "Name", req.Name, "Email", req.Email)
 	// emailのバリデーション
 	email, err := dom.NewEmail(req.Email)
 	if err != nil {
@@ -39,7 +34,7 @@ func (i *interactor) SignUp(ctx context.Context, req SignUpRequest) error {
 	}
 
 	// ユーザーIDの生成
-	id := i.iDProvider.NewUserID()
+	id := i.idProvider.NewUserID()
 
 	now := time.Now()
 

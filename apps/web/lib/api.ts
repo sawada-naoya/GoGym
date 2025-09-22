@@ -38,7 +38,7 @@ const parseJsonIfAny = async (res: Response): Promise<unknown | undefined> => {
 };
 
 const request = async <T>(endpoint: string, method: HttpMethod, options: RequestOptions = {}): Promise<ApiResponse<T>> => {
-  let url = endpoint;
+  let url = API_BASE_URL ? `${API_BASE_URL}${endpoint}` : endpoint;
   const qs = buildQueryParams(options.query);
   if (qs) url += (url.includes("?") ? "&" : "?") + qs;
 

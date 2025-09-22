@@ -32,12 +32,11 @@ var InfrastructureSet = wire.NewSet(
 	db.NewGormDB,
 
 	// 認証サービス（パスワードハッシュ化、JWT生成）
-	auth.NewPasswordService,
+	NewPasswordHasher,
+	NewIDProvider,
 	auth.NewTokenService,
 
 	// インターフェースバインディング（最小限）
-	wire.Bind(new(userUC.PasswordHasher), new(*auth.PasswordService)),
-	wire.Bind(new(userUC.PasswordService), new(*auth.PasswordService)),
 	wire.Bind(new(userUC.TokenService), new(*auth.TokenService)),
 
 	// 将来の拡張: Redis, S3等
@@ -148,9 +147,10 @@ var ServerSet = wire.NewSet(
 // RepositorySetで定義された関数が自動的に適切なインターフェースを返す
 var InterfaceSet = wire.NewSet(
 	// Service interfaces (認証サービス)
-	wire.Bind(new(userUC.PasswordHasher), new(*auth.PasswordService)),
-	wire.Bind(new(userUC.PasswordService), new(*auth.PasswordService)),
 	wire.Bind(new(userUC.TokenService), new(*auth.TokenService)),
+
+	// Repository interfaces (データアクセス)
+	// tagRepositoryは小文字なので、バインディング不要（自動的に適切なインターフェースを返す）
 )
 
 // =============================================================================

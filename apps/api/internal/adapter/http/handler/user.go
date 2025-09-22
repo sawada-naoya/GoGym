@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"log/slog"
 	"net/http"
 
-	uc "gogym-api/internal/usecase/user"
+	"gogym-api/internal/adapter/http/dto"
 	httpError "gogym-api/internal/adapter/http/error"
+	uc "gogym-api/internal/usecase/user"
 
 	"github.com/labstack/echo/v4"
 )
@@ -20,7 +22,8 @@ func NewUserHandler(usecase uc.UseCase) *UserHandler {
 // POST /api/v1/user
 func (h *UserHandler) SignUp(c echo.Context) error {
 	ctx := c.Request().Context()
-	var req uc.SignUpRequest
+	slog.InfoContext(ctx, "SignUp Handler")
+	var req dto.SignUpRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
