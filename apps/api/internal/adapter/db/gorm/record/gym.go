@@ -14,8 +14,8 @@ type GymRecord struct {
 	ID                int64          `gorm:"primaryKey;autoIncrement"`
 	Name              string         `gorm:"size:255;not null"`
 	Description       *string        `gorm:"type:text"`
-	LocationLatitude  float64        `gorm:"type:decimal(10,8);not null"`
-	LocationLongitude float64        `gorm:"type:decimal(11,8);not null"`
+	Latitude  float64        `gorm:"type:double;not null"`
+	Longitude float64        `gorm:"type:double;not null"`
 	Address           string         `gorm:"size:500;not null"`
 	City              *string        `gorm:"size:100"`
 	Prefecture        *string        `gorm:"size:100"`

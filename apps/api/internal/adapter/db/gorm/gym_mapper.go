@@ -19,8 +19,8 @@ func ToGymEntity(r *record.GymRecord) *gym.Gym {
 		Name:        r.Name,
 		Description: r.Description,
 		Location: gym.Location{
-			Latitude:  r.LocationLatitude,
-			Longitude: r.LocationLongitude,
+			Latitude:  r.Latitude,
+			Longitude: r.Longitude,
 		},
 		Address:    r.Address,
 		City:       r.City,
@@ -43,18 +43,18 @@ func ToGymEntity(r *record.GymRecord) *gym.Gym {
 // FromGymEntity はGymドメインエンティティをGymRecordに変換する
 func FromGymEntity(g *gym.Gym) *record.GymRecord {
 	gymRecord := &record.GymRecord{
-		ID:                int64(g.ID),
-		Name:              g.Name,
-		Description:       g.Description,
-		LocationLatitude:  g.Location.Latitude,
-		LocationLongitude: g.Location.Longitude,
-		Address:           g.Address,
-		City:              g.City,
-		Prefecture:        g.Prefecture,
-		PostalCode:        g.PostalCode,
-		IsActive:          g.IsActive,
-		CreatedAt:         g.CreatedAt,
-		UpdatedAt:         g.UpdatedAt,
+		ID:          int64(g.ID),
+		Name:        g.Name,
+		Description: g.Description,
+		Latitude:    g.Location.Latitude,
+		Longitude:   g.Location.Longitude,
+		Address:     g.Address,
+		City:        g.City,
+		Prefecture:  g.Prefecture,
+		PostalCode:  g.PostalCode,
+		IsActive:    g.IsActive,
+		CreatedAt:   g.CreatedAt,
+		UpdatedAt:   g.UpdatedAt,
 	}
 
 	// タグが存在する場合は変換する

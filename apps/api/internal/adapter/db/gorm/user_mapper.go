@@ -15,3 +15,15 @@ func FromUserEntity(u *user.User) *record.User {
 		UpdatedAt:    u.UpdatedAt,
 	}
 }
+
+func ToUserEntity(r *record.User) *user.User {
+	email, _ := user.NewEmail(r.Email)
+	return &user.User{
+		ID:           r.ID,
+		Email:        email,
+		PasswordHash: r.PasswordHash,
+		Name:         r.Name,
+		CreatedAt:    r.CreatedAt,
+		UpdatedAt:    r.UpdatedAt,
+	}
+}

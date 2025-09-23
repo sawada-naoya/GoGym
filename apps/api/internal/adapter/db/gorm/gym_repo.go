@@ -89,8 +89,8 @@ func (r *gymRepository) Search(ctx context.Context, query gym.SearchQuery) (*gym
 
 	for _, gymRecord := range recordsToProcess {
 		// 座標をデフォルト値に設定（テスト用）
-		gymRecord.LocationLatitude = 35.6812
-		gymRecord.LocationLongitude = 139.7671
+		gymRecord.Latitude = 35.6812
+		gymRecord.Longitude = 139.7671
 		entities = append(entities, *ToGymEntity(&gymRecord))
 	}
 

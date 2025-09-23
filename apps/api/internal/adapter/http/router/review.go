@@ -7,6 +7,6 @@ import (
 )
 
 func SetupReviewRoutes(e *echo.Echo, reviewHandler *handler.ReviewHandler) {
-	gymGroup := e.Group("/api/v1/gyms")
-	gymGroup.GET("/:id/reviews", reviewHandler.GetReviews)
+	review := e.Group("/api/v1/gyms")
+	review.GET("/:id/reviews", reviewHandler.GetReviews)
 }

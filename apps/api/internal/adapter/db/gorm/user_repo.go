@@ -33,6 +33,23 @@ func (r *userRepository) Create(ctx context.Context, user *dom.User) error {
 	return nil
 }
 
+func (r *userRepository) FindByEmail(ctx context.Context, email dom.Email) (*dom.User, error) {
+	var recordUser record.User
+
+	err := r.db.WithContext(ctx).
+		Model(&record.User{}).
+		Where("email = ?", email).
+		First(&recordUser).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, dom.NewDomainError(dom.ErrNotFound, "user_not_found", "user not found")
+		}
+		return nil, err
+	}
+
+	return ToUserEntity(&recordUser), nil
+}
+
 func (r *userRepository) ExistsByEmail(ctx context.Context, email dom.Email) (bool, error) {
 	var count int64
 	result := r.db.WithContext(ctx).

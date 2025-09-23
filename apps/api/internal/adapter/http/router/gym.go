@@ -7,13 +7,13 @@ import (
 )
 
 func SetupGymRoutes(e *echo.Echo, g *handler.GymHandler) {
-	// パブリックなジム情報API
-	api := e.Group("/api/v1")
+
+	gym := e.Group("/api/v1")
 
 	// おすすめジム取得
-	api.GET("/gyms/recommended", g.GetRecommendedGyms)
+	gym.GET("/gyms/recommended", g.GetRecommendedGyms)
 
 	// 特定ジム取得
-	api.GET("/gym/:id", g.GetGym)
+	gym.GET("/gym/:id", g.GetGym)
 
 }

@@ -6,17 +6,17 @@ import (
 
 	"gogym-api/internal/adapter/http/dto"
 	httpError "gogym-api/internal/adapter/http/error"
-	uc "gogym-api/internal/usecase/user"
+	uu "gogym-api/internal/usecase/user"
 
 	"github.com/labstack/echo/v4"
 )
 
 type UserHandler struct {
-	uc uc.UseCase
+	uu uu.UseCase
 }
 
-func NewUserHandler(usecase uc.UseCase) *UserHandler {
-	return &UserHandler{uc: usecase}
+func NewUserHandler(uu uu.UseCase) *UserHandler {
+	return &UserHandler{uu: uu}
 }
 
 // POST /api/v1/user
@@ -28,7 +28,7 @@ func (h *UserHandler) SignUp(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	err := h.uc.SignUp(ctx, req)
+	err := h.uu.SignUp(ctx, req)
 	if err != nil {
 		return c.JSON(http.StatusConflict, httpError.ErrorResponse{
 			Code:    "email_already_exists",
