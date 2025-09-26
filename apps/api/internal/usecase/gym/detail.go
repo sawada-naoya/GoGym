@@ -2,7 +2,6 @@ package gym
 
 import (
 	"context"
-	"log/slog"
 
 	"gogym-api/internal/adapter/http/dto"
 	dom "gogym-api/internal/domain/gym"
@@ -10,7 +9,6 @@ import (
 
 // GetGym returns gym detail by ID
 func (i *interactor) GetGym(ctx context.Context, id dom.ID) (*dto.GymResponse, error) {
-	slog.InfoContext(ctx, "GetGym UseCase", "gym_id", id)
 
 	if id == 0 {
 		return nil, dom.NewDomainError(dom.ErrInvalidInput, "invalid_gym_id", "gym ID is required")

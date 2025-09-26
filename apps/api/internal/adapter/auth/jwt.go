@@ -1,116 +1,108 @@
+// internal/auth/jwt.go
 package auth
 
 import (
+	"errors"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/oklog/ulid/v2"
 )
 
-// JWTClaims はJWTのクレーム（payload）を表す構造体
-// ユーザーIDとスコープ情報を含み、JWT標準クレームも継承
-type JWTClaims struct {
-	UserID int64    `json:"user_id"` // ユーザーの一意識別子
-	Scopes []string `json:"scopes"`  // ユーザーの権限スコープ
-	jwt.RegisteredClaims             // JWT標準クレーム（iss, exp, iatなど）
+type Service struct {
+	accessSecret  []byte
+	refreshSecret []byte
+	issuer        string
+	accessTTL     time.Duration
+	refreshTTL    time.Duration
 }
 
-// TokenVerifier はトークンの検証を行うインターフェース
-// JWTトークンの署名検証と有効性チェックを担当
-type TokenVerifier interface {
-	Verify(token string) (*JWTClaims, error)
-}
-
-// TokenIssuer はトークンの発行を行うインターフェース
-// アクセストークンとリフレッシュトークンの生成を担当
-type TokenIssuer interface {
-	IssueAccess(uid int64, scopes []string) (string, error)
-	IssueRefresh(uid int64, jti string) (string, error)
-}
-
-// JWTService はJWTトークンの発行と検証を行うサービス
-// HMAC-SHA256を使用してトークンの署名と検証を実行
-type JWTService struct {
-	secret     []byte        // トークン署名用の秘密鍵
-	issuer     string        // トークン発行者識別子
-	accessTTL  time.Duration // アクセストークンの有効期間
-	refreshTTL time.Duration // リフレッシュトークンの有効期間
-}
-
-// NewJWT はJWTServiceの新しいインスタンスを作成
-func NewJWT(secret, issuer string, accessTTL, refreshTTL time.Duration) *JWTService {
-	return &JWTService{
-		secret:     []byte(secret),
-		issuer:     issuer,
-		accessTTL:  accessTTL,
-		refreshTTL: refreshTTL,
+// New 生成
+func New(accessSecret, refreshSecret []byte, issuer string, accessTTL, refreshTTL time.Duration) *Service {
+	return &Service{
+		accessSecret:  accessSecret,
+		refreshSecret: refreshSecret,
+		issuer:        issuer,
+		accessTTL:     accessTTL,
+		refreshTTL:    refreshTTL,
 	}
 }
 
-// IssueAccess はアクセストークンを発行
-// uid: ユーザーID, scopes: 権限スコープ
-func (j *JWTService) IssueAccess(uid int64, scopes []string) (string, error) {
+// IssueAccess アクセストークン発行。sub=userID を入れる
+func (s *Service) IssueAccess(userID string) (token string, ttl time.Duration, err error) {
 	now := time.Now()
-	claims := JWTClaims{
-		UserID: uid,
-		Scopes: scopes,
-		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    j.issuer,
-			IssuedAt:  jwt.NewNumericDate(now),
-			ExpiresAt: jwt.NewNumericDate(now.Add(j.accessTTL)),
-		},
+	claims := jwt.MapClaims{
+		"sub": userID,
+		"iss": s.issuer,
+		"iat": now.Unix(),
+		"exp": now.Add(s.accessTTL).Unix(),
+		"typ": "access",
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(j.secret)
+	t := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	str, err := t.SignedString(s.accessSecret)
+	return str, s.accessTTL, err
 }
 
-// IssueRefresh はリフレッシュトークンを発行
-// uid: ユーザーID, jti: JWT ID（一意識別子）
-func (j *JWTService) IssueRefresh(uid int64, jti string) (string, error) {
+// IssueRefresh リフレッシュトークン発行。jti=ULID を入れる
+func (s *Service) IssueRefresh(userID string) (token string, ttl time.Duration, jti string, exp time.Time, err error) {
 	now := time.Now()
-	claims := JWTClaims{
-		UserID: uid,
-		Scopes: []string{"refresh"}, // リフレッシュ専用スコープ
-		RegisteredClaims: jwt.RegisteredClaims{
-			ID:        jti, // JWT ID
-			Issuer:    j.issuer,
-			IssuedAt:  jwt.NewNumericDate(now),
-			ExpiresAt: jwt.NewNumericDate(now.Add(j.refreshTTL)),
-		},
+	jti = ulid.Make().String()
+	exp = now.Add(s.refreshTTL)
+	claims := jwt.MapClaims{
+		"sub": userID,
+		"jti": jti,
+		"iss": s.issuer,
+		"iat": now.Unix(),
+		"exp": exp.Unix(),
+		"typ": "refresh",
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(j.secret)
+	t := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	str, err := t.SignedString(s.refreshSecret)
+	return str, s.refreshTTL, jti, exp, err
 }
 
-// Verify はJWTトークンを検証してクレームを返す
-// トークンの署名検証、有効期限チェック、形式検証を実行
-func (j *JWTService) Verify(token string) (*JWTClaims, error) {
-	// トークンをパースしてクレームを取得
-	parsedToken, err := jwt.ParseWithClaims(
-		token,
-		&JWTClaims{},
-		func(token *jwt.Token) (interface{}, error) {
-			// 署名方式の確認
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, jwt.ErrSignatureInvalid
-			}
-			return j.secret, nil
-		},
-	)
-	
-	if err != nil {
-		return nil, err
+// RefreshClaims 検証後に必要な最小情報だけ返す
+type RefreshClaims struct {
+	JTI    string
+	UserID string
+	Exp    time.Time
+}
+
+// ParseRefresh リフレッシュトークン検証。署名/期限/typ を確認して JTI/USER を返す
+func (s *Service) ParseRefresh(tokenStr string) (RefreshClaims, error) {
+	tok, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
+		if t.Method != jwt.SigningMethodHS256 {
+			return nil, errors.New("unexpected alg")
+		}
+		return s.refreshSecret, nil
+	})
+	if err != nil || !tok.Valid {
+		return RefreshClaims{}, errors.New("invalid refresh token")
 	}
-	
-	// トークンの有効性確認
-	if !parsedToken.Valid {
-		return nil, jwt.ErrTokenInvalidClaims
-	}
-	
-	// クレームの型アサーション
-	claims, ok := parsedToken.Claims.(*JWTClaims)
+
+	mc, ok := tok.Claims.(jwt.MapClaims)
 	if !ok {
-		return nil, jwt.ErrTokenInvalidClaims
+		return RefreshClaims{}, errors.New("invalid claims")
 	}
-	
-	return claims, nil
+	if mc["typ"] != "refresh" {
+		return RefreshClaims{}, errors.New("wrong token type")
+	}
+
+	// 期限チェック（Parseがやるが、追加で厳格化）
+	expUnix, ok := mc["exp"].(float64)
+	if !ok {
+		return RefreshClaims{}, errors.New("no exp")
+	}
+	exp := time.Unix(int64(expUnix), 0)
+	if time.Now().After(exp) {
+		return RefreshClaims{}, errors.New("expired")
+	}
+
+	userID, _ := mc["sub"].(string)
+	jti, _ := mc["jti"].(string)
+	if userID == "" || jti == "" {
+		return RefreshClaims{}, errors.New("missing sub or jti")
+	}
+
+	return RefreshClaims{JTI: jti, UserID: userID, Exp: exp}, nil
 }

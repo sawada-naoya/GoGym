@@ -4,7 +4,6 @@ import (
 	"gogym-api/internal/adapter/http/dto"
 	httpError "gogym-api/internal/adapter/http/error"
 	su "gogym-api/internal/usecase/session"
-	uu "gogym-api/internal/usecase/user"
 	"log/slog"
 	"net/http"
 
@@ -13,11 +12,10 @@ import (
 
 type SessionHandler struct {
 	su su.UseCase
-	uu uu.UseCase
 }
 
-func NewSessionHandler(su su.UseCase, uu uu.UseCase) *SessionHandler {
-	return &SessionHandler{su: su, uu: uu}
+func NewSessionHandler(su su.UseCase) *SessionHandler {
+	return &SessionHandler{su: su}
 }
 
 func (h *SessionHandler) Login(c echo.Context) error {
@@ -26,16 +24,30 @@ func (h *SessionHandler) Login(c echo.Context) error {
 
 	var req dto.LoginRequest
 	if err := c.Bind(&req); err != nil {
+		slog.ErrorContext(ctx, "Failed to bind request", "error", err)
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	err := h.uu.Login(ctx, req)
+	// User認証
+	err := h.su.Login(ctx, req)
 	if err != nil {
+		slog.ErrorContext(ctx, "Failed to login user", "email", req.Email, "error", err)
 		return c.JSON(http.StatusUnauthorized, httpError.ErrorResponse{
 			Code:    "invalid_credentials",
 			Message: "Invalid email or password",
 		})
 	}
 
-	return c.NoContent(http.StatusOK)
+	// Session作成
+	tokens, err := h.su.CreateSession(ctx, req.Email)
+	if err != nil {
+		slog.ErrorContext(ctx, "Failed to create session", "email", req.Email, "error", err)
+		return c.JSON(http.StatusInternalServerError, httpError.ErrorResponse{
+			Code:    "session_creation_failed",
+			Message: "Failed to create session",
+		})
+	}
+
+	slog.InfoContext(ctx, "User logged in successfully", "email", req.Email)
+	return c.JSON(http.StatusOK, tokens)
 }

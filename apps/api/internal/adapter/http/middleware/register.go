@@ -1,13 +1,11 @@
 package middleware
 
 import (
-	"gogym-api/internal/adapter/auth"
-
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func SetupMiddleware(e *echo.Echo, jwtService auth.TokenVerifier) {
+func SetupMiddleware(e *echo.Echo) {
 	// ログを出力するミドルウェア
 	e.Use(middleware.Logger())
 
@@ -22,5 +20,5 @@ func SetupMiddleware(e *echo.Echo, jwtService auth.TokenVerifier) {
 	}))
 
 	// JWT認証ミドルウェア（カスタム実装）
-	e.Use(JWT(jwtService))
+
 }

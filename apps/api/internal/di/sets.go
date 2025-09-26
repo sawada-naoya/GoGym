@@ -8,6 +8,7 @@ import (
 
 	"gogym-api/configs"
 	"gogym-api/internal/adapter/auth"
+	"gogym-api/internal/adapter/service"
 	gormAdapter "gogym-api/internal/adapter/db/gorm"
 	"gogym-api/internal/adapter/http/handler"
 	"gogym-api/internal/adapter/http/router"
@@ -15,6 +16,7 @@ import (
 	userUC "gogym-api/internal/usecase/user"
 	gymUC "gogym-api/internal/usecase/gym"
 	reviewUC "gogym-api/internal/usecase/review"
+	sessionUC "gogym-api/internal/usecase/session"
 )
 
 // =============================================================================
@@ -32,12 +34,10 @@ var InfrastructureSet = wire.NewSet(
 	db.NewGormDB,
 
 	// 認証サービス（パスワードハッシュ化、JWT生成）
-	NewPasswordHasher,
-	NewIDProvider,
-	auth.NewTokenService,
-
-	// インターフェースバインディング（最小限）
-	wire.Bind(new(userUC.TokenService), new(*auth.TokenService)),
+	auth.NewBcryptPasswordHasher,
+	service.NewIDProvider,
+	service.NewTimeProvider,
+	auth.New,
 
 	// 将来の拡張: Redis, S3等
 	// redis.NewRedisClient,
@@ -81,6 +81,7 @@ var UseCaseSet = wire.NewSet(
 	userUC.NewInteractor,
 	gymUC.NewUseCase,
 	reviewUC.NewUseCase,
+	sessionUC.NewInteractor,
 )
 
 // =============================================================================
@@ -96,6 +97,7 @@ var HandlerSet = wire.NewSet(
 	handler.NewGymHandler,
 	handler.NewReviewHandler,
 	handler.NewFavoriteHandler,
+	handler.NewSessionHandler,
 )
 
 // =============================================================================
@@ -147,7 +149,7 @@ var ServerSet = wire.NewSet(
 // RepositorySetで定義された関数が自動的に適切なインターフェースを返す
 var InterfaceSet = wire.NewSet(
 	// Service interfaces (認証サービス)
-	wire.Bind(new(userUC.TokenService), new(*auth.TokenService)),
+	wire.Bind(new(sessionUC.JWT), new(*auth.Service)),
 
 	// Repository interfaces (データアクセス)
 	// tagRepositoryは小文字なので、バインディング不要（自動的に適切なインターフェースを返す）

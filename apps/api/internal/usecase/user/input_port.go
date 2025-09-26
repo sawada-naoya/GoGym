@@ -7,5 +7,4 @@ import (
 
 type UseCase interface {
 	SignUp(ctx context.Context, req dto.SignUpRequest) error
-	Login(ctx context.Context, req dto.LoginRequest) error
 }

@@ -25,16 +25,19 @@ func (h *UserHandler) SignUp(c echo.Context) error {
 	slog.InfoContext(ctx, "SignUp Handler")
 	var req dto.SignUpRequest
 	if err := c.Bind(&req); err != nil {
+		slog.ErrorContext(ctx, "Failed to bind request", "error", err)
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
 	err := h.uu.SignUp(ctx, req)
 	if err != nil {
+		slog.ErrorContext(ctx, "Failed to sign up user", "error", err)
 		return c.JSON(http.StatusConflict, httpError.ErrorResponse{
 			Code:    "email_already_exists",
 			Message: err.Error(),
 		})
 	}
 
+	slog.InfoContext(ctx, "User signed up successfully")
 	return c.NoContent(http.StatusCreated)
 }

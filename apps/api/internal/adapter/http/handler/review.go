@@ -27,6 +27,7 @@ func (h *ReviewHandler) GetReviews(c echo.Context) error {
 
 	gymID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
+		slog.ErrorContext(ctx, "Invalid gym ID", "id", c.Param("id"), "error", err)
 		return c.NoContent(http.StatusBadRequest)
 	}
 
@@ -40,8 +41,10 @@ func (h *ReviewHandler) GetReviews(c echo.Context) error {
 
 	response, err := h.ru.GetReviewsByGymID(ctx, gymID, cursor, limit)
 	if err != nil {
+		slog.ErrorContext(ctx, "Failed to get reviews", "gym_id", gymID, "error", err)
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
+	slog.InfoContext(ctx, "Successfully retrieved reviews", "gym_id", gymID)
 	return c.JSON(http.StatusOK, response)
 }
