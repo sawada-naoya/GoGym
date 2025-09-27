@@ -22,15 +22,15 @@ func (i *interactor) Login(ctx context.Context, req dto.LoginRequest) error {
 	// ユーザー検索
 	user, err := i.ur.FindByEmail(ctx, email)
 	if err != nil {
-		return dom.NewDomainError(dom.ErrNotFound, "user_not_found", "ユーザーが見つかりません")
+		return dom.NewDomainError("email_not_found")
 	}
 	if user == nil {
-		return dom.NewDomainError(dom.ErrNotFound, "user_not_found", "ユーザーが見つかりません")
+		return dom.NewDomainError("user_not_found")
 	}
 
 	// パスワード照合
 	if err := i.ph.VerifyPassword(req.Password, user.PasswordHash); err != nil {
-		return dom.NewDomainError(dom.ErrUnauthorized, "invalid_credentials", "メールアドレスまたはパスワードが間違っています")
+		return dom.NewDomainError("invalid_password")
 	}
 	return nil
 }

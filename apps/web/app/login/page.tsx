@@ -5,9 +5,10 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { includes, z } from "zod";
 import { POST } from "@/lib/api";
 import { SuccessBanner, ErrorBanner } from "../../components/ui/Banner";
+import { tokenStore } from "@/lib/tokenStore";
 
 const LoginSchema = z.object({
   email: z.email("有効なメールアドレスを入力してください").min(1, "メールアドレスは必須です"),
@@ -47,24 +48,44 @@ const LoginPage = () => {
     }
   }, [searchParams]);
 
+  type TokenPairResponse = {
+    access_token: string;
+    expires_in: number;
+  };
+
   const onSubmit = async (data: LoginForm) => {
     setApiError(null);
     setLoading(true);
-
     try {
-      const res = await POST("/api/v1/auth/login", {
+      const res = await POST<TokenPairResponse>("/api/v1/sessions/login", {
         body: {
           email: data.email,
           password: data.password,
         },
       });
       if (!res.ok) {
-        setApiError("メールアドレスまたはパスワードが正しくありません");
+        const err = res.data as { key: string } | null;
+        switch (err?.key) {
+          case "email_not_found":
+            setApiError("メールアドレスが正しくありません");
+            break;
+          case "invalid_credentials":
+            setApiError("パスワードが正しくありません");
+            break;
+          default:
+            setApiError("ログインに失敗しました");
+        }
         return;
       }
-      router.push("/");
-    } catch (error) {
+
+      // アクセストークンをメモリに保持（以降のAPIでAuthorizationに付ける）
+      if (res.data) {
+        tokenStore.set(res.data.access_token);
+        router.push("/");
+      }
+    } catch {
       setApiError("ネットワークエラーが発生しました。時間を置いて再度お試しください。");
+      setLoading(false);
     }
   };
 

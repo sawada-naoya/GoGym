@@ -11,12 +11,12 @@ import (
 func (i *interactor) GetGym(ctx context.Context, id dom.ID) (*dto.GymResponse, error) {
 
 	if id == 0 {
-		return nil, dom.NewDomainError(dom.ErrInvalidInput, "invalid_gym_id", "gym ID is required")
+		return nil, dom.NewDomainError("invalid_gym_id")
 	}
 
 	foundGym, err := i.repo.FindByID(ctx, id)
 	if err != nil {
-		return nil, dom.NewDomainErrorWithCause(err, "gym_not_found", "gym not found")
+		return nil, dom.NewDomainError("gym_not_found")
 	}
 
 	// レビュー統計を取得

@@ -42,7 +42,7 @@ func (r *userRepository) FindByEmail(ctx context.Context, email dom.Email) (*dom
 		First(&recordUser).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, dom.NewDomainError(dom.ErrNotFound, "user_not_found", "user not found")
+			return nil, dom.NewDomainError("user_not_found")
 		}
 		return nil, err
 	}

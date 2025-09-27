@@ -12,14 +12,18 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"gogym-api/configs"
+	"gogym-api/internal/adapter/auth"
 	"gogym-api/internal/adapter/db/gorm"
 	"gogym-api/internal/adapter/http/handler"
 	"gogym-api/internal/adapter/http/router"
+	"gogym-api/internal/adapter/service"
 	"gogym-api/internal/di"
 	"gogym-api/internal/infra/db"
 	"gogym-api/internal/usecase/gym"
 	"gogym-api/internal/usecase/review"
+	"gogym-api/internal/usecase/session"
 	"gogym-api/internal/usecase/user"
+	gorm2 "gorm.io/gorm"
 	"log/slog"
 )
 
@@ -57,16 +61,29 @@ func InitServer(ctx context.Context, config *configs.Config, logger *slog.Logger
 	tagRepository := gorm.NewTagRepository(gormDB)
 	useCase := gym.NewUseCase(repository, tagRepository, logger)
 	gymHandler := handler.NewGymHandler(useCase)
-	userRepository := gorm.NewUserRepository(gormDB)
-	passwordHasher := di.NewPasswordHasher()
-	idProvider := di.NewIDProvider()
+	userRepository := NewUserRepository(gormDB)
+	passwordHasher, err := NewUserPasswordHasher()
+	if err != nil {
+		return nil, err
+	}
+	idProvider := NewUserIDProvider()
 	userUseCase := user.NewInteractor(userRepository, passwordHasher, idProvider)
 	userHandler := handler.NewUserHandler(userUseCase)
 	reviewRepository := gorm.NewReviewRepository(gormDB)
 	reviewUseCase := review.NewUseCase(reviewRepository)
 	reviewHandler := handler.NewReviewHandler(reviewUseCase)
 	favoriteHandler := handler.NewFavoriteHandler()
-	echo := NewConfiguredEcho(gymHandler, userHandler, reviewHandler, favoriteHandler)
+	jwt := NewJWTService(config)
+	sessionUserRepository := NewSessionUserRepository(gormDB)
+	sessionIDProvider := NewSessionIDProvider()
+	timeProvider := service.NewTimeProvider()
+	sessionPasswordHasher, err := NewBcryptPasswordHasher()
+	if err != nil {
+		return nil, err
+	}
+	sessionUseCase := session.NewInteractor(jwt, sessionUserRepository, sessionIDProvider, timeProvider, sessionPasswordHasher, userUseCase)
+	sessionHandler := handler.NewSessionHandler(sessionUseCase)
+	echo := NewConfiguredEcho(gymHandler, userHandler, reviewHandler, favoriteHandler, sessionHandler)
 	server := &Server{
 		Echo:   echo,
 		Config: config,
@@ -105,9 +122,9 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 }
 
 // NewConfiguredEcho はルーティング設定済みのEchoサーバーを作成
-func NewConfiguredEcho(gymHandler *handler.GymHandler, userHandler *handler.UserHandler, reviewHandler *handler.ReviewHandler, favoriteHandler *handler.FavoriteHandler) *echo.Echo {
+func NewConfiguredEcho(gymHandler *handler.GymHandler, userHandler *handler.UserHandler, reviewHandler *handler.ReviewHandler, favoriteHandler *handler.FavoriteHandler, sessionHandler *handler.SessionHandler) *echo.Echo {
 	e := NewBasicEcho()
-	router.NewRouter(e, gymHandler, userHandler, reviewHandler, favoriteHandler)
+	router.NewRouter(e, gymHandler, userHandler, reviewHandler, favoriteHandler, sessionHandler)
 
 	return e
 }
@@ -123,4 +140,54 @@ func (s *Server) Start() error {
 func (s *Server) Shutdown(ctx context.Context) error {
 	s.Logger.Info("Shutting down server")
 	return s.Echo.Shutdown(ctx)
+}
+
+// NewJWTService はJWTサービスを作成
+func NewJWTService(cfg *configs.Config) session.JWT {
+	return auth.New(
+		[]byte(cfg.Auth.JWTSecret),
+		[]byte(cfg.Auth.JWTSecret),
+		cfg.Auth.Issuer,
+		cfg.Auth.AccessExpiresIn,
+		cfg.Auth.RefreshExpiresIn,
+	)
+}
+
+// NewBcryptPasswordHasher はBcryptパスワードハッシャーを作成
+func NewBcryptPasswordHasher() (session.PasswordHasher, error) {
+	hasher, err := auth.NewBcryptPasswordHasher(12, "")
+	if err != nil {
+		return nil, err
+	}
+	return hasher, nil
+}
+
+// NewUserPasswordHasher はユーザー用パスワードハッシャーを作成
+func NewUserPasswordHasher() (user.PasswordHasher, error) {
+	hasher, err := auth.NewBcryptPasswordHasher(12, "")
+	if err != nil {
+		return nil, err
+	}
+	return hasher, nil
+}
+
+// NewUserIDProvider はユーザー用IDプロバイダーを作成
+func NewUserIDProvider() user.IDProvider {
+	return service.NewIDProvider()
+}
+
+// NewSessionIDProvider はセッション用IDプロバイダーを作成
+func NewSessionIDProvider() session.IDProvider {
+	return service.NewIDProvider()
+}
+
+// NewUserRepository はユーザー用ユーザーリポジトリを作成
+func NewUserRepository(db2 *gorm2.DB) user.Repository {
+	return gorm.NewUserRepository(db2)
+}
+
+// NewSessionUserRepository はセッション用ユーザーリポジトリを作成
+func NewSessionUserRepository(db2 *gorm2.DB) session.UserRepository {
+	repo := gorm.NewUserRepository(db2)
+	return repo.(session.UserRepository)
 }

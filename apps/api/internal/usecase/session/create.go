@@ -16,10 +16,10 @@ func (i *interactor) CreateSession(ctx context.Context, email string) (dto.Token
 
 	user, err := i.ur.FindByEmail(ctx, emailObj)
 	if err != nil {
-		return dto.TokenPairResponse{}, dom.NewDomainError(dom.ErrNotFound, "user_not_found", "ユーザーが見つかりません")
+		return dto.TokenPairResponse{}, dom.NewDomainError("email_not_found")
 	}
 	if user == nil {
-		return dto.TokenPairResponse{}, dom.NewDomainError(dom.ErrNotFound, "user_not_found", "ユーザーが見つかりません")
+		return dto.TokenPairResponse{}, dom.NewDomainError( "user_not_found")
 	}
 
 	access, accessTTL, err := i.jwt.IssueAccess(user.ID)

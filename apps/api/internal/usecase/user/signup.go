@@ -22,7 +22,7 @@ func (i *interactor) SignUp(ctx context.Context, req dto.SignUpRequest) error {
 		return err
 	}
 	if exists {
-		return dom.NewDomainError(dom.ErrAlreadyExists, "email_already_exists", "このメールアドレスは既に使用されています")
+		return dom.NewDomainError("email_already_exists")
 	}
 
 	// パスワードハッシュ化

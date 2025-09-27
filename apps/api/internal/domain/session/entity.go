@@ -18,13 +18,13 @@ type RefreshToken struct {
 // NewRefreshToken バリデーション付きで新しいリフレッシュトークンを作成
 func NewRefreshToken(jti, userID string, expiresAt, now time.Time) (*RefreshToken, error) {
 	if jti == "" {
-		return nil, NewDomainError(ErrInvalidInput, "invalid_jti", "jti is required")
+		return nil, NewDomainError("invalid_jti")
 	}
 	if userID == "" {
-		return nil, NewDomainError(ErrInvalidInput, "invalid_user_id", "user_id is required")
+		return nil, NewDomainError("invalid_user_id")
 	}
 	if !expiresAt.After(now) {
-		return nil, NewDomainError(ErrInvalidInput, "invalid_expires_at", "expires_at must be in the future")
+		return nil, NewDomainError("invalid_expires_at")
 	}
 
 	return &RefreshToken{

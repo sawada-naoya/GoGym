@@ -50,6 +50,7 @@ const request = async <T>(endpoint: string, method: HttpMethod, options: Request
       ...(options.headers ?? {}),
     },
     body: method !== "GET" && options.body !== undefined ? JSON.stringify(options.body) : undefined,
+    credentials: "include",
   });
 
   let data: T | null = null;

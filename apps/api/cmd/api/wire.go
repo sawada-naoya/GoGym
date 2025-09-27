@@ -13,11 +13,20 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/google/wire"
 	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 
 	"gogym-api/configs"
+	"gogym-api/internal/adapter/auth"
+	gormAdapter "gogym-api/internal/adapter/db/gorm"
 	"gogym-api/internal/adapter/http/handler"
 	"gogym-api/internal/adapter/http/router"
+	"gogym-api/internal/adapter/service"
 	"gogym-api/internal/di"
+	"gogym-api/internal/infra/db"
+	gymUC "gogym-api/internal/usecase/gym"
+	reviewUC "gogym-api/internal/usecase/review"
+	sessionUC "gogym-api/internal/usecase/session"
+	userUC "gogym-api/internal/usecase/user"
 )
 
 // Server はEchoサーバーのラッパー構造体
@@ -51,15 +60,41 @@ type Server struct {
 //                    Echo *Server
 func InitServer(ctx context.Context, config *configs.Config, logger *slog.Logger) (*Server, error) {
 	wire.Build(
-		// 基本的なEchoサーバーを作成する関数
+		// Database
+		di.ProvideDatabaseConfig,
+		db.NewGormDB,
+
+		// Auth services
+		NewJWTService,
+		NewBcryptPasswordHasher,
+		NewUserPasswordHasher,
+		NewUserIDProvider,
+		NewSessionIDProvider,
+		NewUserRepository,
+		NewSessionUserRepository,
+		service.NewTimeProvider,
+
+		// Repositories
+		gormAdapter.NewGymRepository,
+		gormAdapter.NewTagRepository,
+		gormAdapter.NewReviewRepository,
+
+		// Use cases
+		userUC.NewInteractor,
+		gymUC.NewUseCase,
+		reviewUC.NewUseCase,
+		sessionUC.NewInteractor,
+
+		// Handlers
+		handler.NewUserHandler,
+		handler.NewGymHandler,
+		handler.NewReviewHandler,
+		handler.NewFavoriteHandler,
+		handler.NewSessionHandler,
+
+		// Router & Server
 		NewConfiguredEcho,
-		
-		// 依存関係を注入（Router以外）
-		di.InfrastructureSet,
-		di.RepositorySet,
-		di.UseCaseSet,
-		di.HandlerSet,
-		
+
 		// Server構造体を構築
 		wire.Struct(new(Server), "Echo", "Config", "Logger"),
 	)
@@ -87,12 +122,12 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 }
 
 // NewConfiguredEcho はルーティング設定済みのEchoサーバーを作成
-func NewConfiguredEcho(gymHandler *handler.GymHandler, userHandler *handler.UserHandler, reviewHandler *handler.ReviewHandler, favoriteHandler *handler.FavoriteHandler) *echo.Echo {
+func NewConfiguredEcho(gymHandler *handler.GymHandler, userHandler *handler.UserHandler, reviewHandler *handler.ReviewHandler, favoriteHandler *handler.FavoriteHandler, sessionHandler *handler.SessionHandler) *echo.Echo {
 	e := NewBasicEcho()
-	
+
 	// ルーティング設定
-	router.NewRouter(e, gymHandler, userHandler, reviewHandler, favoriteHandler)
-	
+	router.NewRouter(e, gymHandler, userHandler, reviewHandler, favoriteHandler, sessionHandler)
+
 	return e
 }
 
@@ -107,4 +142,54 @@ func (s *Server) Start() error {
 func (s *Server) Shutdown(ctx context.Context) error {
 	s.Logger.Info("Shutting down server")
 	return s.Echo.Shutdown(ctx)
+}
+
+// NewJWTService はJWTサービスを作成
+func NewJWTService(cfg *configs.Config) sessionUC.JWT {
+	return auth.New(
+		[]byte(cfg.Auth.JWTSecret),
+		[]byte(cfg.Auth.JWTSecret),
+		cfg.Auth.Issuer,
+		cfg.Auth.AccessExpiresIn,
+		cfg.Auth.RefreshExpiresIn,
+	)
+}
+
+// NewBcryptPasswordHasher はBcryptパスワードハッシャーを作成
+func NewBcryptPasswordHasher() (sessionUC.PasswordHasher, error) {
+	hasher, err := auth.NewBcryptPasswordHasher(12, "")
+	if err != nil {
+		return nil, err
+	}
+	return hasher, nil
+}
+
+// NewUserPasswordHasher はユーザー用パスワードハッシャーを作成
+func NewUserPasswordHasher() (userUC.PasswordHasher, error) {
+	hasher, err := auth.NewBcryptPasswordHasher(12, "")
+	if err != nil {
+		return nil, err
+	}
+	return hasher, nil
+}
+
+// NewUserIDProvider はユーザー用IDプロバイダーを作成
+func NewUserIDProvider() userUC.IDProvider {
+	return service.NewIDProvider()
+}
+
+// NewSessionIDProvider はセッション用IDプロバイダーを作成
+func NewSessionIDProvider() sessionUC.IDProvider {
+	return service.NewIDProvider()
+}
+
+// NewUserRepository はユーザー用ユーザーリポジトリを作成
+func NewUserRepository(db *gorm.DB) userUC.Repository {
+	return gormAdapter.NewUserRepository(db)
+}
+
+// NewSessionUserRepository はセッション用ユーザーリポジトリを作成
+func NewSessionUserRepository(db *gorm.DB) sessionUC.UserRepository {
+	repo := gormAdapter.NewUserRepository(db)
+	return repo.(sessionUC.UserRepository)
 }

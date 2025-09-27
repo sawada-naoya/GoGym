@@ -34,7 +34,7 @@ func (r *gymRepository) FindByID(ctx context.Context, id gym.ID) (*gym.Gym, erro
 		First(&rec).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, gym.NewDomainError(gym.ErrNotFound, "gym_not_found", "gym not found")
+			return nil, gym.NewDomainError("gym_not_found")
 		}
 		return nil, err
 	}
