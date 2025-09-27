@@ -1,5 +1,3 @@
-import { UserResponse } from "./user";
-
 export interface ReviewResponse {
   id: number;
   content: string;
@@ -8,8 +6,6 @@ export interface ReviewResponse {
   user_id: number;
   created_at: string;
   updated_at: string;
-
-  user?: UserResponse | null;
 }
 
 export interface ReviewListResponse {

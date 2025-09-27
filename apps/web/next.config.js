@@ -1,12 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable standalone output for Docker deployment
-  output: 'standalone',
-  
-  // Configure images domain
-  images: {
-    domains: ['localhost'],
-  },
-}
+  output: "standalone",
 
-module.exports = nextConfig
+  images: {
+    domains: ["localhost"],
+  },
+};
+
+module.exports = nextConfig;

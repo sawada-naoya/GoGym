@@ -21,26 +21,26 @@ type Email struct {
 func NewEmail(raw string) (Email, error) {
 	n := strings.ToLower(strings.TrimSpace(raw))
 	if n == "" {
-		return Email{}, NewDomainError(ErrInvalidEmail, "invalid_email", "email is required")
+		return Email{}, NewDomainError("invalid_email")
 	}
 
 	if len(n) > maxEmailLen {
-		return Email{}, NewDomainError(ErrInvalidEmail, "invalid_email", "email too long")
+		return Email{}, NewDomainError("invalid_email")
 	}
 
 	if !emailRe.MatchString(n) {
-		return Email{}, NewDomainError(ErrInvalidEmail, "invalid_email", "invalid email format")
+		return Email{}, NewDomainError("invalid_email")
 	}
 
 	// @がない、または@の前後が空文字列の場合は無効
 	// 例: "@example.com", "user@"
 	if at := strings.LastIndexByte(n, '@'); at <= 0 || at == len(n)-1 {
-		return Email{}, NewDomainError(ErrInvalidEmail, "invalid_email", "invalid email format")
+		return Email{}, NewDomainError("invalid_email")
 	} else {
 		local := n[:at]
 		domain := n[at+1:]
 		if len(local) > maxLocalLen || len(domain) > maxDomainPartLen {
-			return Email{}, NewDomainError(ErrInvalidEmail, "invalid_email", "email part too long")
+			return Email{}, NewDomainError("invalid_email")
 		}
 	}
 

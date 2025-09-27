@@ -8,7 +8,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func NewRouter(e *echo.Echo, gymHandler *handler.GymHandler, userHandler *handler.UserHandler, reviewHandler *handler.ReviewHandler, favoriteHandler *handler.FavoriteHandler) *echo.Echo {
+func NewRouter(e *echo.Echo, gymHandler *handler.GymHandler, userHandler *handler.UserHandler, reviewHandler *handler.ReviewHandler, favoriteHandler *handler.FavoriteHandler, sessionHandler *handler.SessionHandler) *echo.Echo {
 	// CORSミドルウェア
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"http://localhost:3000", "http://localhost:3001", "http://localhost:3003"},
@@ -38,5 +38,6 @@ func NewRouter(e *echo.Echo, gymHandler *handler.GymHandler, userHandler *handle
 	SetupUserRoutes(e, userHandler)
 	SetupReviewRoutes(e, reviewHandler)
 	SetupFavoriteRoutes(e, favoriteHandler)
+	SessionRoutes(e, sessionHandler)
 	return e
 }

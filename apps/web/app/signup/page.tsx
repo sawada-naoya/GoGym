@@ -3,9 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { POST } from "@/lib/api";
-import { ErrorBanner, SuccessBanner } from "../../components/ui/Banner";
+import { ErrorBanner } from "../../components/ui/Banner";
 
 const SignUpSchema = z
   .object({
@@ -19,52 +21,35 @@ const SignUpSchema = z
     path: ["confirmPassword"],
   });
 
-type FieldErrors = Record<string, string>;
+type SignUpForm = z.infer<typeof SignUpSchema>;
 
 const SignUpPage = () => {
   const router = useRouter();
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<FieldErrors>({});
   const [apiError, setApiError] = useState<string | null>(null);
 
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    if (errors[e.target.name]) {
-      setErrors({ ...errors, [e.target.name]: "" });
-    }
-    // 入力開始時にエラーメッセージをクリア
-    if (apiError) setApiError(null);
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    clearErrors,
+  } = useForm<SignUpForm>({
+    resolver: zodResolver(SignUpSchema),
+    mode: "onBlur", // バリデーションをフィールドからフォーカスが外れた時に実行
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrors({});
+  const clearApiError = () => setApiError(null);
+
+  const onSubmit = async (data: SignUpForm) => {
     setApiError(null);
-
-    const parsed = SignUpSchema.safeParse(form);
-    if (!parsed.success) {
-      const fe: FieldErrors = {};
-      for (const issue of parsed.error.issues) {
-        const k = issue.path[0] as string;
-        if (!fe[k]) fe[k] = issue.message;
-      }
-      setErrors(fe);
-      return;
-    }
-
     setLoading(true);
+
     try {
       const res = await POST("/api/v1/users", {
         body: {
-          name: form.name,
-          email: form.email,
-          password: form.password,
+          name: data.name,
+          email: data.email,
+          password: data.password,
         },
       });
 
@@ -73,7 +58,7 @@ const SignUpPage = () => {
         return;
       }
 
-      router.push("/login?success=signup");
+      router.push("/login");
     } catch (error) {
       setApiError("ネットワークエラーが発生しました。時間を置いて再度お試しください。");
     } finally {
@@ -97,7 +82,7 @@ const SignUpPage = () => {
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit} noValidate>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)} noValidate>
           {apiError && <ErrorBanner message={apiError} />}
 
           <div className="space-y-4">
@@ -105,32 +90,32 @@ const SignUpPage = () => {
               <label htmlFor="name" className="form-label">
                 名前
               </label>
-              <input id="name" name="name" type="text" autoComplete="name" className={`form-input ${errors.name ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`} placeholder="山田太郎" value={form.name} onChange={onChange} />
-              {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
+              <input {...register("name", { onChange: clearApiError })} id="name" type="text" autoComplete="name" className={`form-input ${errors.name ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`} placeholder="山田太郎" />
+              {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
             </div>
 
             <div>
               <label htmlFor="email" className="form-label">
                 メールアドレス
               </label>
-              <input id="email" name="email" type="email" autoComplete="email" className={`form-input ${errors.email ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`} placeholder="example@example.com" value={form.email} onChange={onChange} />
-              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+              <input {...register("email", { onChange: clearApiError })} id="email" type="email" autoComplete="email" className={`form-input ${errors.email ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`} placeholder="example@example.com" />
+              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
             </div>
 
             <div>
               <label htmlFor="password" className="form-label">
                 パスワード
               </label>
-              <input id="password" name="password" type="password" autoComplete="new-password" className={`form-input ${errors.password ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`} placeholder="パスワードを入力" value={form.password} onChange={onChange} />
-              {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
+              <input {...register("password", { onChange: clearApiError })} id="password" type="password" autoComplete="new-password" className={`form-input ${errors.password ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`} placeholder="パスワードを入力" />
+              {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
             </div>
 
             <div>
               <label htmlFor="confirmPassword" className="form-label">
                 パスワード（確認）
               </label>
-              <input id="confirmPassword" name="confirmPassword" type="password" autoComplete="new-password" className={`form-input ${errors.confirmPassword ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`} placeholder="パスワードを再度入力" value={form.confirmPassword} onChange={onChange} />
-              {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>}
+              <input {...register("confirmPassword", { onChange: clearApiError })} id="confirmPassword" type="password" autoComplete="new-password" className={`form-input ${errors.confirmPassword ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`} placeholder="パスワードを再度入力" />
+              {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>}
             </div>
           </div>
 

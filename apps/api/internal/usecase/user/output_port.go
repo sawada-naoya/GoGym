@@ -4,9 +4,6 @@ import (
 	"context"
 	dom "gogym-api/internal/domain/user"
 )
-
-// usecase → output (repository, external services, etc.)
-
 // Repository はユーザーデータの永続化を担当
 type Repository interface {
 	Create(ctx context.Context, u *dom.User) error

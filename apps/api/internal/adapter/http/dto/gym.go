@@ -8,7 +8,8 @@ type GymResponse struct {
 	ID            int      `json:"id"`
 	Name          string   `json:"name"`
 	Description   string   `json:"description"`
-	Location      string   `json:"location"`
+	Latitude      float64  `json:"latitude"`
+	Longitude     float64  `json:"longitude"`
 	AverageRating *float32 `json:"average_rating,omitempty"`
 	ReviewCount   int      `json:"review_count"`
 	Tags          []string `json:"tags"`
@@ -30,7 +31,8 @@ func ToGymResponse(g gym.Gym) GymResponse {
 		ID:            int(g.ID),
 		Name:          g.Name,
 		Description:   description,
-		Location:      g.Location.String(),
+		Latitude:      g.Location.Latitude,
+		Longitude:     g.Location.Longitude,
 		AverageRating: g.AverageRating,
 		ReviewCount:   g.ReviewCount,
 		Tags:          tagNames,

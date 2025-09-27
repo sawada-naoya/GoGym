@@ -2,7 +2,6 @@ package gym
 
 import (
 	"context"
-	"log/slog"
 	"sort"
 
 	"gogym-api/internal/adapter/http/dto"
@@ -11,7 +10,6 @@ import (
 
 // RecommendGyms returns recommended gyms for top page
 func (i *interactor) RecommendGyms(ctx context.Context) ([]dto.GymResponse, error) {
-	slog.InfoContext(ctx, "RecommendGyms UseCase")
 
 	// トップページ用の固定パラメータ
 	searchQuery := gym.SearchQuery{

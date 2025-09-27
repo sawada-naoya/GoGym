@@ -1,5 +1,5 @@
 import { Banner } from "./Banner";
-import { ApiError, getFormError } from "../../../lib/errors";
+import { ApiError, getFormError } from "../../../lib/tokenStore";
 
 interface ErrorBannerProps {
   message?: string | React.ReactNode;

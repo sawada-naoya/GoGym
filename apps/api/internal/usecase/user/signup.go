@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"log/slog"
 	"time"
 
 	"gogym-api/internal/adapter/http/dto"
@@ -11,7 +10,6 @@ import (
 
 // SignUp handles user registration
 func (i *interactor) SignUp(ctx context.Context, req dto.SignUpRequest) error {
-	slog.InfoContext(ctx, "SignUp UseCase", "Name", req.Name, "Email", req.Email)
 	// emailのバリデーション
 	email, err := dom.NewEmail(req.Email)
 	if err != nil {
@@ -24,7 +22,7 @@ func (i *interactor) SignUp(ctx context.Context, req dto.SignUpRequest) error {
 		return err
 	}
 	if exists {
-		return dom.NewDomainError(dom.ErrAlreadyExists, "email_already_exists", "このメールアドレスは既に使用されています")
+		return dom.NewDomainError("email_already_exists")
 	}
 
 	// パスワードハッシュ化

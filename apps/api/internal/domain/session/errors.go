@@ -1,4 +1,4 @@
-package user
+package session
 
 type DomainError struct {
 	Key string

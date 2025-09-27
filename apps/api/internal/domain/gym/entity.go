@@ -10,10 +10,10 @@ import (
 // Gym はジムの集約ルートを表す
 type Gym struct {
 	BaseEntity
-	Name          string               `validate:"required,max=255"`
+	Name          string `validate:"required,max=255"`
 	Description   *string
 	Location      Location
-	Address       string               `validate:"required,max=500"`
+	Address       string `validate:"required,max=500"`
 	City          *string
 	Prefecture    *string
 	PostalCode    *string
@@ -22,7 +22,6 @@ type Gym struct {
 	AverageRating *float32
 	ReviewCount   int
 }
-
 
 // NewGym は検証付きで新しいジムを作成する
 func NewGym(name, address string, location Location) (*Gym, error) {
@@ -43,23 +42,23 @@ func NewGym(name, address string, location Location) (*Gym, error) {
 // Validate はジムデータを検証する
 func (g *Gym) Validate() error {
 	if g.Name == "" {
-		return NewDomainError(ErrInvalidInput, "invalid_name", "gym name is required")
+		return NewDomainError("invalid_name")
 	}
 
 	if len(g.Name) > 255 {
-		return NewDomainError(ErrInvalidInput, "invalid_name", "gym name too long")
+		return NewDomainError("invalid_name")
 	}
 
 	if g.Address == "" {
-		return NewDomainError(ErrInvalidInput, "invalid_address", "gym address is required")
+		return NewDomainError("invalid_address")
 	}
 
 	if len(g.Address) > 500 {
-		return NewDomainError(ErrInvalidInput, "invalid_address", "gym address too long")
+		return NewDomainError("invalid_address")
 	}
 
 	if !g.Location.IsValid() {
-		return NewDomainError(ErrInvalidLocation, "invalid_location", "invalid location coordinates")
+		return NewDomainError("invalid_location")
 	}
 
 	return nil
@@ -112,7 +111,6 @@ type Tag struct {
 	Gyms []Gym
 }
 
-
 // NewTag は検証付きで新しいタグを作成する
 func NewTag(name string) (*Tag, error) {
 	tag := &Tag{
@@ -129,11 +127,11 @@ func NewTag(name string) (*Tag, error) {
 // Validate はタグデータを検証する
 func (t *Tag) Validate() error {
 	if t.Name == "" {
-		return NewDomainError(ErrInvalidInput, "invalid_name", "tag name is required")
+		return NewDomainError("invalid_name")
 	}
 
 	if len(t.Name) > 50 {
-		return NewDomainError(ErrInvalidInput, "invalid_name", "tag name too long")
+		return NewDomainError("invalid_name")
 	}
 
 	return nil
@@ -147,14 +145,12 @@ type GymTag struct {
 	Tag   *Tag
 }
 
-
 // Favorite はユーザーのお気に入りジムを表す
 type Favorite struct {
 	BaseEntity
 	UserID ID
 	GymID  ID
 }
-
 
 // NewFavorite は検証付きで新しいお気に入りを作成する
 func NewFavorite(userID, gymID ID) (*Favorite, error) {
@@ -173,11 +169,11 @@ func NewFavorite(userID, gymID ID) (*Favorite, error) {
 // Validate はお気に入りデータを検証する
 func (f *Favorite) Validate() error {
 	if f.UserID == 0 {
-		return NewDomainError(ErrInvalidInput, "invalid_user_id", "user ID is required")
+		return NewDomainError("invalid_user_id")
 	}
 
 	if f.GymID == 0 {
-		return NewDomainError(ErrInvalidInput, "invalid_gym_id", "gym ID is required")
+		return NewDomainError("invalid_gym_id")
 	}
 
 	return nil
