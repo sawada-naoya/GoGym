@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func New(env string) *slog.Logger {
+func NewLogger(env string) *slog.Logger {
 	opts := &slog.HandlerOptions{
 		AddSource: env == "development",
 	}

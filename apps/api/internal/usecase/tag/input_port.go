@@ -6,6 +6,6 @@ import (
 )
 
 // handler → usecase (if needed in the future)
-type UseCase interface {
+type TagUseCase interface {
 	GetTags(ctx context.Context) ([]gym.Tag, error)
 }

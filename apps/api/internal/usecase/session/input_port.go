@@ -6,10 +6,10 @@ package session
 
 import (
 	"context"
-	"gogym-api/internal/adapter/http/dto"
+	"gogym-api/internal/adapter/dto"
 )
 
-type UseCase interface {
+type SessionUseCase interface {
 	Login(ctx context.Context, req dto.LoginRequest) error
 	CreateSession(ctx context.Context, email string) (dto.TokenPairResponse, error)
 	// Logout(ctx context.Context, refreshToken string) error
