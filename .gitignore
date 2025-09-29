@@ -35,16 +35,15 @@
 
 /node_modules
 
-# Environment files
-/.env
-/.env.local
-/.env.development
-/.env.production
+# Environment files - all variants
+**/.env
+**/.env.*
+**/.env.local
+**/.env.development
+**/.env.production
+**/.env.staging
+**/.env.test
 .env*
-
-# API environment files
-/apps/api/.env*
-/infra/.env*
 
 /public/
 
