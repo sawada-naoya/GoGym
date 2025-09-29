@@ -2,25 +2,22 @@ package repository
 
 import (
 	"context"
-	"gogym-api/internal/adapter/repository/record"
 	"gogym-api/internal/adapter/repository/mapper"
+	"gogym-api/internal/adapter/repository/record"
 	dom "gogym-api/internal/domain/user"
-	uc "gogym-api/internal/usecase/user"
 
 	"gorm.io/gorm"
 )
 
-type userRepository struct {
+type UserRepository struct { // ← 公開にする
 	db *gorm.DB
 }
 
-// NewUserRepository は新しいユーザーリポジトリを作成する
-func NewUserRepository(db *gorm.DB) uc.Repository {
-	return &userRepository{db: db}
+func NewUserRepository(db *gorm.DB) *UserRepository {
+	return &UserRepository{db: db}
 }
 
-func (r *userRepository) Create(ctx context.Context, user *dom.User) error {
-	// ドメインエンティティをGORMレコードに変換
+func (r *UserRepository) Create(ctx context.Context, user *dom.User) error {
 	recordUser := mapper.FromUserEntity(user)
 
 	result := r.db.WithContext(ctx).Create(recordUser)
@@ -31,12 +28,12 @@ func (r *userRepository) Create(ctx context.Context, user *dom.User) error {
 	return nil
 }
 
-func (r *userRepository) FindByEmail(ctx context.Context, email dom.Email) (*dom.User, error) {
+func (r *UserRepository) FindByEmail(ctx context.Context, email dom.Email) (*dom.User, error) {
 	var recordUser record.User
 
 	err := r.db.WithContext(ctx).
 		Model(&record.User{}).
-		Where("email = ?", email).
+		Where("email = ?", email.String()).
 		First(&recordUser).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -48,7 +45,7 @@ func (r *userRepository) FindByEmail(ctx context.Context, email dom.Email) (*dom
 	return mapper.ToUserEntity(&recordUser), nil
 }
 
-func (r *userRepository) ExistsByEmail(ctx context.Context, email dom.Email) (bool, error) {
+func (r *UserRepository) ExistsByEmail(ctx context.Context, email dom.Email) (bool, error) {
 	var count int64
 	result := r.db.WithContext(ctx).
 		Model(&record.User{}).

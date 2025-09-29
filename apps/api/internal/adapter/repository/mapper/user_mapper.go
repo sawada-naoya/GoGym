@@ -3,11 +3,13 @@ package mapper
 import (
 	"gogym-api/internal/adapter/repository/record"
 	"gogym-api/internal/domain/user"
+
+	"github.com/oklog/ulid/v2"
 )
 
 func FromUserEntity(u *user.User) *record.User {
 	return &record.User{
-		ID:           string(u.ID),
+		ID:           u.ID.String(),
 		Email:        u.Email.String(),
 		PasswordHash: u.PasswordHash,
 		Name:         u.Name,
@@ -18,8 +20,9 @@ func FromUserEntity(u *user.User) *record.User {
 
 func ToUserEntity(r *record.User) *user.User {
 	email, _ := user.NewEmail(r.Email)
+	id, _ := ulid.Parse(r.ID)
 	return &user.User{
-		ID:           r.ID,
+		ID:           id,
 		Email:        email,
 		PasswordHash: r.PasswordHash,
 		Name:         r.Name,

@@ -12,10 +12,10 @@ type RecommendedGymsResponse = {
 // おすすめのジムを取得する関数
 const fetchRecommendedGyms = async (): Promise<RecommendedGymsResponse> => {
   try {
-    const data = await GET<RecommendedGymsResponse>("/api/v1/gyms/recommended", {
+    const res = await GET<RecommendedGymsResponse>("/gyms/recommended", {
       query: { limit: 6 },
     });
-    return data;
+    return res.data || { gyms: [] };
   } catch (error) {
     console.error("Failed to fetch recommended gyms:", error);
     // エラー時は空のレスポンスを返す

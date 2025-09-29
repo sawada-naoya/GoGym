@@ -2,72 +2,56 @@ package main
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"gogym-api/configs"
-	customLog "gogym-api/internal/infra/log"
+	"gogym-api/internal/configs"
+	"gogym-api/internal/di"
 )
 
 func main() {
-	// コンテキスト作成
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	// 設定読み込み
 	config, err := configs.Load()
 	if err != nil {
-		log.Fatalf("Failed to load config: %v", err)
+		slog.Error("Failed to load configuration", "error", err)
 	}
 
-	// ログ初期化
-	logger := customLog.NewLogger(config.HTTP.Env)
-
-	// デフォルトのslogハンドラーを設定（他のパッケージでslog.InfoContext等を使えるように）
-	slog.SetDefault(logger)
-
-	logger.Info("Starting GoGym API Server")
-
-	// 依存性注入とサーバー初期化
-	server, err := InitServer(ctx, config, logger)
+	e, _, err := di.BuildServer(config)
 	if err != nil {
-		logger.Error("Failed to initialize server", "error", err)
+		slog.Error("Failed to build server", "error", err)
 		os.Exit(1)
 	}
 
-	// グレースフルシャットダウンのためのシグナルハンドリング
+	addr := fmt.Sprintf("%s:%d", config.HTTP.Host, config.HTTP.Port)
+	slog.Info("Starting server", "address", addr)
+
+	errCh := make(chan error, 1)
 	go func() {
-		sigChan := make(chan os.Signal, 1)
-		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-		<-sigChan
-
-		logger.Info("Received shutdown signal")
-
-		// タイムアウト付きでシャットダウン
-		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer shutdownCancel()
-
-		if err := server.Shutdown(shutdownCtx); err != nil {
-			logger.Error("Failed to shutdown server gracefully", "error", err)
-		}
-		cancel()
+		errCh <- e.Start(addr)
 	}()
 
-	// サーバー起動
-	logger.Info("Server configuration",
-		"port", config.HTTP.Port,
-		"env", config.HTTP.Env,
-		"db_host", config.Database.Host,
-	)
+	sigCtx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 
-	if err := server.Start(); err != nil {
-		logger.Error("Server failed to start", "error", err)
-		os.Exit(1)
+	select {
+	case <-sigCtx.Done():
+		slog.Info("shutdown signal received")
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if err := e.Shutdown(ctx); err != nil {
+			slog.Error("graceful shutdown failed", "error", err)
+			os.Exit(1)
+		}
+		slog.Info("server shutdown complete")
+	case err := <-errCh:
+		// 起動直後にエラーで落ちた場合
+		if err != nil && err != http.ErrServerClosed {
+			slog.Error("server error", "error", err)
+			os.Exit(1)
+		}
 	}
-
-	logger.Info("Server shutdown complete")
 }

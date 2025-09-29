@@ -9,28 +9,18 @@ import (
 )
 
 func RegisterRoutes(
-	e *echo.Echo,
+	httpCfg configs.HTTPConfig,
 	gymHandler *handler.GymHandler,
 	userHandler *handler.UserHandler,
 	reviewHandler *handler.ReviewHandler,
 	sessionHandler *handler.SessionHandler,
-) {
+) *echo.Echo {
+	e := server.NewEcho(httpCfg)
 	v1 := e.Group("/api/v1")
 
 	GymRoutes(v1, gymHandler)
 	UserRoutes(v1, userHandler)
 	ReviewRoutes(v1, reviewHandler)
 	SessionRoutes(v1, sessionHandler)
-}
-
-func BuildEcho(
-	httpCfg configs.HTTPConfig,
-	gym *handler.GymHandler,
-	user *handler.UserHandler,
-	review *handler.ReviewHandler,
-	session *handler.SessionHandler,
-) *echo.Echo {
-	e := server.NewEcho(httpCfg)
-	RegisterRoutes(e, gym, user, review, session)
 	return e
 }

@@ -2,8 +2,8 @@ package repository
 
 import (
 	"context"
-	"gogym-api/internal/adapter/repository/record"
 	"gogym-api/internal/adapter/repository/mapper"
+	"gogym-api/internal/adapter/repository/record"
 	"gogym-api/internal/domain/review"
 	reviewUsecase "gogym-api/internal/usecase/review"
 

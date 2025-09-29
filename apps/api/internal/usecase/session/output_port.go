@@ -6,28 +6,12 @@ package session
 
 import (
 	"context"
-	"time"
 
-	jwt "gogym-api/internal/adapter/auth"
 	userDom "gogym-api/internal/domain/user"
 )
 
-type JWT interface {
-	IssueAccess(userID string) (token string, ttl time.Duration, err error)
-	IssueRefresh(userID string) (token string, ttl time.Duration, jti string, exp time.Time, err error)
-	ParseRefresh(tokenStr string) (jwt.RefreshClaims, error)
-}
-
 type UserRepository interface {
 	FindByEmail(ctx context.Context, email userDom.Email) (*userDom.User, error)
-}
-
-type IDProvider interface {
-	NewJTI() string
-}
-
-type TimeProvider interface {
-	Now() time.Time
 }
 
 type PasswordHasher interface {

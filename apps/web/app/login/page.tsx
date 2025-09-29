@@ -48,7 +48,7 @@ const LoginPage = () => {
     }
   }, [searchParams]);
 
-  type TokenPairResponse = {
+  type TokenResponse = {
     access_token: string;
     expires_in: number;
   };
@@ -57,7 +57,7 @@ const LoginPage = () => {
     setApiError(null);
     setLoading(true);
     try {
-      const res = await POST<TokenPairResponse>("/api/v1/sessions/login", {
+      const res = await POST<TokenResponse>("/sessions/login", {
         body: {
           email: data.email,
           password: data.password,

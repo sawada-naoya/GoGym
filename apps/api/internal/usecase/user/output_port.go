@@ -4,6 +4,7 @@ import (
 	"context"
 	dom "gogym-api/internal/domain/user"
 )
+
 // Repository はユーザーデータの永続化を担当
 type Repository interface {
 	Create(ctx context.Context, u *dom.User) error
@@ -14,11 +15,6 @@ type Repository interface {
 type PasswordHasher interface {
 	HashPassword(password string) (string, error)
 	VerifyPassword(password, hash string) error
-}
-
-// IDProvider はユニークIDの生成を担当
-type IDProvider interface {
-	NewUserID() string
 }
 
 // TokenService はJWTトークンの生成・検証を担当

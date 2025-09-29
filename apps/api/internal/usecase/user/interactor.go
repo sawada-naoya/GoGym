@@ -2,23 +2,24 @@ package user
 
 import (
 	"context"
+	"crypto/rand"
 	"time"
 
 	"gogym-api/internal/adapter/dto"
 	dom "gogym-api/internal/domain/user"
+
+	"github.com/oklog/ulid/v2"
 )
 
 type interactor struct {
-	repo       Repository
-	hasher     PasswordHasher
-	idProvider IDProvider
+	repo   Repository
+	hasher PasswordHasher
 }
 
-func NewInteractor(repo Repository, hasher PasswordHasher, idProvider IDProvider) UserUseCase {
+func NewInteractor(repo Repository, hasher PasswordHasher) UserUseCase {
 	return &interactor{
-		repo:       repo,
-		hasher:     hasher,
-		idProvider: idProvider,
+		repo:   repo,
+		hasher: hasher,
 	}
 }
 
@@ -45,8 +46,10 @@ func (i *interactor) SignUp(ctx context.Context, req dto.SignUpRequest) error {
 		return err
 	}
 
-	// ユーザーIDの生成
-	id := i.idProvider.NewUserID()
+	// ユーザーID(ulid)の生成
+	t := time.Now()
+	entropy := ulid.Monotonic(rand.Reader, 0)
+	id := ulid.MustNew(ulid.Timestamp(t), entropy)
 
 	now := time.Now()
 

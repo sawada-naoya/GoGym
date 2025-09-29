@@ -5,10 +5,12 @@ package user
 import (
 	"strings"
 	"time"
+
+	"github.com/oklog/ulid/v2"
 )
 
 type User struct {
-	ID           string    // ULID識別子
+	ID           ulid.ULID // ULID識別子
 	Name         string    // 表示名
 	Email        Email     // メールアドレス（バリューオブジェクト）
 	PasswordHash string    // パスワードハッシュ
@@ -17,7 +19,7 @@ type User struct {
 }
 
 // NewUser: 不変条件を満たすユーザーを生成（IDは自動生成）
-func NewUser(id string, name string, email Email, passwordHash string, now time.Time) (*User, error) {
+func NewUser(id ulid.ULID, name string, email Email, passwordHash string, now time.Time) (*User, error) {
 	n := strings.TrimSpace(name)
 	if n == "" || len(n) > 100 {
 		return nil, NewDomainError("invalid_name")

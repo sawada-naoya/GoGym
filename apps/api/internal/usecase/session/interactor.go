@@ -7,37 +7,32 @@ package session
 import (
 	"context"
 	userUC "gogym-api/internal/usecase/user"
+	"os"
+	"time"
 
 	"gogym-api/internal/adapter/dto"
 	dom "gogym-api/internal/domain/user"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type interactor struct {
 	// 外部依存関係
-	jwt JWT
-	ur  UserRepository
-	idp IDProvider
-	tp  TimeProvider
-	ph  PasswordHasher
+	ur UserRepository
+	ph PasswordHasher
 	// 他のユースケース
 	uu userUC.UserUseCase
 }
 
 func NewInteractor(
-	jwt JWT,
 	ur UserRepository,
-	idp IDProvider,
-	tp TimeProvider,
 	ph PasswordHasher,
 	uu userUC.UserUseCase,
 ) SessionUseCase {
 	return &interactor{
-		jwt: jwt,
-		ur:  ur,
-		idp: idp,
-		tp:  tp,
-		ph:  ph,
-		uu:  uu,
+		ur: ur,
+		ph: ph,
+		uu: uu,
 	}
 }
 
@@ -65,35 +60,39 @@ func (i *interactor) Login(ctx context.Context, req dto.LoginRequest) error {
 	return nil
 }
 
-func (i *interactor) CreateSession(ctx context.Context, email string) (dto.TokenPairResponse, error) {
+func (i *interactor) CreateSession(ctx context.Context, email string) (dto.TokenResponse, error) {
 
 	emailObj, err := dom.NewEmail(email)
 	if err != nil {
-		return dto.TokenPairResponse{}, err
+		return dto.TokenResponse{}, err
 	}
 
 	user, err := i.ur.FindByEmail(ctx, emailObj)
 	if err != nil {
-		return dto.TokenPairResponse{}, dom.NewDomainError("email_not_found")
+		return dto.TokenResponse{}, dom.NewDomainError("email_not_found")
 	}
 	if user == nil {
-		return dto.TokenPairResponse{}, dom.NewDomainError("user_not_found")
+		return dto.TokenResponse{}, dom.NewDomainError("user_not_found")
 	}
 
-	access, accessTTL, err := i.jwt.IssueAccess(user.ID)
+	now := time.Now()
+	accessTTL := 24 * time.Hour
+
+	claims := jwt.MapClaims{
+		"sub": user.ID,
+		"exp": now.Add(accessTTL).Unix(),
+		"iat": now.Unix(),
+		"typ": "access",
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	secret := []byte(os.Getenv("JWT_SECRET"))
+	tokenString, err := token.SignedString(secret)
 	if err != nil {
-		return dto.TokenPairResponse{}, err
+		return dto.TokenResponse{}, err
 	}
 
-	refresh, _, _, exp, err := i.jwt.IssueRefresh(user.ID)
-	if err != nil {
-		return dto.TokenPairResponse{}, err
-	}
-
-	return dto.TokenPairResponse{
-		AccessToken:  access,
-		ExpiresIn:    int64(accessTTL.Seconds()),
-		RefreshToken: refresh,
-		RefreshExp:   exp.Unix(),
+	return dto.TokenResponse{
+		AccessToken: tokenString,
+		ExpiresIn:   int64(accessTTL.Seconds()),
 	}, nil
 }

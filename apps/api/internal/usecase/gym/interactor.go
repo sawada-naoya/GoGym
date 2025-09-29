@@ -1,8 +1,6 @@
 package gym
 
 import (
-	"log/slog"
-
 	"gogym-api/internal/usecase/tag"
 
 	"context"
@@ -16,14 +14,12 @@ import (
 type interactor struct {
 	repo    Repository
 	tagRepo tag.Repository
-	logger  *slog.Logger
 }
 
-func NewInteractor(repo Repository, tagRepo tag.Repository, logger *slog.Logger) GymUseCase {
+func NewInteractor(repo Repository, tagRepo tag.Repository) GymUseCase {
 	return &interactor{
 		repo:    repo,
 		tagRepo: tagRepo,
-		logger:  logger,
 	}
 }
 

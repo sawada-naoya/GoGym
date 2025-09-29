@@ -45,7 +45,7 @@ const SignUpPage = () => {
     setLoading(true);
 
     try {
-      const res = await POST("/api/v1/users", {
+      const res = await POST("/users", {
         body: {
           name: data.name,
           email: data.email,

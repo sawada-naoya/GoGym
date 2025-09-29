@@ -11,6 +11,6 @@ import (
 
 type SessionUseCase interface {
 	Login(ctx context.Context, req dto.LoginRequest) error
-	CreateSession(ctx context.Context, email string) (dto.TokenPairResponse, error)
+	CreateSession(ctx context.Context, email string) (dto.TokenResponse, error)
 	// Logout(ctx context.Context, refreshToken string) error
 }

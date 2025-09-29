@@ -9,8 +9,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// DatabaseConfig はデータベース接続設定を保持する構造体
-// MySQL 8.0への接続に必要な情報を環境変数から取得する
 type DatabaseConfig struct {
 	Host     string `env:"DB_HOST,required"`           // データベースのホスト名（必須）
 	Port     string `env:"DB_PORT" envDefault:"3307"`  // データベースのポート番号（デフォルト: 3307）
@@ -20,8 +18,6 @@ type DatabaseConfig struct {
 	Timezone string `env:"TZ" envDefault:"Asia/Tokyo"` // タイムゾーン設定（デフォルト: Asia/Tokyo）
 }
 
-// AuthConfig はJWT認証設定を保持する構造体
-// アクセストークンとリフレッシュトークンの設定を管理する
 type AuthConfig struct {
 	JWTSecret        string        `env:"JWT_SECRET,required"`                     // JWTの署名用秘密鍵（必須、16文字以上）
 	AccessExpiresIn  time.Duration `env:"JWT_ACCESS_EXPIRES_IN" envDefault:"1h"`   // アクセストークン有効期限（デフォルト: 1時間）
@@ -29,8 +25,6 @@ type AuthConfig struct {
 	Issuer           string        `env:"JWT_ISSUER" envDefault:"gogym-api"`       // JWTの発行者（デフォルト: gogym-api）
 }
 
-// CORSConfig はCross-Origin Resource Sharing設定を保持する構造体
-// フロントエンドからのクロスオリジンリクエストを制御する
 type CORSConfig struct {
 	AllowOrigins []string `env:"CORS_ALLOW_ORIGINS"   envSeparator:","`
 	AllowMethods []string `env:"CORS_ALLOW_METHODS"   envSeparator:"," envDefault:"GET,POST,PUT,DELETE,OPTIONS"`
@@ -38,8 +32,6 @@ type CORSConfig struct {
 	AllowCreds   bool     `env:"CORS_ALLOW_CREDENTIALS" envDefault:"true"`
 }
 
-// ServerConfig はHTTPサーバー設定を保持する構造体
-// Echoサーバーの起動に必要な設定を管理する
 type HTTPConfig struct {
 	Host string     `env:"APP_HOST" envDefault:"0.0.0.0"` // バインド先
 	Port int        `env:"APP_PORT" envDefault:"8081"`    // ポート
@@ -54,8 +46,6 @@ type HTTPConfig struct {
 	MaxHeaderBytes    int           `env:"HTTP_MAX_HEADER_BYTES"    envDefault:"1048576"` // 1<<20
 }
 
-// Config はアプリケーション全体の設定を保持するメイン構造体
-// 各種設定構造体を組み合わせて、アプリケーション起動時に一度だけ読み込まれる
 type Config struct {
 	Database DatabaseConfig // データベース接続設定
 	Auth     AuthConfig     // JWT認証設定
