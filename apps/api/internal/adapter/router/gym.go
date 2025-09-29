@@ -9,9 +9,9 @@ import (
 func GymRoutes(e *echo.Group, g *handler.GymHandler) {
 	gym := e.Group("/gyms")
 	// おすすめジム取得
-	gym.GET("/gyms/recommended", g.GetRecommendedGyms)
+	gym.GET("/recommended", g.GetRecommendedGyms)
 
 	// 特定ジム取得
-	gym.GET("/gym/:id", g.GetGym)
+	gym.GET("/:id", g.GetGym)
 
 }

@@ -4,30 +4,22 @@ import SearchForm from "@/components/SearchForm";
 import { Gym } from "@/types/gym";
 import { GET } from "@/lib/api";
 
-// レスポンスの型定義
-type RecommendedGymsResponse = {
-  gyms: Gym[];
-};
-
 // おすすめのジムを取得する関数
-const fetchRecommendedGyms = async (): Promise<RecommendedGymsResponse> => {
+const fetchRecommendedGyms = async (): Promise<Gym[]> => {
   try {
-    const res = await GET<RecommendedGymsResponse>("/gyms/recommended", {
+    const res = await GET<Gym[]>("/gyms/recommended", {
       query: { limit: 6 },
     });
-    return res.data || { gyms: [] };
+    if (res.status < 200 || res.status >= 300) return [];
+    return res.data || [];
   } catch (error) {
     console.error("Failed to fetch recommended gyms:", error);
-    // エラー時は空のレスポンスを返す
-    return {
-      gyms: [] as Gym[],
-    };
+    return [];
   }
 };
 
 const Home = async () => {
-  const response = await fetchRecommendedGyms();
-  const gyms = response.gyms;
+  const gyms = await fetchRecommendedGyms();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -55,11 +47,11 @@ const Home = async () => {
             <h2 className="text-3xl font-bold text-gray-900 mb-2">{gyms?.length > 0 ? "⭐ おすすめのジム" : "新しいジムを追加中..."}</h2>
             <p className="text-gray-600">{gyms?.length > 0 ? "評価の高い順に表示しています" : "データベースにジム情報を追加してください"}</p>
           </div>
-          <div className="text-sm text-gray-600">{gyms.length > 0 && `厳選された${gyms.length}件のジム`}</div>
+          <div className="text-sm text-gray-600">{gyms?.length > 0 && `厳選された${gyms.length}件のジム`}</div>
         </div>
 
         {/* ジムカードグリッド */}
-        {gyms.length > 0 ? (
+        {gyms?.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {gyms?.map((gym) => (
               <GymCard key={gym.id} gym={gym} />

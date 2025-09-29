@@ -1,10 +1,10 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { useState } from 'react'
+import Link from "next/link";
+import { useState } from "react";
 
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <header className="bg-booking-700 shadow-lg">
@@ -33,26 +33,17 @@ const Header = () => {
 
           {/* ユーザーメニュー */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link
-              href="/login"
-              className="text-white hover:text-booking-200 transition-colors px-4 py-2 rounded-md"
-            >
+            <Link href="/login" className="text-white hover:text-booking-200 transition-colors px-4 py-2 rounded-md">
               ログイン
             </Link>
-            <Link
-              href="/register"
-              className="bg-white text-booking-700 hover:bg-booking-50 transition-colors px-4 py-2 rounded-md font-medium"
-            >
+            <Link href="/signup" className="bg-white text-booking-700 hover:bg-booking-50 transition-colors px-4 py-2 rounded-md font-medium">
               新規登録
             </Link>
           </div>
 
           {/* モバイルメニューボタン */}
-          <button
-            className="md:hidden text-white font-medium px-3 py-2 border border-white/20 rounded"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? '閉じる' : 'メニュー'}
+          <button className="md:hidden text-white font-medium px-3 py-2 border border-white/20 rounded" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+            {isMenuOpen ? "閉じる" : "メニュー"}
           </button>
         </div>
 
@@ -73,16 +64,10 @@ const Header = () => {
                 GoGymについて
               </Link>
               <div className="flex flex-col space-y-2 pt-4 border-t border-booking-600">
-                <Link
-                  href="/login"
-                  className="text-white hover:text-booking-200 transition-colors py-2"
-                >
+                <Link href="/login" className="text-white hover:text-booking-200 transition-colors py-2">
                   ログイン
                 </Link>
-                <Link
-                  href="/register"
-                  className="bg-white text-booking-700 hover:bg-booking-50 transition-colors px-4 py-2 rounded-md font-medium text-center"
-                >
+                <Link href="/register" className="bg-white text-booking-700 hover:bg-booking-50 transition-colors px-4 py-2 rounded-md font-medium text-center">
                   新規登録
                 </Link>
               </div>
@@ -91,7 +76,7 @@ const Header = () => {
         )}
       </div>
     </header>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;
