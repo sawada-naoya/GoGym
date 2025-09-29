@@ -18,10 +18,10 @@ type PageProps = {
 
 const fetchGym = async (id: string): Promise<Gym | null> => {
   try {
-    const data = await GET<Gym>(`/api/v1/gym/${id}`, {
+    const res = await GET<Gym>(`/gym/${id}`, {
       cache: "no-store",
     });
-    return data || null;
+    return res.data || null;
   } catch (error) {
     console.error("Failed to fetch gym:", error);
     return null;
@@ -30,10 +30,10 @@ const fetchGym = async (id: string): Promise<Gym | null> => {
 
 const fetchGymReviews = async (id: string): Promise<ReviewListResponse | null> => {
   try {
-    const data = await GET<ReviewListResponse>(`/api/v1/gyms/${id}/reviews`, {
+    const res = await GET<ReviewListResponse>(`/gyms/${id}/reviews`, {
       cache: "no-store",
     });
-    return data || null;
+    return res.data || null;
   } catch (error) {
     console.error("Failed to fetch gym reviews:", error);
     return null;
@@ -49,7 +49,7 @@ const GymPage = async ({ params }: PageProps) => {
   if (!reviews) {
     console.error("No reviews found for this gym");
   }
-  
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />

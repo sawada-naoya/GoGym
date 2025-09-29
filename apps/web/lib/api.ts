@@ -38,7 +38,7 @@ const parseJsonIfAny = async (res: Response): Promise<unknown | undefined> => {
 };
 
 const request = async <T>(endpoint: string, method: HttpMethod, options: RequestOptions = {}): Promise<ApiResponse<T>> => {
-  let url = API_BASE_URL ? `${API_BASE_URL}${endpoint}` : endpoint;
+  let url = API_BASE_URL ? `${API_BASE_URL}/api/v1${endpoint}` : `/api/v1${endpoint}`;
   const qs = buildQueryParams(options.query);
   if (qs) url += (url.includes("?") ? "&" : "?") + qs;
 
@@ -50,6 +50,7 @@ const request = async <T>(endpoint: string, method: HttpMethod, options: Request
       ...(options.headers ?? {}),
     },
     body: method !== "GET" && options.body !== undefined ? JSON.stringify(options.body) : undefined,
+    credentials: "include",
   });
 
   let data: T | null = null;

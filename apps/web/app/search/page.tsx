@@ -24,16 +24,30 @@ const fetchRecommendedGyms = async (searchParams?: SearchGymParams): Promise<Sea
 
     if (hasSearchCondition) {
       // 検索条件がある場合は通常の検索エンドポイント
-      return await GET<SearchGymResponse>("/api/v1/gyms", {
+      const res = await GET<SearchGymResponse>("/gyms", {
         query: queryParams,
         cache: "no-store",
       });
+      return (
+        res.data || {
+          gyms: [],
+          next_cursor: null,
+          has_more: false,
+        }
+      );
     } else {
       // 検索条件がない場合はおすすめジムエンドポイント
-      return await GET<SearchGymResponse>("/api/v1/gyms/recommended", {
+      const res = await GET<SearchGymResponse>("/gyms/recommended", {
         query: { limit: queryParams.limit || 20 },
         cache: "no-store",
       });
+      return (
+        res.data || {
+          gyms: [],
+          next_cursor: null,
+          has_more: false,
+        }
+      );
     }
   } catch (error) {
     console.error("Failed to fetch recommended gyms:", error);
@@ -93,11 +107,7 @@ const SearchResults = async ({ searchParams }: { searchParams: SearchGymParams }
       {/* ジム一覧 */}
       {gyms && gyms.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {gyms?.map((gym) => (
-              <GymCard key={gym.id} gym={gym} />
-            )) || []}
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">{gyms?.map((gym) => <GymCard key={gym.id} gym={gym} />) || []}</div>
 
           {/* もっと見るボタン */}
           {has_more && (

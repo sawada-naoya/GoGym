@@ -1,6 +1,3 @@
-// internal/domain/review/entity.go
-// 役割: レビュードメインのEntity/VO（Domain Layer）
-// ビジネスルールと不変条件を持つ純粋なドメインオブジェクト。GORM/JSONタグは一切なし
 package review
 
 import (
@@ -21,7 +18,7 @@ type Review struct {
 // NewReview creates a new review with validation
 func NewReview(userID, gymID gym.ID, rating Rating) (*Review, error) {
 	if !rating.IsValid() {
-		return nil, gym.NewDomainError(gym.ErrInvalidRating, "invalid_rating", "rating must be between 1 and 5")
+		return nil, NewDomainError("invalid_rating")
 	}
 
 	review := &Review{
@@ -40,19 +37,19 @@ func NewReview(userID, gymID gym.ID, rating Rating) (*Review, error) {
 // Validate validates review data
 func (r *Review) Validate() error {
 	if r.UserID == 0 {
-		return gym.NewDomainError(gym.ErrInvalidInput, "invalid_user_id", "user ID is required")
+		return NewDomainError("invalid_user_id")
 	}
 
 	if r.GymID == 0 {
-		return gym.NewDomainError(gym.ErrInvalidInput, "invalid_gym_id", "gym ID is required")
+		return NewDomainError("invalid_gym_id")
 	}
 
 	if !r.Rating.IsValid() {
-		return gym.NewDomainError(gym.ErrInvalidRating, "invalid_rating", "rating must be between 1 and 5")
+		return NewDomainError("invalid_rating")
 	}
 
 	if r.Comment != nil && len(*r.Comment) > 1000 {
-		return gym.NewDomainError(gym.ErrInvalidInput, "invalid_comment", "comment too long")
+		return NewDomainError("invalid_comment")
 	}
 
 	return nil

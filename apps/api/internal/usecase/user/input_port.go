@@ -2,10 +2,9 @@ package user
 
 import (
 	"context"
-	"gogym-api/internal/adapter/http/dto"
+	"gogym-api/internal/adapter/dto"
 )
 
-// handler → usecase
-type UseCase interface {
+type UserUseCase interface {
 	SignUp(ctx context.Context, req dto.SignUpRequest) error
 }
