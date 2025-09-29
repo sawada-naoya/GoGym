@@ -1,0 +1,7 @@
+/tmp/
+api
+
+# 環境変数
+.env
+.env*.local
+!.env.example
