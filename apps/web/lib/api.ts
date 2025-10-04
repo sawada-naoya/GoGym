@@ -22,6 +22,7 @@ type RequestOptions = {
   query?: Query;
   body?: unknown;
   headers?: Record<string, string>;
+  cache?: RequestCache;
 };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;

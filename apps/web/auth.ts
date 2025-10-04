@@ -19,7 +19,7 @@ export const { auth, signIn, signOut } = NextAuth({
         });
         if (!res.ok || !res.data) return null;
 
-        const { user, access_token, expires_in } = res.data;
+        const { user, access_token } = res.data;
         if (!user?.id || !user?.name || !user?.email || !access_token) return null;
 
         // next-auth の“User”として返す（追加フィールドは any でOK）
