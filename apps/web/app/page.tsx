@@ -6,15 +6,15 @@ import { GET } from "@/lib/api";
 
 // おすすめのジムを取得する関数
 const fetchRecommendedGyms = async (): Promise<Gym[]> => {
+  const fallback: Gym[] = [];
   try {
     const res = await GET<Gym[]>("/gyms/recommended", {
       query: { limit: 6 },
     });
-    if (res.status < 200 || res.status >= 300) return [];
-    return res.data || [];
+    if (!res.ok || !res.data) return fallback;
+    return res.data;
   } catch (error) {
-    console.error("Failed to fetch recommended gyms:", error);
-    return [];
+    return fallback;
   }
 };
 

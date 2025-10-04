@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { includes, z } from "zod";
@@ -48,45 +49,28 @@ const LoginPage = () => {
     }
   }, [searchParams]);
 
-  type TokenResponse = {
-    access_token: string;
-    expires_in: number;
-  };
-
   const onSubmit = async (data: LoginForm) => {
     setApiError(null);
     setLoading(true);
-    try {
-      const res = await POST<TokenResponse>("/sessions/login", {
-        body: {
-          email: data.email,
-          password: data.password,
-        },
-      });
-      if (!res.ok) {
-        const err = res.data as { key: string } | null;
-        switch (err?.key) {
-          case "email_not_found":
-            setApiError("メールアドレスが正しくありません");
-            break;
-          case "invalid_credentials":
-            setApiError("パスワードが正しくありません");
-            break;
-          default:
-            setApiError("ログインに失敗しました");
-        }
-        return;
-      }
 
-      // アクセストークンをメモリに保持（以降のAPIでAuthorizationに付ける）
-      if (res.data) {
-        tokenStore.set(res.data.access_token);
-        router.push("/");
-      }
-    } catch {
-      setApiError("ネットワークエラーが発生しました。時間を置いて再度お試しください。");
+    const callbackUrl = searchParams.get("callbackUrl") ?? "/";
+    const res = await signIn("credentials", {
+      email: data.email,
+      password: data.password,
+      redirect: false,
+      callbackUrl,
+    });
+
+    if (res?.error) {
       setLoading(false);
+      if (res.error === "CredentialsSignin") {
+        setApiError("メールアドレスまたはパスワードが正しくありません");
+      } else {
+        setApiError("ログインに失敗しました");
+      }
+      return;
     }
+    router.push(res?.url ?? callbackUrl);
   };
 
   return (

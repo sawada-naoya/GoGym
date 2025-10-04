@@ -92,6 +92,11 @@ func (i *interactor) CreateSession(ctx context.Context, email string) (dto.Token
 	}
 
 	return dto.TokenResponse{
+		User: dto.UserResponse{
+			ID:    user.ID.String(),
+			Name:  user.Name,
+			Email: user.Email.String(),
+		},
 		AccessToken: tokenString,
 		ExpiresIn:   int64(accessTTL.Seconds()),
 	}, nil
