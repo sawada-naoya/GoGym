@@ -6,10 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { includes, z } from "zod";
-import { POST } from "@/lib/api";
+import { z } from "zod";
 import { SuccessBanner, ErrorBanner } from "../../components/ui/Banner";
-import { tokenStore } from "@/lib/tokenStore";
 
 const LoginSchema = z.object({
   email: z.email("有効なメールアドレスを入力してください").min(1, "メールアドレスは必須です"),

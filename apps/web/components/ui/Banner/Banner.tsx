@@ -1,13 +1,14 @@
-import { BannerVariant, BannerProps } from "./Banner.types";
+import { useEffect } from "react";
+import { BannerProps, BannerVariant } from "./Banner.types";
 
-const colors: Record<BannerVariant, { bg: string; border: string; text: string; icon: string }> = {
-  success: { bg: "bg-green-50", border: "border-green-300", text: "text-green-800", icon: "text-green-400" },
-  error: { bg: "bg-red-50", border: "border-red-300", text: "text-red-800", icon: "text-red-400" },
-  info: { bg: "bg-blue-50", border: "border-blue-300", text: "text-blue-800", icon: "text-blue-400" },
-  warning: { bg: "bg-yellow-50", border: "border-yellow-300", text: "text-yellow-800", icon: "text-yellow-400" },
+const colors: Record<BannerVariant, { bg: string; border: string; text: string; icon: string; ring: string }> = {
+  success: { bg: "bg-green-50", border: "border-green-300", text: "text-green-800", icon: "text-green-400", ring: "focus:ring-green-600" },
+  error: { bg: "bg-red-50", border: "border-red-300", text: "text-red-800", icon: "text-red-400", ring: "focus:ring-red-600" },
+  info: { bg: "bg-blue-50", border: "border-blue-300", text: "text-blue-800", icon: "text-blue-400", ring: "focus:ring-blue-600" },
+  warning: { bg: "bg-yellow-50", border: "border-yellow-300", text: "text-yellow-800", icon: "text-yellow-400", ring: "focus:ring-yellow-600" },
 };
 
-const icons: Record<BannerVariant, JSX.Element> = {
+const defaultIcons: Record<BannerVariant, JSX.Element> = {
   success: (
     <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -30,28 +31,38 @@ const icons: Record<BannerVariant, JSX.Element> = {
   ),
 };
 
-export const Banner = ({ variant, message, onClose }: BannerProps) => {
-  const { bg, border, text, icon } = colors[variant];
+export const Banner = ({ variant, message, title, dismissible, autoHideMs, onClose, icon = true, className = "", "data-testid": testId }: BannerProps) => {
+  const { bg, border, text, icon: iconColor, ring } = colors[variant];
+
+  const isDismissible = dismissible ?? !!onClose;
+
+  useEffect(() => {
+    if (!autoHideMs || !onClose) return;
+    const t = setTimeout(onClose, autoHideMs);
+    return () => clearTimeout(t);
+  }, [autoHideMs, onClose]);
+
+  // アクセシビリティ：エラー/警告は assertive、それ以外は polite
+  const ariaLive = variant === "error" || variant === "warning" ? "assertive" : "polite";
+  const role = variant === "error" || variant === "warning" ? "alert" : "status";
 
   return (
-    <div className={`mb-4 rounded-md border ${border} ${bg} p-4`}>
+    <div className={`mb-4 rounded-md border ${border} ${bg} p-4 ${className}`} role={role} aria-live={ariaLive} data-testid={testId}>
       <div className="flex">
-        <div className="flex-shrink-0">
-          <div className={icon}>{icons[variant]}</div>
+        {icon !== false && (
+          <div className="flex-shrink-0">
+            <div className={iconColor}>{icon === true ? defaultIcons[variant] : icon}</div>
+          </div>
+        )}
+
+        <div className={`ml-3 flex-1 ${icon === false ? "" : "mt-0.5"}`}>
+          {title && <div className={`text-sm font-semibold ${text}`}>{title}</div>}
+          <div className={`text-sm ${text}`}>{message}</div>
         </div>
-        <div className="ml-3 flex-1">
-          <div className={`text-sm font-medium ${text}`}>{message}</div>
-        </div>
-        {onClose && (
+
+        {isDismissible && onClose && (
           <div className="ml-auto pl-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className={`inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 ${
-                variant === "success" ? "text-green-500 hover:bg-green-100 focus:ring-green-600" : variant === "error" ? "text-red-500 hover:bg-red-100 focus:ring-red-600" : variant === "info" ? "text-blue-500 hover:bg-blue-100 focus:ring-blue-600" : "text-yellow-500 hover:bg-yellow-100 focus:ring-yellow-600"
-              }`}
-              aria-label="閉じる"
-            >
+            <button type="button" onClick={onClose} className={`inline-flex rounded-md p-1.5 ${colors[variant].icon} hover:opacity-80 focus:outline-none focus:ring-2 ${ring}`} aria-label="閉じる">
               <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
               </svg>
