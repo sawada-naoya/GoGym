@@ -34,7 +34,7 @@ const fetchGym = async (id: string): Promise<Gym | null> => {
     updated_at: "",
   };
   try {
-    const res = await GET<Gym>(`/gym/${id}`, {
+    const res = await GET<Gym>(`/api/v1/gym/${id}`, {
       cache: "no-store",
     });
     if (!res.ok || !res.data) return fallback;
@@ -50,7 +50,7 @@ const fetchGymReviews = async (id: string): Promise<ReviewListResponse | null> =
     next_cursor: null,
   };
   try {
-    const res = await GET<ReviewListResponse>(`/gyms/${id}/reviews`, {
+    const res = await GET<ReviewListResponse>(`/api/v1/gyms/${id}/reviews`, {
       cache: "no-store",
     });
     if (!res.ok || !res.data) return fallback;

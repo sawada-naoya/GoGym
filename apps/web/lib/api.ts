@@ -29,16 +29,20 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const isJson = (h: Headers) => (h.get("content-type") || "").toLowerCase().includes("application/json");
 
-const appendQuery = (endpoint: string, q?: Query) => {
-  if (!q) return endpoint;
-  const u = new URL(endpoint);
-  u.searchParams.sort();
+const appendQuery = (endpoint: string, q?: Query): string => {
+  if (!q || Object.keys(q).length === 0) return endpoint;
+
+  const [path, existing] = endpoint.split("?");
+  const params = new URLSearchParams(existing ?? "");
+
   for (const [k, v] of Object.entries(q)) {
-    if (v === undefined || v === null) continue;
-    if (Array.isArray(v)) v.forEach((item) => u.searchParams.append(k, String(item)));
-    else u.searchParams.set(k, String(v));
+    if (v == null) continue;
+    if (Array.isArray(v)) v.forEach((item) => params.append(k, String(item)));
+    else params.set(k, String(v));
   }
-  return u.pathname + (u.search ? `?${u.searchParams.toString()}` : "");
+
+  const qstr = params.toString();
+  return qstr ? `${path}?${qstr}` : path;
 };
 
 const _request = async <T, E = { message?: string }>(method: HttpMethod, endpoint: string, options: RequestOptions = {}): Promise<ApiResponse<T, E>> => {

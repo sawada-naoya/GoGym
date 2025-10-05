@@ -25,7 +25,7 @@ const fetchRecommendedGyms = async (searchParams?: SearchGymParams): Promise<Sea
 
     if (hasSearchCondition) {
       // 検索条件がある場合は通常の検索エンドポイント
-      const res = await GET<SearchGymResponse>("/gyms", {
+      const res = await GET<SearchGymResponse>("/api/v1/gyms", {
         query: queryParams,
         cache: "no-store",
       });
@@ -33,7 +33,7 @@ const fetchRecommendedGyms = async (searchParams?: SearchGymParams): Promise<Sea
       return res.data;
     } else {
       // 検索条件がない場合はおすすめジムエンドポイント
-      const res = await GET<SearchGymResponse>("/gyms/recommended", {
+      const res = await GET<SearchGymResponse>("/api/v1/gyms/recommended", {
         query: { limit: queryParams.limit || 20 },
         cache: "no-store",
       });

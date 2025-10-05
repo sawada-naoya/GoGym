@@ -12,7 +12,20 @@ import (
 
 	"gogym-api/internal/configs"
 	"gogym-api/internal/di"
+
+	"github.com/joho/godotenv"
 )
+
+func init() {
+	// デフォルト APP_ENV
+	if os.Getenv("APP_ENV") == "" {
+		_ = os.Setenv("APP_ENV", "development")
+	}
+	if os.Getenv("APP_ENV") != "production" {
+		_ = godotenv.Load(".env.local")
+		_ = godotenv.Overload(".env")
+	}
+}
 
 func main() {
 	config, err := configs.Load()
