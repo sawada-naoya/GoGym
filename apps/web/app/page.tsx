@@ -6,12 +6,10 @@ import { GET } from "@/lib/api";
 
 // おすすめのジムを取得する関数
 const fetchRecommendedGyms = async (): Promise<Gym[]> => {
-  console.log("Fetching recommended gyms...");
   const res = await GET<Gym[]>("/api/v1/gyms/recommended", {
     query: { limit: 6 },
     cache: "no-store",
   });
-  console.log("Fetched gyms:", res);
   return res.ok && res.data ? res.data : [];
 };
 
@@ -19,11 +17,11 @@ const Home = async () => {
   const gyms = await fetchRecommendedGyms();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* ヒーロー */}
-      <div className="bg-gradient-to-br from-booking-600 to-booking-800 relative overflow-hidden">
+      <div className="bg-gradient-to-br from-booking-600 to-booking-800 relative overflow-hidden -mt-4">
         <div className="absolute inset-0 bg-black/10" />
-        <div className="relative container mx-auto px-4 py-16">
+        <div className="relative container mx-auto px-4 py-16 pt-20">
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">あなたにぴったりのジムを見つけよう</h1>
             <p className="text-xl text-white/90">評価の高いおすすめジムを表示中</p>
@@ -35,7 +33,7 @@ const Home = async () => {
       </div>
 
       {/* ジム一覧 */}
-      <div className="container mx-auto px-4 py-12">
+      <div className="bg-gray-50 container mx-auto px-4 py-12">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">{gyms.length > 0 ? "⭐ おすすめのジム" : "新しいジムを追加中..."}</h2>

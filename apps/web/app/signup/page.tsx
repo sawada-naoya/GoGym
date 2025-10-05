@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { POST } from "@/lib/api";
-import { ErrorBanner } from "../../components/ui/Banner";
+import { useBanner } from "@/components/Banner";
 
 const SignUpSchema = z
   .object({
@@ -27,6 +27,7 @@ const SignUpPage = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const { success, error } = useBanner();
 
   const {
     register,
@@ -35,7 +36,7 @@ const SignUpPage = () => {
     clearErrors,
   } = useForm<SignUpForm>({
     resolver: zodResolver(SignUpSchema),
-    mode: "onBlur", // バリデーションをフィールドからフォーカスが外れた時に実行
+    mode: "onBlur",
   });
 
   const clearApiError = () => setApiError(null);
@@ -54,13 +55,20 @@ const SignUpPage = () => {
       });
 
       if (!res.ok) {
-        setApiError("このメールアドレスは既に使用されています");
+        error("このメールアドレスは既に使用されています");
         return;
       }
+      sessionStorage.setItem(
+        "flash",
+        JSON.stringify({
+          variant: "success",
+          message: "アカウントの作成に成功しました。ログインしてください。",
+        })
+      );
 
       router.push("/login");
-    } catch (error) {
-      setApiError("ネットワークエラーが発生しました。時間を置いて再度お試しください。");
+    } catch (e) {
+      error("ネットワークエラーが発生しました。時間を置いて再度お試しください。");
     } finally {
       setLoading(false);
     }
@@ -83,8 +91,6 @@ const SignUpPage = () => {
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)} noValidate>
-          {apiError && <ErrorBanner message={apiError} />}
-
           <div className="space-y-4">
             <div>
               <label htmlFor="name" className="form-label">
