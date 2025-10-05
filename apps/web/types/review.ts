@@ -6,6 +6,9 @@ export interface ReviewResponse {
   user_id: number;
   created_at: string;
   updated_at: string;
+  user?: {
+    name: string;
+  };
 }
 
 export interface ReviewListResponse {
