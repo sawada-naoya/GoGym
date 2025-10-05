@@ -10,6 +10,8 @@ import GymAccessInfo from "../components/GymAccessInfo";
 import GymReview from "../components/GymReview";
 import GymContactSidebar from "../components/GymContactSidebar";
 
+export const dynamic = "force-dynamic";
+
 type PageProps = {
   params: {
     id: string;

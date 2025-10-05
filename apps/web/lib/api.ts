@@ -46,6 +46,17 @@ const appendQuery = (endpoint: string, q?: Query): string => {
 };
 
 const _request = async <T, E = { message?: string }>(method: HttpMethod, endpoint: string, options: RequestOptions = {}): Promise<ApiResponse<T, E>> => {
+  // ビルド時や環境変数が設定されていない場合はエラーを返す
+  if (!API_BASE_URL) {
+    console.warn(`API_BASE_URL is not set. Skipping ${method} ${endpoint}`);
+    return {
+      ok: false,
+      status: 500,
+      error: { message: "API_BASE_URL is not configured" } as E,
+      headers: new Headers(),
+    };
+  }
+
   const path = appendQuery(endpoint, options.query);
   const url = API_BASE_URL + path;
 

@@ -4,6 +4,8 @@ import GymCard from "@/components/GymCard";
 import type { Gym } from "@/types/gym";
 import { GET } from "@/lib/api";
 
+export const dynamic = "force-dynamic";
+
 // おすすめのジムを取得する関数
 const fetchRecommendedGyms = async (): Promise<Gym[]> => {
   const res = await GET<Gym[]>("/api/v1/gyms/recommended", {

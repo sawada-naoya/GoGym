@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
@@ -16,7 +16,7 @@ const LoginSchema = z.object({
 
 type LoginForm = z.infer<typeof LoginSchema>;
 
-const LoginClient = () => {
+const LoginFormContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
@@ -166,6 +166,14 @@ const LoginClient = () => {
         </form>
       </div>
     </div>
+  );
+};
+
+const LoginClient = () => {
+  return (
+    <Suspense fallback={null}>
+      <LoginFormContent />
+    </Suspense>
   );
 };
 
