@@ -1,236 +1,91 @@
 version: "3"
 
-# 初回セットアップ:
-#   task dev              # 完全な開発環境起動（推奨）
-#
-# 日常開発:
-#   task up               # Dockerサービス起動
-#   task down             # 全サービス停止
-#   task logs             # 全ログ表示
-#   task logs-api         # APIログのみ
-#   task health           # サービス状況確認
-#
-# コード変更時:
-#   task gen              # OpenAPI→Go/TS生成
-#   task test             # 全テスト実行
-#   task lint             # 静的解析実行
-#
-# データベース:
-#   task migrate          # マイグレーション実行
-#   task seed             # サンプルデータ投入
-#   task migrate-status   # マイグレーション状況
-#
-# ローカル実行（Docker不要）:
-#   task api              # Go APIローカル起動
-#   task web              # Next.js Webローカル起動
-#
-# メンテナンス:
-#   task clean            # 全クリーンアップ
-#   task build            # プロダクションビルド
+# ─────────────────────────────────────────────────────────────
+# Minimal tasks: db / api / web / seed だけに絞った構成
+# 初回は「task setup」で DB 起動＆シード投入まで完了
+# 日常は「task db:up」「task api」「task web」を並行実行
+# ─────────────────────────────────────────────────────────────
 
 vars:
-  DOCKER_COMPOSE_FILE: ./infra/docker/docker-compose.yml
+  DOCKER_COMPOSE_FILE: ./infra/docker-compose.yml
   API_DIR: ./apps/api
   WEB_DIR: ./apps/web
-  OPENAPI_DIR: ./packages/openapi
+  SEED_FILE: ./apps/api/internal/infra/db/seeds/seed.sql
+  AIR_VERSION: v1.61.1
 
 tasks:
+  # ========= One-shot =========
   setup:
-    desc: プロジェクト全体のセットアップ（初回実行時）
-    deps: [gen, up, migrate, seed]
+    desc: 初回セットアップ（DB起動→シード投入）
     cmds:
-      - echo "✅ GoGym開発環境のセットアップが完了しました！"
-      - echo "🌐 Web: http://localhost:3000"
-      - echo "🔧 API: http://localhost:8080"
-      - echo "💾 MinIO: http://localhost:9001 (minioadmin/minioadmin123)"
+      - task: db:up
+      - task: db:wait
+      - task: db:seed
+      - echo "✅ DB起動＆シード投入完了"
 
-  clean:
-    desc: 生成ファイルとDockerコンテナをクリーンアップ
+  # ========= DB only (Docker) =========
+  db:up:
+    desc: データベース(MySQL)をDockerで起動
     cmds:
-      - echo "🧹 クリーンアップを開始..."
-      - task: down
-      - rm -rf {{.API_DIR}}/internal/gen
-      - rm -rf {{.WEB_DIR}}/types/generated
-      - rm -rf {{.OPENAPI_DIR}}/generated
-      - docker system prune -f
-      - echo "✅ クリーンアップ完了"
+      - echo "🚀 MySQLを起動中..."
+      - docker compose -f {{.DOCKER_COMPOSE_FILE}} up -d mysql
+      - echo "✅ MySQL起動完了（ポート 3307→3306@container）"
 
-  gen:
-    desc: OpenAPI仕様からGo・TypeScriptコードを生成
-    deps: [gen-go, gen-ts]
+  db:down:
+    desc: データベース(MySQL)を停止
     cmds:
-      - echo "✅ 全コード生成完了！"
+      - echo "🛑 MySQLを停止中..."
+      - docker compose -f {{.DOCKER_COMPOSE_FILE}} down
+      - echo "✅ 停止完了"
 
-  gen-go:
-    desc: OpenAPI仕様からGoサーバーコードを生成
-    dir: "{{.OPENAPI_DIR}}"
+  db:logs:
+    desc: MySQLログをフォロー表示
     cmds:
-      - echo "🔧 Goコード生成中..."
-      - ./gen-go.sh
+      - docker compose -f {{.DOCKER_COMPOSE_FILE}} logs -f mysql
 
-  gen-ts:
-    desc: OpenAPI仕様からTypeScriptクライアントを生成
-    dir: "{{.OPENAPI_DIR}}"
+  db:wait:
+    desc: MySQLが受け付け可能になるまで待機
+    silent: true
     cmds:
-      - echo "🔧 TypeScriptクライアント生成中..."
-      - ./gen-ts.sh
+      - |
+        echo "⏳ MySQLの起動待ち..."
+        for i in {1..60}; do
+          docker compose -f {{.DOCKER_COMPOSE_FILE}} exec -T mysql \
+            mysqladmin ping -h 127.0.0.1 -u root -ppassword --silent && break
+          sleep 1
+        done
+        echo "✅ MySQL is ready"
 
-  up:
-    desc: 全サービスをDockerで起動
+  db:seed:
+    desc: シードデータを投入（Docker上のMySQLへ）
     cmds:
-      - echo "🚀 Dockerサービスを起動中..."
-      - docker-compose -f {{.DOCKER_COMPOSE_FILE}} up -d
-      - echo "✅ サービス起動完了"
+      - |
+        echo "🌱 シード投入: {{.SEED_FILE}}"
+        test -f {{.SEED_FILE}} || (echo "❌ SEED_FILEが見つかりません: {{.SEED_FILE}}" && exit 1)
+        # -T を付けてstdinパイプを正しく渡す
+        docker compose -f {{.DOCKER_COMPOSE_FILE}} exec -T mysql \
+          mysql -u gogym -ppassword -D gogym < {{.SEED_FILE}}
+        echo "✅ シード投入完了"
 
-  down:
-    desc: 全サービスを停止
-    cmds:
-      - echo "🛑 サービスを停止中..."
-      - docker-compose -f {{.DOCKER_COMPOSE_FILE}} down
-      - echo "✅ サービス停止完了"
-
-  logs:
-    desc: 全サービスのログを表示
-    cmds:
-      - docker-compose -f {{.DOCKER_COMPOSE_FILE}} logs -f
-
-  logs-api:
-    desc: APIサーバーのログのみ表示
-    cmds:
-      - docker-compose -f {{.DOCKER_COMPOSE_FILE}} logs -f api
-
-  logs-web:
-    desc: Webサーバーのログのみ表示
-    cmds:
-      - docker-compose -f {{.DOCKER_COMPOSE_FILE}} logs -f web
-
-  migrate:
-    desc: データベースマイグレーションを実行
-    cmds:
-      - echo "📊 データベースマイグレーション実行中..."
-      - docker-compose -f {{.DOCKER_COMPOSE_FILE}} exec api goose -dir /app/infra/migrations mysql "gogym:password@tcp(mysql:3306)/gogym" up
-      - echo "✅ マイグレーション完了"
-
-  migrate-down:
-    desc: データベースマイグレーションをロールバック
-    cmds:
-      - echo "⏪ データベースロールバック実行中..."
-      - docker-compose -f {{.DOCKER_COMPOSE_FILE}} exec api goose -dir /app/infra/migrations mysql "gogym:password@tcp(mysql:3306)/gogym" down
-      - echo "✅ ロールバック完了"
-
-  migrate-status:
-    desc: マイグレーション状態を確認
-    cmds:
-      - docker-compose -f {{.DOCKER_COMPOSE_FILE}} exec api goose -dir /app/infra/migrations mysql "gogym:password@tcp(mysql:3306)/gogym" status
-
-  seed:
-    desc: サンプルデータをデータベースに投入
-    cmds:
-      - echo "🌱 サンプルデータ投入中..."
-      - docker-compose -f {{.DOCKER_COMPOSE_FILE}} exec mysql mysql -u gogym -ppassword -D gogym < /app/infra/seeds/seed.sql
-      - echo "✅ サンプルデータ投入完了"
-
-  dev:
-    desc: 完全な開発環境を起動（推奨）
-    cmds:
-      - echo "🚀 GoGym開発環境を起動中..."
-      - task: gen
-      - task: up
-      - task: migrate
-      - echo ""
-      - echo "🎉 開発環境起動完了！"
-      - echo "📱 Web: http://localhost:3000"
-      - echo "🔧 API: http://localhost:8080"
-      - echo "💾 MinIO: http://localhost:9001 (minioadmin/minioadmin123)"
-      - echo ""
-      - echo "📋 便利なコマンド:"
-      - echo "  task logs
-      - echo "  task logs-api
-      - echo "  task logs-web
-      - echo "  task down
-
+  # ========= API (local with Air) =========
   api:
-    desc: APIサーバーをローカルで起動（ホットリロード有効）
+    desc: APIをローカル起動（Airでホットリロード）
     dir: "{{.API_DIR}}"
+    deps: [api:air-setup]
     cmds:
-      - echo "🔧 Go APIをローカルで起動中..."
-      - go run cmd/api/main.go
+      - echo "🔧 API起動 (air)"
+      - air
 
-  api-build:
-    desc: APIバイナリをビルド
-    dir: "{{.API_DIR}}"
+  api:air-setup:
+    desc: Airを特定バージョンでインストール（idempotent）
+    internal: true
     cmds:
-      - echo "🔨 Go APIビルド中..."
-      - go build -o bin/gogym-api cmd/api/main.go
-      - echo "✅ APIビルド完了: bin/gogym-api"
+      - go install github.com/air-verse/air@{{.AIR_VERSION}}
 
-  api-test:
-    desc: APIテストを実行
-    dir: "{{.API_DIR}}"
-    cmds:
-      - echo "🧪 Go APIテスト実行中..."
-      - go test -v ./...
-
-  api-lint:
-    desc: APIコードの静的解析
-    dir: "{{.API_DIR}}"
-    cmds:
-      - echo "🔍 Go APIリント実行中..."
-      - golangci-lint run
-
+  # ========= Web (local) =========
   web:
-    desc: Webサーバーをローカルで起動（ホットリロード有効）
+    desc: Webをローカル起動（npm run dev）
     dir: "{{.WEB_DIR}}"
     cmds:
-      - echo "⚡ Next.js Webをローカルで起動中..."
-      - pnpm dev
-
-  web-build:
-    desc: Webアプリケーションをビルド
-    dir: "{{.WEB_DIR}}"
-    cmds:
-      - echo "🔨 Next.js Webビルド中..."
-      - pnpm build
-      - echo "✅ Webビルド完了"
-
-  web-test:
-    desc: Webテストを実行
-    dir: "{{.WEB_DIR}}"
-    cmds:
-      - echo "🧪 Next.js テスト実行中..."
-      - pnpm test
-
-  web-lint:
-    desc: Webコードの静的解析
-    dir: "{{.WEB_DIR}}"
-    cmds:
-      - echo "🔍 TypeScript/React リント実行中..."
-      - pnpm lint
-
-  test:
-    desc: API・Web両方のテストを実行
-    deps: [api-test, web-test]
-    cmds:
-      - echo "✅ 全テスト完了！"
-
-  lint:
-    desc: API・Web両方の静的解析を実行
-    deps: [api-lint, web-lint]
-    cmds:
-      - echo "✅ 全リント完了！"
-
-  build:
-    desc: API・Web両方をプロダクション用ビルド
-    deps: [api-build, web-build]
-    cmds:
-      - echo "✅ 全アプリケーションビルド完了！"
-
-  health:
-    desc: 全サービスの稼働状況を確認
-    cmds:
-      - echo "🏥 サービス状況確認中..."
-      - curl -f http://localhost:8080/health || echo "❌ API: 停止中"
-      - curl -f http://localhost:3000 || echo "❌ Web: 停止中"
-      - docker-compose -f {{.DOCKER_COMPOSE_FILE}} exec mysql mysqladmin ping -h mysql -u gogym -ppassword || echo "❌ MySQL: 停止中"
-      - docker-compose -f {{.DOCKER_COMPOSE_FILE}} exec redis redis-cli ping || echo "❌ Redis: 停止中"
-      - echo "✅ ヘルスチェック完了"
+      - echo "⚡ Web起動 (npm run dev)"
+      - npm run dev

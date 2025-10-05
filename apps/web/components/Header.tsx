@@ -2,12 +2,15 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useSession, signOut } from "next-auth/react";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { data: session, status } = useSession();
+  const userName = session?.user?.name;
 
   return (
-    <header className="bg-booking-700 shadow-lg">
+    <header className="bg-booking-700 shadow-lg relative z-50">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-4">
           {/* ロゴ */}
@@ -33,12 +36,25 @@ const Header = () => {
 
           {/* ユーザーメニュー */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link href="/login" className="text-white hover:text-booking-200 transition-colors px-4 py-2 rounded-md">
-              ログイン
-            </Link>
-            <Link href="/signup" className="bg-white text-booking-700 hover:bg-booking-50 transition-colors px-4 py-2 rounded-md font-medium">
-              新規登録
-            </Link>
+            {status === "loading" ? (
+              <div className="h-8 w-28 animate-pulse rounded bg-white/20" />
+            ) : userName ? (
+              <>
+                <span className="text-white">{userName}</span>
+                <button onClick={() => signOut({ callbackUrl: "/login" })} className="bg-white text-booking-700 hover:bg-booking-50 transition-colors px-4 py-2 rounded-md font-medium">
+                  ログアウト
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="text-white hover:text-booking-200 transition-colors px-4 py-2 rounded-md">
+                  ログイン
+                </Link>
+                <Link href="/signup" className="bg-white text-booking-700 hover:bg-booking-50 transition-colors px-4 py-2 rounded-md font-medium">
+                  新規登録
+                </Link>
+              </>
+            )}
           </div>
 
           {/* モバイルメニューボタン */}

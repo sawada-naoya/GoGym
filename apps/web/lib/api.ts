@@ -1,75 +1,101 @@
-// API base URL
+type ApiSuccess<T> = {
+  ok: true;
+  status: number;
+  data: T;
+  headers: Headers;
+};
+
+type ApiFailure<E = unknown> = {
+  ok: false;
+  status: number;
+  error?: E;
+  headers: Headers;
+};
+
+type ApiResponse<T, E = unknown> = ApiSuccess<T> | ApiFailure<E>;
+
+type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
+export type Query = Record<string, string | number | boolean | (string | number | boolean)[] | null | undefined>;
+
+type RequestOptions = {
+  query?: Query;
+  body?: unknown;
+  headers?: Record<string, string>;
+  cache?: RequestCache;
+};
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-export type Query = Record<string, string | number | boolean | undefined>;
+const isJson = (h: Headers) => (h.get("content-type") || "").toLowerCase().includes("application/json");
 
-export type RequestOptions = Omit<RequestInit, "method" | "body"> & {
-  body?: unknown;
-  query?: Query;
-};
+const appendQuery = (endpoint: string, q?: Query): string => {
+  if (!q || Object.keys(q).length === 0) return endpoint;
 
-export type ApiResponse<T> = {
-  ok: boolean;
-  status: number;
-  data: T | null;
-};
+  const [path, existing] = endpoint.split("?");
+  const params = new URLSearchParams(existing ?? "");
 
-const buildQueryParams = (query?: Query): string => {
-  if (!query) return "";
-  const params = new URLSearchParams();
-  for (const [key, value] of Object.entries(query)) {
-    if (value === undefined) continue;
-    params.append(key, String(value));
+  for (const [k, v] of Object.entries(q)) {
+    if (v == null) continue;
+    if (Array.isArray(v)) v.forEach((item) => params.append(k, String(item)));
+    else params.set(k, String(v));
   }
-  return params.toString();
+
+  const qstr = params.toString();
+  return qstr ? `${path}?${qstr}` : path;
 };
 
-const parseJsonIfAny = async (res: Response): Promise<unknown | undefined> => {
-  const ct = res.headers.get("Content-Type") || "";
-  if (!ct.includes("application/json")) return undefined;
-  try {
-    const text = await res.text();
-    if (!text) return undefined;
-    return JSON.parse(text);
-  } catch {
-    return undefined;
+const _request = async <T, E = { message?: string }>(method: HttpMethod, endpoint: string, options: RequestOptions = {}): Promise<ApiResponse<T, E>> => {
+  // ビルド時や環境変数が設定されていない場合はエラーを返す
+  if (!API_BASE_URL) {
+    console.warn(`API_BASE_URL is not set. Skipping ${method} ${endpoint}`);
+    return {
+      ok: false,
+      status: 500,
+      error: { message: "API_BASE_URL is not configured" } as E,
+      headers: new Headers(),
+    };
   }
-};
 
-const request = async <T>(endpoint: string, method: HttpMethod, options: RequestOptions = {}): Promise<ApiResponse<T>> => {
-  let url = API_BASE_URL ? `${API_BASE_URL}/api/v1${endpoint}` : `/api/v1${endpoint}`;
-  const qs = buildQueryParams(options.query);
-  if (qs) url += (url.includes("?") ? "&" : "?") + qs;
+  const path = appendQuery(endpoint, options.query);
+  const url = API_BASE_URL + path;
+
+  const headers: Record<string, string> = { ...(options.headers ?? {}) };
+  const hasBody = method !== "GET" && options.body !== undefined;
+  if (hasBody && !headers["Content-Type"]) headers["Content-Type"] = "application/json";
 
   const res = await fetch(url, {
-    ...options,
     method,
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers ?? {}),
-    },
-    body: method !== "GET" && options.body !== undefined ? JSON.stringify(options.body) : undefined,
+    headers,
+    body: hasBody ? JSON.stringify(options.body) : undefined,
     credentials: "include",
   });
-
-  let data: T | null = null;
-  try {
-    data = await res.json();
-  } catch {
-    data = null;
+  // JSONの場合はレスポンスをパース
+  const parse = async <X>(): Promise<X | undefined> => {
+    if (res.status === 204) return undefined;
+    if (!isJson(res.headers)) return undefined;
+    try {
+      return (await res.json()) as X;
+    } catch {
+      return undefined;
+    }
+  };
+  if (res.ok) {
+    const data = (await parse<T>()) as T;
+    return { ok: true, status: res.status, data, headers: res.headers };
+  } else {
+    const error = await parse<E>();
+    return { ok: false, status: res.status, error, headers: res.headers };
   }
-
-  return { ok: res.ok, status: res.status, data };
 };
 
 // CRUDエイリアス
-export const GET = <T>(endpoint: string, options?: RequestOptions) => request<T>(endpoint, "GET", options);
+export const GET = <T>(endpoint: string, options?: RequestOptions) => _request<T>("GET", endpoint, options);
 
-export const POST = <T>(endpoint: string, options?: RequestOptions) => request<T>(endpoint, "POST", options);
+export const POST = <T>(endpoint: string, options?: RequestOptions) => _request<T>("POST", endpoint, options);
 
-export const PUT = <T>(endpoint: string, options?: RequestOptions) => request<T>(endpoint, "PUT", options);
+export const PUT = <T>(endpoint: string, options?: RequestOptions) => _request<T>("PUT", endpoint, options);
 
-export const PATCH = <T>(endpoint: string, options?: RequestOptions) => request<T>(endpoint, "PATCH", options);
+export const PATCH = <T>(endpoint: string, options?: RequestOptions) => _request<T>("PATCH", endpoint, options);
 
-export const DELETE_ = <T>(endpoint: string, options?: RequestOptions) => request<T>(endpoint, "DELETE", options);
+export const DELETE_ = <T>(endpoint: string, options?: RequestOptions) => _request<T>("DELETE", endpoint, options);

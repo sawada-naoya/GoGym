@@ -10,6 +10,8 @@ import GymAccessInfo from "../components/GymAccessInfo";
 import GymReview from "../components/GymReview";
 import GymContactSidebar from "../components/GymContactSidebar";
 
+export const dynamic = "force-dynamic";
+
 type PageProps = {
   params: {
     id: string;
@@ -17,25 +19,45 @@ type PageProps = {
 };
 
 const fetchGym = async (id: string): Promise<Gym | null> => {
+  const fallback: Gym = {
+    id: 0,
+    name: "",
+    description: null,
+    location: { latitude: 0, longitude: 0 },
+    address: "",
+    city: null,
+    prefecture: null,
+    postal_code: null,
+    is_active: false,
+    tags: [],
+    average_rating: null,
+    review_count: 0,
+    created_at: "",
+    updated_at: "",
+  };
   try {
-    const res = await GET<Gym>(`/gym/${id}`, {
+    const res = await GET<Gym>(`/api/v1/gym/${id}`, {
       cache: "no-store",
     });
-    return res.data || null;
+    if (!res.ok || !res.data) return fallback;
+    return res.data;
   } catch (error) {
-    console.error("Failed to fetch gym:", error);
     return null;
   }
 };
 
 const fetchGymReviews = async (id: string): Promise<ReviewListResponse | null> => {
+  const fallback: ReviewListResponse = {
+    reviews: [],
+    next_cursor: null,
+  };
   try {
-    const res = await GET<ReviewListResponse>(`/gyms/${id}/reviews`, {
+    const res = await GET<ReviewListResponse>(`/api/v1/gyms/${id}/reviews`, {
       cache: "no-store",
     });
-    return res.data || null;
+    if (!res.ok || !res.data) return fallback;
+    return res.data;
   } catch (error) {
-    console.error("Failed to fetch gym reviews:", error);
     return null;
   }
 };

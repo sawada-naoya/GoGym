@@ -7,6 +7,7 @@ import { GET } from "@/lib/api";
 
 // おすすめジム取得関数（評価順でソート）
 const fetchRecommendedGyms = async (searchParams?: SearchGymParams): Promise<SearchGymResponse> => {
+  const fallback: SearchGymResponse = { gyms: [], next_cursor: null, has_more: false };
   try {
     // クエリパラメータを構築
     const queryParams: Record<string, any> = {
@@ -24,38 +25,24 @@ const fetchRecommendedGyms = async (searchParams?: SearchGymParams): Promise<Sea
 
     if (hasSearchCondition) {
       // 検索条件がある場合は通常の検索エンドポイント
-      const res = await GET<SearchGymResponse>("/gyms", {
+      const res = await GET<SearchGymResponse>("/api/v1/gyms", {
         query: queryParams,
         cache: "no-store",
       });
-      return (
-        res.data || {
-          gyms: [],
-          next_cursor: null,
-          has_more: false,
-        }
-      );
+      if (!res.ok || !res.data) return fallback;
+      return res.data;
     } else {
       // 検索条件がない場合はおすすめジムエンドポイント
-      const res = await GET<SearchGymResponse>("/gyms/recommended", {
+      const res = await GET<SearchGymResponse>("/api/v1/gyms/recommended", {
         query: { limit: queryParams.limit || 20 },
         cache: "no-store",
       });
-      return (
-        res.data || {
-          gyms: [],
-          next_cursor: null,
-          has_more: false,
-        }
-      );
+      if (!res.ok || !res.data) return fallback;
+      const { gyms, next_cursor, has_more } = res.data;
+      return { gyms, next_cursor, has_more };
     }
   } catch (error) {
-    console.error("Failed to fetch recommended gyms:", error);
-    return {
-      gyms: [],
-      next_cursor: null,
-      has_more: false,
-    };
+    return fallback;
   }
 };
 

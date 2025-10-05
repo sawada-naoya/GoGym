@@ -11,6 +11,11 @@ type Review struct {
 	Rating    int    `json:"rating"`
 	Comment   string `json:"comment"`
 	CreatedAt string `json:"created_at"`
+	User      *User  `json:"user,omitempty"`
+}
+
+type User struct {
+	Name string `json:"name"`
 }
 
 type GetReviewsResponse struct {
@@ -25,6 +30,13 @@ func ToReviewDTO(domainReview dom.Review) Review {
 		comment = *domainReview.Comment
 	}
 
+	var user *User
+	if domainReview.UserDisplayName != nil {
+		user = &User{
+			Name: *domainReview.UserDisplayName,
+		}
+	}
+
 	return Review{
 		ID:        int64(domainReview.ID),
 		GymID:     int64(domainReview.GymID),
@@ -32,6 +44,7 @@ func ToReviewDTO(domainReview dom.Review) Review {
 		Rating:    domainReview.Rating.Int(),
 		Comment:   comment,
 		CreatedAt: domainReview.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		User:      user,
 	}
 }
 
