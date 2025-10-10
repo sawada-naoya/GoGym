@@ -11,7 +11,7 @@ const GymCard = ({ gym }: GymCardProps) => {
   const reviewCount = gym.review_count;
 
   return (
-    <Link href={`/gym/${gym.id}`}>
+    <Link href={`/gyms/${gym.id}`}>
       <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group cursor-pointer">
         {/* 画像部分 */}
         <div className="relative h-64 bg-gray-200">
