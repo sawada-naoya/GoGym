@@ -26,6 +26,7 @@ type RequestOptions = {
 };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+console.log("✅ NEXT_PUBLIC_API_URL:", process.env.NEXT_PUBLIC_API_URL);
 
 const isJson = (h: Headers) => (h.get("content-type") || "").toLowerCase().includes("application/json");
 
@@ -58,7 +59,7 @@ const _request = async <T, E = { message?: string }>(method: HttpMethod, endpoin
   }
 
   const path = appendQuery(endpoint, options.query);
-  const url = API_BASE_URL + path;
+  const url = `${API_BASE_URL.replace(/\/$/, "")}${path.startsWith("/") ? path : `/${path}`}`;
 
   const headers: Record<string, string> = { ...(options.headers ?? {}) };
   const hasBody = method !== "GET" && options.body !== undefined;

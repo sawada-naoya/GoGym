@@ -19,7 +19,7 @@ INSERT INTO tags (name) VALUES
 ('駅近');
 
 -- Insert sample gyms (simplified schema - no spatial data for now)
-INSERT INTO gyms (name, description, location_latitude, location_longitude, address, city, prefecture, postal_code, is_active) VALUES
+INSERT INTO gyms (name, description, latitude, longitude, address, city, prefecture, postal_code, is_active)VALUES
 (
     'ゴールドジム 原宿東京',
     '本格的なウェイトトレーニングの聖地。豊富なフリーウェイトとマシンで、初心者から上級者まで満足できる設備。24時間営業で忙しい方にも最適。',

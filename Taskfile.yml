@@ -64,7 +64,7 @@ tasks:
         test -f {{.SEED_FILE}} || (echo "❌ SEED_FILEが見つかりません: {{.SEED_FILE}}" && exit 1)
         # -T を付けてstdinパイプを正しく渡す
         docker compose -f {{.DOCKER_COMPOSE_FILE}} exec -T mysql \
-          mysql -u gogym -ppassword -D gogym < {{.SEED_FILE}}
+          mysql -u gogym -ppassword --default-character-set=utf8mb4 -D gogym < {{.SEED_FILE}}
         echo "✅ シード投入完了"
 
   # ========= API (local with Air) =========
