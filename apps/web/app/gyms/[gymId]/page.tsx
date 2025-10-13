@@ -36,7 +36,7 @@ const fetchGym = async (id: string): Promise<Gym | null> => {
     updated_at: "",
   };
   try {
-    const res = await GET<Gym>(`/api/v1/gym/${id}`, {
+    const res = await GET<Gym>(`/api/v1/gyms/${id}`, {
       cache: "no-store",
     });
     if (!res.ok || !res.data) return fallback;
@@ -74,7 +74,6 @@ const GymPage = async ({ params }: PageProps) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
       <GymPhotoGallery gym={gym} />
       <div className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
