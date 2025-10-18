@@ -40,41 +40,36 @@ export type TrainingRecordAPI = {
 };
 
 // -----------------------------
-// 表示用 (GET /api/training-records/:id)
+// 送受信用を共通化するための型定義
 // -----------------------------
 
-export type TrainingExercise = {
-  id: number; // training_exercises.id
-  name: string; // "ベンチプレス" など
-  trainingPartId: number | null; // 紐づく部位ID
-  isDefault: 0 | 1; // プリセット or ユーザー作成
-  sets: {
-    id: number;
-    setNumber: number;
-    weightKg: number;
-    reps: number;
-    estimatedMax: number | null; // 推定1RM（計算済み）
-    note: string | null; // メモ
-  }[];
-};
-
-export type TrainingRecordDisplay = {
-  id: number;
+// app/_components/types.ts（例）
+export type TrainingFormDTO = {
+  id?: number | null; // 既存ならrecord id
   performedDate: string; // "YYYY-MM-DD"
-  startedAt: string | null; // ISO
-  endedAt: string | null; // ISO
-  place: string | null;
+  startedAt: string | null; // "HH:mm"（フォーム用）
+  endedAt: string | null; // "HH:mm"
+  place: string;
   note: string | null;
   conditionLevel: 1 | 2 | 3 | 4 | 5 | null;
-  durationMinutes: number | null;
 
-  // 部位情報（null許容）
   trainingPart: {
     id: number | null;
-    name: string | null; // "胸"など
+    name: string | null;
     source: "preset" | "custom" | null;
-  } | null;
+  };
 
-  // 種目＋セット（一覧）
-  exercises: TrainingExercise[];
+  exercises: {
+    id?: number | null; // training_exercises.id（既存なら）
+    name: string; // 種目名
+    trainingPartId: number | null;
+    isDefault: 0 | 1;
+    sets: {
+      id?: number | null; // training_sets.id（既存なら）
+      setNumber: number;
+      weightKg: number | string; // 入力中は空文字も許容
+      reps: number | string;
+      note: string | null;
+    }[];
+  }[];
 };
