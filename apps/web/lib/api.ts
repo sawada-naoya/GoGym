@@ -26,7 +26,6 @@ type RequestOptions = {
 };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-console.log("✅ NEXT_PUBLIC_API_URL:", process.env.NEXT_PUBLIC_API_URL);
 
 const isJson = (h: Headers) => (h.get("content-type") || "").toLowerCase().includes("application/json");
 
