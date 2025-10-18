@@ -36,7 +36,7 @@ const fetchGym = async (id: string): Promise<Gym | null> => {
     updated_at: "",
   };
   try {
-    const res = await GET<Gym>(`/api/v1/gym/${id}`, {
+    const res = await GET<Gym>(`/api/v1/gyms/${id}`, {
       cache: "no-store",
     });
     if (!res.ok || !res.data) return fallback;
