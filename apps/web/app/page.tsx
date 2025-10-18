@@ -8,8 +8,6 @@ export const dynamic = "force-dynamic";
 
 // おすすめのジムを取得する関数
 const fetchRecommendedGyms = async (): Promise<Gym[]> => {
-  console.log("🔍 SSR fetch start: ", process.env.NEXT_PUBLIC_API_URL);
-
   const res = await GET<Gym[]>("api/v1/gyms/recommended", {
     query: { limit: 6 },
     cache: "no-store",
