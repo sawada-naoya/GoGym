@@ -1,15 +1,15 @@
 "use client";
 import React from "react";
-import type { TrainingFormDTO } from "./types";
+import type { WorkoutFormDTO } from "./types";
 
-type SessionMeta = Pick<TrainingFormDTO, "startedAt" | "endedAt" | "place" | "conditionLevel" | "trainingPart">;
+type SessionMeta = Pick<WorkoutFormDTO, "startedAt" | "endedAt" | "place" | "conditionLevel" | "workoutPart">;
 
 type Props = {
   value: SessionMeta;
   onChange: (next: SessionMeta) => void;
 };
 
-const TrainingSessionMetaEditor: React.FC<Props> = ({ value, onChange }) => {
+const WorkoutSessionMetaEditor: React.FC<Props> = ({ value, onChange }) => {
   const setTime = (key: "startedAt" | "endedAt", hhmm: string) => {
     onChange({ ...value, [key]: hhmm || null });
   };
@@ -28,13 +28,13 @@ const TrainingSessionMetaEditor: React.FC<Props> = ({ value, onChange }) => {
     if (!trimmed) {
       onChange({
         ...value,
-        trainingPart: { id: null, name: null, source: null },
+        workoutPart: { id: null, name: null, source: null },
       });
       return;
     }
     onChange({
       ...value,
-      trainingPart: { id: null, name: trimmed, source: "custom" },
+      workoutPart: { id: null, name: trimmed, source: "custom" },
     });
   };
 
@@ -57,7 +57,7 @@ const TrainingSessionMetaEditor: React.FC<Props> = ({ value, onChange }) => {
         {/* 部位（自由入力） */}
         <div className="flex items-center gap-2">
           <label className="text-sm font-medium text-gray-700">部位</label>
-          <input type="text" value={value.trainingPart?.name ?? ""} onChange={(e) => setPartName(e.target.value)} placeholder="例: 胸 / 脚 / 背中" className="w-40 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500" />
+          <input type="text" value={value.workoutPart?.name ?? ""} onChange={(e) => setPartName(e.target.value)} placeholder="例: 胸 / 脚 / 背中" className="w-40 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500" />
         </div>
 
         {/* コンディション（1〜5） */}
@@ -75,4 +75,4 @@ const TrainingSessionMetaEditor: React.FC<Props> = ({ value, onChange }) => {
   );
 };
 
-export default TrainingSessionMetaEditor;
+export default WorkoutSessionMetaEditor;

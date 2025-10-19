@@ -1,6 +1,6 @@
 import { GET } from "@/lib/api";
-import TrainingRecordEditor from "./_components/TrainingRecordEditor";
-import { TrainingFormDTO } from "./_components/types";
+import WorkoutRecordEditor from "./_components/WorkoutRecordEditor";
+import { WorkoutFormDTO } from "./_components/types";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +12,7 @@ const toHHmm = (iso: string | null): string | null => {
   return `${hh}:${mm}`;
 };
 
-const buildEmptyDTO = (date: string): TrainingFormDTO => ({
+const buildEmptyDTO = (date: string): WorkoutFormDTO => ({
   id: null,
   performedDate: date,
   startedAt: null,
@@ -20,12 +20,12 @@ const buildEmptyDTO = (date: string): TrainingFormDTO => ({
   place: "",
   note: null,
   conditionLevel: null,
-  trainingPart: { id: null, name: null, source: null },
+  workoutPart: { id: null, name: null, source: null },
   exercises: [
     {
       id: null,
       name: "",
-      trainingPartId: null,
+      workoutPartId: null,
       isDefault: 0,
       sets: Array.from({ length: 5 }, (_, i) => ({
         id: null,
@@ -38,12 +38,12 @@ const buildEmptyDTO = (date: string): TrainingFormDTO => ({
   ],
 });
 
-const fetchDTO = async (date: string): Promise<TrainingFormDTO> => {
-  const res = await GET(`/api/training-records?date=${date}`);
+const fetchDTO = async (date: string): Promise<WorkoutFormDTO> => {
+  const res = await GET(`/api/v1/workouts/records?date=${date}`);
   if (!res.ok) {
     return buildEmptyDTO(date);
   }
-  const display = res.data as TrainingFormDTO;
+  const display = res.data as WorkoutFormDTO;
   if (!display || !display.id) {
     return buildEmptyDTO(date);
   }
@@ -55,15 +55,15 @@ const fetchDTO = async (date: string): Promise<TrainingFormDTO> => {
     place: display.place ?? "",
     note: display.note ?? null,
     conditionLevel: display.conditionLevel ?? null,
-    trainingPart: {
-      id: display.trainingPart?.id ?? null,
-      name: display.trainingPart?.name ?? null,
-      source: display.trainingPart?.source ?? null,
+    workoutPart: {
+      id: display.workoutPart?.id ?? null,
+      name: display.workoutPart?.name ?? null,
+      source: display.workoutPart?.source ?? null,
     },
     exercises: display.exercises.map((ex) => ({
       id: ex.id,
       name: ex.name,
-      trainingPartId: ex.trainingPartId,
+      workoutPartId: ex.workoutPartId,
       isDefault: ex.isDefault,
       sets: (ex.sets ?? []).map((s) => ({
         id: s.id,
@@ -85,7 +85,7 @@ const Page = async ({ searchParams }: { searchParams?: { date?: string } }) => {
   const day = Number(date.slice(8, 10));
 
   return (
-    <TrainingRecordEditor
+    <WorkoutRecordEditor
       Year={year}
       Month={month}
       Day={day}

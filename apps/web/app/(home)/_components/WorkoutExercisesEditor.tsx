@@ -1,15 +1,15 @@
 "use client";
 import React from "react";
-import type { TrainingFormDTO } from "./types";
+import type { WorkoutFormDTO } from "./types";
 
-type Row = TrainingFormDTO["exercises"][number];
+type Row = WorkoutFormDTO["exercises"][number];
 
 type Props = {
   rows: Row[];
   onChangeRows: (rows: Row[]) => void;
 };
 
-const TrainingExercisesEditor: React.FC<Props> = ({ rows, onChangeRows }) => {
+const WorkoutExercisesEditor: React.FC<Props> = ({ rows, onChangeRows }) => {
   const updateCell = (ri: number, si: number, key: "weightKg" | "reps", val: string) => {
     const next = structuredClone(rows) as Row[];
     (next[ri].sets[si] as any)[key] = val; // 入力中は "" を許容
@@ -53,7 +53,7 @@ const TrainingExercisesEditor: React.FC<Props> = ({ rows, onChangeRows }) => {
       {
         id: null,
         name: "",
-        trainingPartId: null,
+        workoutPartId: null,
         isDefault: 0,
         sets: Array.from({ length: 5 }, (_, i) => ({
           setNumber: i + 1,
@@ -137,4 +137,4 @@ const TrainingExercisesEditor: React.FC<Props> = ({ rows, onChangeRows }) => {
   );
 };
 
-export default TrainingExercisesEditor;
+export default WorkoutExercisesEditor;
