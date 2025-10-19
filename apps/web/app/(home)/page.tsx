@@ -70,7 +70,7 @@ const fetchDTO = async (date: string): Promise<TrainingFormDTO> => {
         setNumber: s.setNumber,
         weightKg: s.weightKg, // 数値→フォームではそのまま扱える
         reps: s.reps,
-        note: s.note,
+        note: s.note ?? null,
       })),
     })),
   };

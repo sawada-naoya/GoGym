@@ -69,7 +69,7 @@ export type TrainingFormDTO = {
       setNumber: number;
       weightKg: number | string; // 入力中は空文字も許容
       reps: number | string;
-      note: string | null;
+      note: string | null; // 入力中は空文字も許容
     }[];
   }[];
 };

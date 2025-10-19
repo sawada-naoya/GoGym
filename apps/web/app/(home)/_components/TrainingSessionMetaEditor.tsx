@@ -39,9 +39,8 @@ const TrainingSessionMetaEditor: React.FC<Props> = ({ value, onChange }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow mb-6 p-6">
-      <div className="flex flex-wrap items-start justify-start gap-3 text-left">
-        {/* 時間 */}
+    <div className="flex flex-wrap items-start justify-start gap-3 text-left">
+      {/* 時間 */}
         <div className="flex items-center gap-1">
           <label className="mr-2 text-sm font-medium text-gray-700">時間</label>
           <input type="time" className="w-24 px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500" value={value.startedAt ?? ""} onChange={(e) => setTime("startedAt", e.target.value)} />
@@ -66,13 +65,12 @@ const TrainingSessionMetaEditor: React.FC<Props> = ({ value, onChange }) => {
           <label className="text-sm font-medium text-gray-700">コンディション</label>
           <div className="flex gap-1">
             {[1, 2, 3, 4, 5].map((n) => (
-              <button key={n} type="button" onClick={() => setCondition(n as 1 | 2 | 3 | 4 | 5)} className={`w-8 h-8 rounded border text-sm font-medium transition-colors ${value.conditionLevel === n ? "bg-booking-600 text-white border-booking-600" : "border-gray-300 text-gray-700 hover:bg-gray-100"}`}>
+              <button key={n} type="button" onClick={() => setCondition(n as 1 | 2 | 3 | 4 | 5)} className={`w-10 h-10 rounded border text-sm font-medium transition-colors ${value.conditionLevel === n ? "bg-booking-600 text-white border-booking-600" : "border-gray-300 text-gray-700 hover:bg-gray-100"}`}>
                 {n}
               </button>
             ))}
           </div>
         </div>
-      </div>
     </div>
   );
 };

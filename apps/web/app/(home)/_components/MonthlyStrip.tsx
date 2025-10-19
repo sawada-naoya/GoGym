@@ -8,7 +8,7 @@ export default function MonthlyStrip({ year, month, selectedDay, onSelectDay }: 
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
   return (
-    <div className="bg-white rounded-lg shadow mb-6 p-6 overflow-x-auto">
+    <div className="overflow-x-auto">
       <div className="flex gap-2 min-w-max">
         {days.map((day) => {
           const date = new Date(year, month - 1, day);

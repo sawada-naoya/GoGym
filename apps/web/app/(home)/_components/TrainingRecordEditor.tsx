@@ -69,40 +69,47 @@ const TrainingRecordEditor = ({ Year, Month, Day, defaultValues, isUpdate }: Pro
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex items-center justify-between mb-4">
             <div className="text-xl font-semibold">トレーニングノート</div>
-            <button onClick={form.handleSubmit(handleSubmit)} className="px-4 py-2 rounded-md bg-booking-600 text-white disabled:opacity-50">
-              {isUpdate ? "修正" : "登録"}
-            </button>
           </div>
-          {/* 年月（読み取り専用表示） */}
+          {/* 年月と日付選択を統合 */}
           <div className="bg-white rounded-lg shadow mb-6 p-6">
-            <div className="flex items-center justify-center gap-4">
+            <div className="flex items-center justify-center gap-4 mb-6">
               <input readOnly type="number" value={Year} className="w-24 text-center border rounded-md px-3 py-2" />
               <span className="text-lg font-medium">年</span>
               <input readOnly type="number" value={Month} className="w-20 text-center border rounded-md px-3 py-2" />
               <span className="text-lg font-medium">月</span>
             </div>
+            <MonthlyStrip year={Year} month={Month} selectedDay={selectedDay} onSelectDay={setSelectedDay} />
           </div>
-          {/* 別日を選択したら router.push('?date=...') でSSR再取得が正攻法 */}
-          <MonthlyStrip year={Year} month={Month} selectedDay={selectedDay} onSelectDay={setSelectedDay} />
-          <TrainingSessionMetaEditor
-            value={{
-              startedAt: form.getValues("startedAt"),
-              endedAt: form.getValues("endedAt"),
-              place: form.getValues("place"),
-              conditionLevel: form.getValues("conditionLevel"),
-              trainingPart: form.getValues("trainingPart"),
-            }}
-            onChange={(next) => {
-              form.setValue("startedAt", next.startedAt);
-              form.setValue("endedAt", next.endedAt);
-              form.setValue("place", next.place);
-              form.setValue("conditionLevel", next.conditionLevel);
-              form.setValue("trainingPart", next.trainingPart);
-            }}
-          />
+          {/* トレーニング詳細 */}
+          <div className="bg-white rounded-lg shadow mb-6 p-6">
+            <div className="flex items-start justify-between gap-4">
+              <TrainingSessionMetaEditor
+                value={{
+                  startedAt: form.getValues("startedAt"),
+                  endedAt: form.getValues("endedAt"),
+                  place: form.getValues("place"),
+                  conditionLevel: form.getValues("conditionLevel"),
+                  trainingPart: form.getValues("trainingPart"),
+                }}
+                onChange={(next) => {
+                  form.setValue("startedAt", next.startedAt);
+                  form.setValue("endedAt", next.endedAt);
+                  form.setValue("place", next.place);
+                  form.setValue("conditionLevel", next.conditionLevel);
+                  form.setValue("trainingPart", next.trainingPart);
+                }}
+              />
+              <button onClick={form.handleSubmit(handleSubmit)} className="px-6 py-2 rounded-md bg-booking-600 text-white disabled:opacity-50 whitespace-nowrap self-center">
+                {isUpdate ? "修正" : "登録"}
+              </button>
+            </div>
 
-          {/* 種目＋セット */}
-          <TrainingExercisesEditor rows={rows ?? defaultValues.exercises} onChangeRows={(next) => form.setValue("exercises", next, { shouldDirty: true })} />
+            {/* 区切り線 */}
+            <div className="my-6 border-t border-gray-200"></div>
+
+            {/* 種目＋セット */}
+            <TrainingExercisesEditor rows={rows ?? defaultValues.exercises} onChangeRows={(next) => form.setValue("exercises", next, { shouldDirty: true })} />
+          </div>
         </div>
       </div>
     </FormProvider>

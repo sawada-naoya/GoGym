@@ -16,9 +16,12 @@ const TrainingExercisesEditor: React.FC<Props> = ({ rows, onChangeRows }) => {
     onChangeRows(next);
   };
 
-  const updateSetNote = (ri: number, si: number, note: string) => {
+  const updateExerciseNote = (ri: number, note: string) => {
     const next = structuredClone(rows) as Row[];
-    next[ri].sets[si].note = note || null;
+    // 最初のセット（set_number=1）にメモを保存
+    if (next[ri].sets[0]) {
+      next[ri].sets[0].note = note || null;
+    }
     onChangeRows(next);
   };
 
@@ -63,7 +66,7 @@ const TrainingExercisesEditor: React.FC<Props> = ({ rows, onChangeRows }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow overflow-x-auto">
+    <div className="overflow-x-auto">
       <table className="w-full border-collapse">
         <thead>
           <tr className="border-b-2 border-gray-300">
@@ -96,10 +99,16 @@ const TrainingExercisesEditor: React.FC<Props> = ({ rows, onChangeRows }) => {
                 {row.sets.slice(0, 5).map((s, si) => (
                   <React.Fragment key={si}>
                     <td className="px-2 py-2 border-r border-gray-200 border-b border-gray-200">
-                      <input type="number" value={s.weightKg as any} onChange={(e) => updateCell(ri, si, "weightKg", e.target.value)} className="w-full px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-booking-500" />
+                      <div className="flex items-center gap-1">
+                        <input type="number" value={s.weightKg as any} onChange={(e) => updateCell(ri, si, "weightKg", e.target.value)} className="w-14 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-booking-500" />
+                        <span className="text-xs text-gray-600">kg</span>
+                      </div>
                     </td>
                     <td className="px-2 py-2 border-r border-gray-300 border-b border-gray-200">
-                      <input type="number" value={s.reps as any} onChange={(e) => updateCell(ri, si, "reps", e.target.value)} className="w-full px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-booking-500" />
+                      <div className="flex items-center gap-1">
+                        <input type="number" value={s.reps as any} onChange={(e) => updateCell(ri, si, "reps", e.target.value)} className="w-14 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-booking-500" />
+                        <span className="text-xs text-gray-600">rep</span>
+                      </div>
                     </td>
                   </React.Fragment>
                 ))}
@@ -107,10 +116,8 @@ const TrainingExercisesEditor: React.FC<Props> = ({ rows, onChangeRows }) => {
 
               <tr className="border-b border-gray-300 hover:bg-gray-50">
                 <td colSpan={11} className="px-4 py-2">
-                  <div className="grid grid-cols-5 gap-2">
-                    {row.sets.slice(0, 5).map((s, si) => (
-                      <input key={si} type="text" value={s.note ?? ""} placeholder={`${si + 1}セット目メモ（任意）`} onChange={(e) => updateSetNote(ri, si, e.target.value)} className="w-full px-2 py-1 text-xs text-gray-600 border border-gray-200 rounded focus:outline-none" />
-                    ))}
+                  <div className="flex items-center gap-2">
+                    <input type="text" value={row.sets[0]?.note ?? ""} placeholder="メモ" onChange={(e) => updateExerciseNote(ri, e.target.value)} className="flex-1 px-3 py-2 text-sm text-gray-700 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-booking-500" />
                   </div>
                 </td>
               </tr>
