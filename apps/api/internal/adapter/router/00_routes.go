@@ -14,6 +14,7 @@ func RegisterRoutes(
 	userHandler *handler.UserHandler,
 	reviewHandler *handler.ReviewHandler,
 	sessionHandler *handler.SessionHandler,
+	workoutHandler *handler.WorkoutHandler,
 ) *echo.Echo {
 	e := server.NewEcho(httpCfg)
 	v1 := e.Group("/api/v1")
@@ -22,5 +23,6 @@ func RegisterRoutes(
 	UserRoutes(v1, userHandler)
 	ReviewRoutes(v1, reviewHandler)
 	SessionRoutes(v1, sessionHandler)
+	WorkoutRoutes(v1, workoutHandler)
 	return e
 }

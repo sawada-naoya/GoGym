@@ -19,6 +19,7 @@ import (
 	"gogym-api/internal/usecase/review"
 	"gogym-api/internal/usecase/session"
 	"gogym-api/internal/usecase/user"
+	"gogym-api/internal/usecase/workout"
 )
 
 // Injectors from wire.go:
@@ -43,22 +44,25 @@ func BuildServer(cfg *configs.Config) (*echo.Echo, func(), error) {
 	reviewHandler := handler.NewReviewHandler(reviewUseCase)
 	sessionUseCase := session.NewInteractor(userRepository, bcryptPasswordHasher, userUseCase)
 	sessionHandler := handler.NewSessionHandler(sessionUseCase)
-	echoEcho := router.RegisterRoutes(httpConfig, gymHandler, userHandler, reviewHandler, sessionHandler)
+	workoutRepository := repository.NewWorkoutRepository(gormDB)
+	workoutUseCase := workout.NewInteractor(workoutRepository)
+	workoutHandler := handler.NewWorkoutHandler(workoutUseCase)
+	echoEcho := router.RegisterRoutes(httpConfig, gymHandler, userHandler, reviewHandler, sessionHandler, workoutHandler)
 	return echoEcho, func() {
 	}, nil
 }
 
 // wire.go:
 
-var RepositorySet = wire.NewSet(repository.NewUserRepository, wire.Bind(new(user.Repository), new(*repository.UserRepository)), wire.Bind(new(session.UserRepository), new(*repository.UserRepository)), repository.NewGymRepository, repository.NewReviewRepository, repository.NewTagRepository)
+var RepositorySet = wire.NewSet(repository.NewUserRepository, wire.Bind(new(user.Repository), new(*repository.UserRepository)), wire.Bind(new(session.UserRepository), new(*repository.UserRepository)), repository.NewGymRepository, repository.NewReviewRepository, repository.NewTagRepository, repository.NewWorkoutRepository)
 
 var internalPlatformSet = wire.NewSet(auth.NewBcryptPasswordHasher, wire.Bind(new(user.PasswordHasher), new(*auth.BcryptPasswordHasher)), wire.Bind(new(session.PasswordHasher), new(*auth.BcryptPasswordHasher)))
 
 var UsecaseSet = wire.NewSet(
-	internalPlatformSet, gym.NewInteractor, review.NewInteractor, session.NewInteractor, user.NewInteractor,
+	internalPlatformSet, gym.NewInteractor, review.NewInteractor, session.NewInteractor, user.NewInteractor, workout.NewInteractor,
 )
 
-var HandlerSet = wire.NewSet(handler.NewGymHandler, handler.NewReviewHandler, handler.NewUserHandler, handler.NewSessionHandler)
+var HandlerSet = wire.NewSet(handler.NewGymHandler, handler.NewReviewHandler, handler.NewUserHandler, handler.NewSessionHandler, handler.NewWorkoutHandler)
 
 var ServerSet = wire.NewSet(router.RegisterRoutes)
 
