@@ -15,6 +15,7 @@ import (
 	reviewuc "gogym-api/internal/usecase/review"
 	sessionuc "gogym-api/internal/usecase/session"
 	useruc "gogym-api/internal/usecase/user"
+	workoutuc "gogym-api/internal/usecase/workout"
 
 	"gogym-api/internal/infra/db"
 
@@ -29,6 +30,7 @@ var RepositorySet = wire.NewSet(
 	repository.NewGymRepository,
 	repository.NewReviewRepository,
 	repository.NewTagRepository,
+	repository.NewWorkoutRepository,
 )
 
 var internalPlatformSet = wire.NewSet(
@@ -43,6 +45,7 @@ var UsecaseSet = wire.NewSet(
 	reviewuc.NewInteractor,
 	sessionuc.NewInteractor,
 	useruc.NewInteractor,
+	workoutuc.NewInteractor,
 )
 
 var HandlerSet = wire.NewSet(
@@ -50,6 +53,7 @@ var HandlerSet = wire.NewSet(
 	handler.NewReviewHandler,
 	handler.NewUserHandler,
 	handler.NewSessionHandler,
+	handler.NewWorkoutHandler,
 )
 
 var ServerSet = wire.NewSet(

@@ -3,12 +3,12 @@ import { ReviewListResponse } from "@/types/review";
 import { GET } from "@/lib/api";
 import Header from "@/components/Header";
 import { notFound } from "next/navigation";
-import GymPhotoGallery from "../components/GymPhotoGallery";
-import GymBasicInfo from "../components/GymBasicInfo";
-import GymAmenities from "../components/GymAmenities";
-import GymAccessInfo from "../components/GymAccessInfo";
-import GymReview from "../components/GymReview";
-import GymContactSidebar from "../components/GymContactSidebar";
+import GymPhotoGallery from "../_components/GymPhotoGallery";
+import GymBasicInfo from "../_components/GymBasicInfo";
+import GymAmenities from "../_components/GymAmenities";
+import GymAccessInfo from "../_components/GymAccessInfo";
+import GymReview from "../_components/GymReview";
+import GymContactSidebar from "../_components/GymContactSidebar";
 
 export const dynamic = "force-dynamic";
 

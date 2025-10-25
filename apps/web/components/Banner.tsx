@@ -83,9 +83,7 @@ export const BannerHost: React.FC<{ className?: string }> = ({ className }) => {
                 </div>
               )}
               <div className={`ml-3 flex-1 ${icon === false ? "" : "mt-0.5"}`}>
-                <div className={`text-sm ${text}`}>
-                  {typeof message === "string" ? <span>{message}</span> : message}
-                </div>
+                <div className={`text-sm ${text}`}>{typeof message === "string" ? <span>{message}</span> : message}</div>
               </div>
             </div>
           </div>

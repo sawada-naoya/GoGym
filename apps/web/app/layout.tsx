@@ -9,8 +9,8 @@ import { BannerProvider, BannerHost } from "@/components/Banner";
 import GlobalBanners from "./GlobalBanners";
 
 export const metadata: Metadata = {
-  title: "GoGym - ジム検索アプリ",
-  description: "東京のジムを簡単に検索・比較できるアプリです",
+  title: "GoGym - トレーニング記録アプリ",
+  description: "日々のトレーニングを記録し、成長を可視化するアプリ",
 };
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => (
