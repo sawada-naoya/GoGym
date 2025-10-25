@@ -16,7 +16,7 @@ export type WorkoutFormDTO = {
   exercises: {
     id?: number | null; // workout_exercises.id（既存なら）
     name: string; // 種目名
-    workout_partId: number | null;
+    workout_part_id: number | null;
     is_default: 0 | 1;
     sets: {
       id?: number | null; // workout_sets.id（既存なら）

@@ -3,12 +3,14 @@ export type WorkoutRecord = {
   id: number;
   user_id: string;
   performed_date: string; // "YYYY-MM-DD"
-  startedAt: string | null; // "YYYY-MM-DDTHH:mm:ssZ" など
-  endedAt: string | null;
+  started_at: string | null; // "YYYY-MM-DDTHH:mm:ssZ" など
+  ended_at: string | null;
   place: string | null;
   note: string | null;
   condition_level: 1 | 2 | 3 | 4 | 5 | null;
   duration_minutes: number | null;
+
+  WorkoutParts?: WorkoutPart[];
 };
 
 export type WorkoutPart = {
@@ -16,20 +18,24 @@ export type WorkoutPart = {
   name: string;
   is_default: 0 | 1;
   user_id: string | null;
+
+  WorkoutExercises?: WorkoutExercise[];
 };
 
-export type TrainingExercise = {
+export type WorkoutExercise = {
   id: number;
   name: string;
   workout_part_id: number | null;
   is_default: 0 | 1;
   user_id: string | null;
+
+  sets: WorkoutSet[];
 };
 
 export type WorkoutSet = {
   id: number;
   workout_record_id: number;
-  training_exerciseId: number;
+  workout_exercise_id: number;
   set_number: number;
   weight_kg: number;
   reps: number;

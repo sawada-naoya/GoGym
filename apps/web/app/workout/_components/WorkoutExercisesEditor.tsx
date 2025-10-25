@@ -30,8 +30,8 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ rows, onChangeRows }) => {
     if (sets.length >= 5) return row;
     const baseLen = sets.length;
     const add: Row["sets"] = Array.from({ length: 5 - baseLen }, (_, i) => ({
-      setNumber: baseLen + i + 1,
-      weightKg: "" as const,
+      set_number: baseLen + i + 1,
+      weight_kg: "" as const,
       reps: "" as const,
       note: null,
     }));
@@ -53,11 +53,11 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ rows, onChangeRows }) => {
       {
         id: null,
         name: "",
-        workoutPartId: null,
-        isDefault: 0,
+        workout_part_id: null,
+        is_default: 0,
         sets: Array.from({ length: 5 }, (_, i) => ({
-          setNumber: i + 1,
-          weightKg: "" as const,
+          set_number: i + 1,
+          weight_kg: "" as const,
           reps: "" as const,
           note: null,
         })),
@@ -100,7 +100,7 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ rows, onChangeRows }) => {
                   <React.Fragment key={si}>
                     <td className="px-2 py-2 border-r border-gray-200 border-b border-gray-200">
                       <div className="flex items-center gap-1">
-                        <input type="number" value={s.weightKg as any} onChange={(e) => updateCell(ri, si, "weightKg", e.target.value)} className="w-14 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-booking-500" />
+                        <input type="number" value={s.weight_kg as any} onChange={(e) => updateCell(ri, si, "weightKg", e.target.value)} className="w-14 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-booking-500" />
                         <span className="text-xs text-gray-600">kg</span>
                       </div>
                     </td>

@@ -27,7 +27,7 @@ const buildEmptyDTO = (date: string): WorkoutFormDTO => ({
     {
       id: null,
       name: "",
-      workout_partId: null,
+      workout_part_id: null,
       is_default: 0,
       sets: Array.from({ length: 5 }, (_, i) => ({
         id: null,
@@ -65,7 +65,7 @@ const fetchDTO = async (date: string): Promise<WorkoutFormDTO> => {
     exercises: display.exercises.map((ex) => ({
       id: ex.id,
       name: ex.name,
-      workout_partId: ex.workout_partId,
+      workout_part_id: ex.workout_part_id,
       is_default: ex.is_default,
       sets: (ex.sets ?? []).map((s) => ({
         id: s.id,
@@ -105,15 +105,7 @@ const Page = async ({ params, searchParams }: Props) => {
   const month = Number(date.slice(5, 7));
   const day = Number(date.slice(8, 10));
 
-  return (
-    <WorkoutRecordEditor
-      Year={year}
-      Month={month}
-      Day={day}
-      defaultValues={dto}
-      isUpdate={!!dto.id}
-    />
-  );
+  return <WorkoutRecordEditor Year={year} Month={month} Day={day} defaultValues={dto} isUpdate={!!dto.id} />;
 };
 
 export default Page;

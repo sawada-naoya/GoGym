@@ -10,8 +10,7 @@ export default function Home() {
 
   // ログイン済みの場合はworkoutページにリダイレクト
   if (session?.user) {
-    const userId = (session as any).user.id;
-    router.push(`/${userId}/workout`);
+    router.push(`/workout`);
     return null;
   }
 
