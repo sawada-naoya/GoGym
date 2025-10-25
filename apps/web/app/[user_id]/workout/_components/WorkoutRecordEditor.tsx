@@ -43,18 +43,18 @@ const WorkoutRecordEditor = ({ Year, Month, Day, defaultValues, isUpdate }: Prop
   const handleSubmit = async (data: WorkoutFormDTO) => {
     const body = {
       ...data,
-      performedDate,
-      startedAt: toISO(Year, Month, selectedDay, data.startedAt),
-      endedAt: toISO(Year, Month, selectedDay, data.endedAt),
+      performed_date: performedDate,
+      started_at: toISO(Year, Month, selectedDay, data.started_at),
+      ended_at: toISO(Year, Month, selectedDay, data.ended_at),
     };
 
     try {
       if (isUpdate && data.id) {
-        const res = await PUT(`/api/training-records/${data.id}`, { body });
+        const res = await PUT(`/api/v1/workouts/records/${data.id}`, { body });
         if (!res.ok) return error("更新に失敗しました");
         success("更新しました");
       } else {
-        const res = await POST(`/api/training-records`, { body });
+        const res = await POST(`/api/v1/workouts/records`, { body });
         if (!res.ok) return error("保存に失敗しました");
         success("保存しました");
       }
@@ -85,18 +85,18 @@ const WorkoutRecordEditor = ({ Year, Month, Day, defaultValues, isUpdate }: Prop
             <div className="flex items-start justify-between gap-4">
               <WorkoutSessionMetaEditor
                 value={{
-                  startedAt: form.getValues("startedAt"),
-                  endedAt: form.getValues("endedAt"),
+                  started_at: form.getValues("started_at"),
+                  ended_at: form.getValues("ended_at"),
                   place: form.getValues("place"),
-                  conditionLevel: form.getValues("conditionLevel"),
-                  workoutPart: form.getValues("workoutPart"),
+                  condition_level: form.getValues("condition_level"),
+                  workout_part: form.getValues("workout_part"),
                 }}
                 onChange={(next) => {
-                  form.setValue("startedAt", next.startedAt);
-                  form.setValue("endedAt", next.endedAt);
+                  form.setValue("started_at", next.started_at);
+                  form.setValue("ended_at", next.ended_at);
                   form.setValue("place", next.place);
-                  form.setValue("conditionLevel", next.conditionLevel);
-                  form.setValue("workoutPart", next.workoutPart);
+                  form.setValue("condition_level", next.condition_level);
+                  form.setValue("workout_part", next.workout_part);
                 }}
               />
               <button onClick={form.handleSubmit(handleSubmit)} className="px-6 py-2 rounded-md bg-booking-600 text-white disabled:opacity-50 whitespace-nowrap self-center">

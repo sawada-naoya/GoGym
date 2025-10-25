@@ -13,8 +13,8 @@ const API_BASE = process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_URL
 
 const authOptions: NextAuthOptions = {
   pages: {
-    signIn: "/login",
-    error: "/login",
+    signIn: "/",
+    error: "/",
   },
 
   session: { strategy: "jwt" },
@@ -97,7 +97,7 @@ const authOptions: NextAuthOptions = {
 
         if (u.origin === base.origin) return url;
 
-        return `${baseUrl}/`;
+        return baseUrl;
       } catch {
         return baseUrl;
       }

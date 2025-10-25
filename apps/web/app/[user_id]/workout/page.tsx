@@ -1,4 +1,6 @@
 import { GET } from "@/lib/api";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 import WorkoutRecordEditor from "./_components/WorkoutRecordEditor";
 import { WorkoutFormDTO } from "./_components/types";
 
@@ -14,23 +16,23 @@ const toHHmm = (iso: string | null): string | null => {
 
 const buildEmptyDTO = (date: string): WorkoutFormDTO => ({
   id: null,
-  performedDate: date,
-  startedAt: null,
-  endedAt: null,
+  performed_date: date,
+  started_at: null,
+  ended_at: null,
   place: "",
   note: null,
-  conditionLevel: null,
-  workoutPart: { id: null, name: null, source: null },
+  condition_level: null,
+  workout_part: { id: null, name: null, source: null },
   exercises: [
     {
       id: null,
       name: "",
-      workoutPartId: null,
-      isDefault: 0,
+      workout_partId: null,
+      is_default: 0,
       sets: Array.from({ length: 5 }, (_, i) => ({
         id: null,
-        setNumber: i + 1,
-        weightKg: "",
+        set_number: i + 1,
+        weight_kg: "",
         reps: "",
         note: null,
       })),
@@ -49,26 +51,26 @@ const fetchDTO = async (date: string): Promise<WorkoutFormDTO> => {
   }
   return {
     id: display.id,
-    performedDate: display.performedDate,
-    startedAt: toHHmm(display.startedAt),
-    endedAt: toHHmm(display.endedAt),
+    performed_date: display.performed_date,
+    started_at: toHHmm(display.started_at),
+    ended_at: toHHmm(display.ended_at),
     place: display.place ?? "",
     note: display.note ?? null,
-    conditionLevel: display.conditionLevel ?? null,
-    workoutPart: {
-      id: display.workoutPart?.id ?? null,
-      name: display.workoutPart?.name ?? null,
-      source: display.workoutPart?.source ?? null,
+    condition_level: display.condition_level ?? null,
+    workout_part: {
+      id: display.workout_part?.id ?? null,
+      name: display.workout_part?.name ?? null,
+      source: display.workout_part?.source ?? null,
     },
     exercises: display.exercises.map((ex) => ({
       id: ex.id,
       name: ex.name,
-      workoutPartId: ex.workoutPartId,
-      isDefault: ex.isDefault,
+      workout_partId: ex.workout_partId,
+      is_default: ex.is_default,
       sets: (ex.sets ?? []).map((s) => ({
         id: s.id,
-        setNumber: s.setNumber,
-        weightKg: s.weightKg, // 数値→フォームではそのまま扱える
+        set_number: s.set_number,
+        weight_kg: s.weight_kg,
         reps: s.reps,
         note: s.note ?? null,
       })),
@@ -76,7 +78,26 @@ const fetchDTO = async (date: string): Promise<WorkoutFormDTO> => {
   };
 };
 
-const Page = async ({ searchParams }: { searchParams?: { date?: string } }) => {
+type Props = {
+  params: { user_id: string };
+  searchParams?: { date?: string };
+};
+
+const Page = async ({ params, searchParams }: Props) => {
+  const session = await getServerSession();
+
+  // 未ログインの場合はトップページにリダイレクト
+  if (!session?.user) {
+    redirect("/");
+  }
+
+  // URLのuser_idとログインユーザーのIDが一致するかチェック
+  const loggedInUserId = (session as any).user.id;
+  if (params.user_id !== loggedInUserId) {
+    // 自分のページにリダイレクト
+    redirect(`/${loggedInUserId}/workout`);
+  }
+
   const nowJST = new Date(Date.now() + 9 * 60 * 60 * 1000);
   const date = searchParams?.date ?? [nowJST.getUTCFullYear(), String(nowJST.getUTCMonth() + 1).padStart(2, "0"), String(nowJST.getUTCDate()).padStart(2, "0")].join("-");
   const dto = await fetchDTO(date);
@@ -89,8 +110,8 @@ const Page = async ({ searchParams }: { searchParams?: { date?: string } }) => {
       Year={year}
       Month={month}
       Day={day}
-      defaultValues={dto} // ← フォームにそのまま入る！
-      isUpdate={!!dto.id} // ← 既存かどうかの判定もpage側で済ませる
+      defaultValues={dto}
+      isUpdate={!!dto.id}
     />
   );
 };
