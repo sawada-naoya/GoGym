@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useForm, FormProvider, useWatch } from "react-hook-form";
+import { useSession } from "next-auth/react";
 import MonthlyStrip from "./MonthlyStrip";
 import WorkoutSessionMetaEditor from "./WorkoutSessionMetaEditor";
 import WorkoutExercisesEditor from "./WorkoutExercisesEditor";
@@ -26,6 +27,8 @@ const toISO = (y: number, m: number, d: number, hm?: string | null) => {
 const WorkoutRecordEditor = ({ Year, Month, Day, defaultValues, isUpdate }: Props) => {
   const { success, error } = useBanner();
   const [selectedDay, setSelectedDay] = useState(Day);
+  const { data: session } = useSession();
+  const accessToken = (session as any)?.accessToken;
 
   const form = useForm<WorkoutFormDTO>({
     defaultValues,
@@ -50,11 +53,11 @@ const WorkoutRecordEditor = ({ Year, Month, Day, defaultValues, isUpdate }: Prop
 
     try {
       if (isUpdate && data.id) {
-        const res = await PUT(`/api/v1/workouts/records/${data.id}`, { body });
+        const res = await PUT(`/api/v1/workouts/records/${data.id}`, { body: body, token: accessToken });
         if (!res.ok) return error("更新に失敗しました");
         success("更新しました");
       } else {
-        const res = await POST(`/api/v1/workouts/records`, { body });
+        const res = await POST(`/api/v1/workouts/records`, { body: body, token: accessToken });
         if (!res.ok) return error("保存に失敗しました");
         success("保存しました");
       }

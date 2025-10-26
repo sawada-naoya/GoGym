@@ -83,19 +83,12 @@ type Props = {
   searchParams?: { date?: string };
 };
 
-const Page = async ({ params, searchParams }: Props) => {
+const Page = async ({ searchParams }: Props) => {
   const session = await getServerSession();
 
   // 未ログインの場合はトップページにリダイレクト
   if (!session?.user) {
     redirect("/");
-  }
-
-  // URLのuser_idとログインユーザーのIDが一致するかチェック
-  const loggedInUserId = (session as any).user.id;
-  if (params.user_id !== loggedInUserId) {
-    // 自分のページにリダイレクト
-    redirect(`/${loggedInUserId}/workout`);
   }
 
   const nowJST = new Date(Date.now() + 9 * 60 * 60 * 1000);

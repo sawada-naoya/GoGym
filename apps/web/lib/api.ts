@@ -23,6 +23,7 @@ type RequestOptions = {
   body?: unknown;
   headers?: Record<string, string>;
   cache?: RequestCache;
+  token?: string;
 };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -61,6 +62,7 @@ const _request = async <T, E = { message?: string }>(method: HttpMethod, endpoin
   const url = API_BASE_URL + path;
 
   const headers: Record<string, string> = { ...(options.headers ?? {}) };
+  if (options.token) headers["Authorization"] = `Bearer ${options.token}`;
   const hasBody = method !== "GET" && options.body !== undefined;
   if (hasBody && !headers["Content-Type"]) headers["Content-Type"] = "application/json";
 
@@ -68,7 +70,7 @@ const _request = async <T, E = { message?: string }>(method: HttpMethod, endpoin
     method,
     headers,
     body: hasBody ? JSON.stringify(options.body) : undefined,
-    credentials: "include",
+    credentials: "omit",
   });
   // JSONの場合はレスポンスをパース
   const parse = async <X>(): Promise<X | undefined> => {
