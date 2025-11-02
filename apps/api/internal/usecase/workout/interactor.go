@@ -22,3 +22,13 @@ func (i *interactor) GetWorkoutRecords(ctx context.Context, userID string, date 
 	}
 	return records, nil
 }
+
+func (i *interactor) CreateWorkoutRecord(ctx context.Context, workout dom.WorkoutRecord) error {
+	// Domain logic can be added here (validation, business rules, etc.)
+
+	err := i.repo.Create(ctx, workout)
+	if err != nil {
+		return err
+	}
+	return nil
+}

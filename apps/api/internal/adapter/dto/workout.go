@@ -7,7 +7,7 @@ import (
 	dom "gogym-api/internal/domain/workout"
 )
 
-type WorkoutFormDTO struct {
+type WorkoutRecordDTO struct {
 	ID             *int64  `json:"id,omitempty"`        // 既存ならrecord id
 	PerformedDate  string  `json:"performedDate"`       // "YYYY-MM-DD"
 	StartedAt      *string `json:"startedAt,omitempty"` // "HH:mm"
@@ -43,12 +43,12 @@ type SetDTO struct {
 }
 
 // DomainToDTO converts domain.WorkoutRecord to WorkoutFormDTO
-func WorkoutRecordToDTO(record *dom.WorkoutRecord) *WorkoutFormDTO {
+func WorkoutRecordToDTO(record *dom.WorkoutRecord) *WorkoutRecordDTO {
 	if record == nil {
 		return nil
 	}
 
-	dto := &WorkoutFormDTO{
+	dto := &WorkoutRecordDTO{
 		ID:             domainIDToInt64Ptr(record.ID),
 		PerformedDate:  record.PerformedDate.Format("2006-01-02"),
 		StartedAt:      timeToHHmm(record.StartedAt),
@@ -127,4 +127,112 @@ func conditionLevelToIntPtr(c dom.ConditionLevel) *int {
 	}
 	i := int(c)
 	return &i
+}
+
+// WorkoutRecordDTOToDomain converts WorkoutRecordDTO to domain.WorkoutRecord
+func WorkoutRecordDTOToDomain(dto *WorkoutRecordDTO) (*dom.WorkoutRecord, error) {
+	if dto == nil {
+		return nil, fmt.Errorf("dto is nil")
+	}
+
+	// Parse performedDate
+	performedDate, err := time.Parse("2006-01-02", dto.PerformedDate)
+	if err != nil {
+		return nil, fmt.Errorf("invalid performedDate format: %w", err)
+	}
+
+	// Create WorkoutRecord
+	record, err := dom.NewWorkoutRecord(dom.ULID(""), performedDate) // userID will be set by handler/usecase
+	if err != nil {
+		return nil, fmt.Errorf("failed to create workout record: %w", err)
+	}
+
+	// Set ID if exists
+	if dto.ID != nil {
+		id := dom.ID(*dto.ID)
+		record.ID = &id
+	}
+
+	// Parse and set times
+	var startedAt, endedAt *time.Time
+	if dto.StartedAt != nil {
+		t, err := parseTimeWithDate(performedDate, *dto.StartedAt)
+		if err != nil {
+			return nil, fmt.Errorf("invalid startedAt format: %w", err)
+		}
+		startedAt = &t
+	}
+	if dto.EndedAt != nil {
+		t, err := parseTimeWithDate(performedDate, *dto.EndedAt)
+		if err != nil {
+			return nil, fmt.Errorf("invalid endedAt format: %w", err)
+		}
+		endedAt = &t
+	}
+	if err := record.SetTimes(startedAt, endedAt); err != nil {
+		return nil, fmt.Errorf("invalid times: %w", err)
+	}
+
+	// Set other fields
+	if dto.Place != "" {
+		record.Place = &dto.Place
+	}
+	record.Note = dto.Note
+	if dto.ConditionLevel != nil {
+		record.Condition = dom.ConditionLevel(*dto.ConditionLevel)
+	}
+
+	// Convert exercises to sets
+	for _, exercise := range dto.Exercises {
+		exerciseRef := dom.WorkoutExerciseRef{
+			Name: exercise.Name,
+		}
+		if exercise.ID != nil {
+			exerciseRef.ID = dom.ID(*exercise.ID)
+		}
+		if exercise.WorkoutPartID != nil {
+			partID := dom.ID(*exercise.WorkoutPartID)
+			exerciseRef.PartID = &partID
+		}
+		if exercise.IsDefault != nil {
+			exerciseRef.IsPreset = *exercise.IsDefault
+		}
+
+		// Convert sets
+		for _, setDTO := range exercise.Sets {
+			workoutSet := dom.WorkoutSet{
+				Exercise:  exerciseRef,
+				SetNumber: setDTO.SetNumber,
+			}
+
+			if setDTO.ID != nil {
+				id := dom.ID(*setDTO.ID)
+				workoutSet.ID = &id
+			}
+
+			if setDTO.WeightKg != nil {
+				workoutSet.Weight = dom.WeightKg(*setDTO.WeightKg)
+			}
+			if setDTO.Reps != nil {
+				workoutSet.Reps = dom.Reps(*setDTO.Reps)
+			}
+			workoutSet.Note = setDTO.Note
+
+			// Add set to record
+			if err := record.AddSet(workoutSet); err != nil {
+				return nil, fmt.Errorf("failed to add set: %w", err)
+			}
+		}
+	}
+
+	return record, nil
+}
+
+// parseTimeWithDate combines a date and HH:mm time string
+func parseTimeWithDate(date time.Time, hhmmStr string) (time.Time, error) {
+	t, err := time.Parse("15:04", hhmmStr)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return time.Date(date.Year(), date.Month(), date.Day(), t.Hour(), t.Minute(), 0, 0, date.Location()), nil
 }

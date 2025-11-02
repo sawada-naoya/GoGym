@@ -43,3 +43,38 @@ func (r *workoutRepository) GetRecordsByDate(ctx context.Context, userID string,
 
 	return *domainRecord, nil
 }
+
+func (r *workoutRepository) Create(ctx context.Context, workout dom.WorkoutRecord) error {
+	recordWorkout := mapper.WorkoutRecordToRecord(&workout)
+	if recordWorkout == nil {
+		return fmt.Errorf("failed to convert domain workout record to repository record")
+	}
+
+	// トランザクション内でWorkoutRecordとWorkoutSetsを作成
+	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		// WorkoutRecordを作成
+		if err := tx.Create(recordWorkout).Error; err != nil {
+			return fmt.Errorf("failed to create workout record: %w", err)
+		}
+
+		// WorkoutSetsのWorkoutRecordIDを更新
+		for i := range recordWorkout.Sets {
+			recordWorkout.Sets[i].WorkoutRecordID = recordWorkout.ID
+		}
+
+		// WorkoutSetsを一括作成
+		if len(recordWorkout.Sets) > 0 {
+			if err := tx.Create(&recordWorkout.Sets).Error; err != nil {
+				return fmt.Errorf("failed to create workout sets: %w", err)
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

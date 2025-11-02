@@ -100,3 +100,59 @@ func intPtrToConditionLevel(i *int) dom.ConditionLevel {
 		return dom.CondUnknown
 	}
 }
+
+// WorkoutRecordToRecord converts domain.WorkoutRecord to record.WorkoutRecord
+func WorkoutRecordToRecord(domainRecord *dom.WorkoutRecord) *record.WorkoutRecord {
+	if domainRecord == nil {
+		return nil
+	}
+
+	rec := &record.WorkoutRecord{
+		UserID:          string(domainRecord.UserID),
+		PerformedDate:   domainRecord.PerformedDate,
+		StartedAt:       domainRecord.StartedAt,
+		EndedAt:         domainRecord.EndedAt,
+		Place:           domainRecord.Place,
+		Note:            domainRecord.Note,
+		ConditionLevel:  conditionLevelToIntPtr(domainRecord.Condition),
+		DurationMinutes: domainRecord.DurationMin,
+		Sets:            make([]record.WorkoutSet, 0, len(domainRecord.Sets)),
+	}
+
+	if domainRecord.ID != nil {
+		rec.ID = int(*domainRecord.ID)
+	}
+
+	for _, domainSet := range domainRecord.Sets {
+		rec.Sets = append(rec.Sets, WorkoutSetToRecord(&domainSet, 0))
+	}
+
+	return rec
+}
+
+// WorkoutSetToRecord converts domain.WorkoutSet to record.WorkoutSet
+func WorkoutSetToRecord(domainSet *dom.WorkoutSet, workoutRecordID int) record.WorkoutSet {
+	recSet := record.WorkoutSet{
+		WorkoutRecordID:   workoutRecordID,
+		WorkoutExerciseID: int(domainSet.Exercise.ID),
+		SetNumber:         domainSet.SetNumber,
+		WeightKg:          float64(domainSet.Weight),
+		Reps:              int(domainSet.Reps),
+		EstimatedMax:      domainSet.EstimatedMax,
+		Note:              domainSet.Note,
+	}
+
+	if domainSet.ID != nil {
+		recSet.ID = int(*domainSet.ID)
+	}
+
+	return recSet
+}
+
+func conditionLevelToIntPtr(c dom.ConditionLevel) *int {
+	if c == dom.CondUnknown {
+		return nil
+	}
+	i := int(c)
+	return &i
+}

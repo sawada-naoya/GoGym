@@ -25,9 +25,9 @@ func (w WeightKg) Valid() bool { return w >= 0 }
 func (r Reps) Valid() bool     { return r >= 0 }
 
 type WorkoutExerciseRef struct {
-	ID       ID     // workout_exercises.id
-	Name     string // キャッシュ用（必要なら）
-	PartID   *ID    // nil 許容
+	ID       ID
+	Name     string
+	PartID   *ID
 	IsPreset bool   // user_id == NULL を圧縮表現
 	Owner    *ULID  // nil ならプリセット
 }
