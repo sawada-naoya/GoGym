@@ -1,0 +1,80 @@
+package repository
+
+import (
+	"context"
+	"errors"
+	"fmt"
+
+	"gogym-api/internal/adapter/repository/mapper"
+	"gogym-api/internal/adapter/repository/record"
+	dom "gogym-api/internal/domain/workout"
+	workoutUsecase "gogym-api/internal/usecase/workout"
+
+	"gorm.io/gorm"
+)
+
+type workoutRepository struct {
+	db *gorm.DB
+}
+
+func NewWorkoutRepository(db *gorm.DB) workoutUsecase.Repository {
+	return &workoutRepository{db: db}
+}
+
+func (r *workoutRepository) GetRecordsByDate(ctx context.Context, userID string, date string) (dom.WorkoutRecord, error) {
+	var rec record.WorkoutRecord
+	err := r.db.WithContext(ctx).
+		Preload("Sets.Exercise.Part").
+		Where("user_id = ? AND performed_date = ?", userID, date).
+		First(&rec).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			// レコードが見つからない場合は空のドメインモデルを返す
+			return dom.WorkoutRecord{}, nil
+		}
+		return dom.WorkoutRecord{}, fmt.Errorf("error fetching workout records: %w", err)
+	}
+
+	domainRecord := mapper.WorkoutRecordToDomain(&rec)
+	if domainRecord == nil {
+		return dom.WorkoutRecord{}, fmt.Errorf("failed to convert record to domain")
+	}
+
+	return *domainRecord, nil
+}
+
+func (r *workoutRepository) Create(ctx context.Context, workout dom.WorkoutRecord) error {
+	recordWorkout := mapper.WorkoutRecordToRecord(&workout)
+	if recordWorkout == nil {
+		return fmt.Errorf("failed to convert domain workout record to repository record")
+	}
+
+	// トランザクション内でWorkoutRecordとWorkoutSetsを作成
+	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		// WorkoutRecordを作成
+		if err := tx.Create(recordWorkout).Error; err != nil {
+			return fmt.Errorf("failed to create workout record: %w", err)
+		}
+
+		// WorkoutSetsのWorkoutRecordIDを更新
+		for i := range recordWorkout.Sets {
+			recordWorkout.Sets[i].WorkoutRecordID = recordWorkout.ID
+		}
+
+		// WorkoutSetsを一括作成
+		if len(recordWorkout.Sets) > 0 {
+			if err := tx.Create(&recordWorkout.Sets).Error; err != nil {
+				return fmt.Errorf("failed to create workout sets: %w", err)
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
