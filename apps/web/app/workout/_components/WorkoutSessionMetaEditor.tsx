@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import type { WorkoutFormDTO } from "./types";
+import type { WorkoutFormDTO } from "../_lib/types";
 
 type SessionMeta = Pick<WorkoutFormDTO, "started_at" | "ended_at" | "place" | "condition_level" | "workout_part">;
 

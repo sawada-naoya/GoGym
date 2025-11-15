@@ -2,7 +2,7 @@ import { GET } from "@/lib/api";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import WorkoutRecordEditor from "./_components/WorkoutRecordEditor";
-import { WorkoutFormDTO } from "./_components/types";
+import { WorkoutFormDTO } from "./_lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -14,9 +14,9 @@ const toHHmm = (iso: string | null): string | null => {
   return `${hh}:${mm}`;
 };
 
-const buildEmptyDTO = (date: string): WorkoutFormDTO => ({
+const buildEmptyDTO = (): WorkoutFormDTO => ({
   id: null,
-  performed_date: date,
+  performed_date: "",
   started_at: null,
   ended_at: null,
   place: "",
@@ -40,15 +40,29 @@ const buildEmptyDTO = (date: string): WorkoutFormDTO => ({
   ],
 });
 
-const fetchDTO = async (date: string): Promise<WorkoutFormDTO> => {
-  const res = await GET(`/api/v1/workouts/records?date=${date}`);
+const fetchWorkoutRecord = async (date?: string): Promise<WorkoutFormDTO> => {
+  // dateがある場合はクエリパラメータに含める、ない場合はバックエンドが今日のJST日付を使用
+  const url = date ? `/api/v1/workouts/records?date=${date}` : "/api/v1/workouts/records";
+  const res = await GET(url);
+
   if (!res.ok) {
-    return buildEmptyDTO(date);
+    // エラーの場合は空のDTOを返す
+    return buildEmptyDTO();
   }
+
   const display = res.data as WorkoutFormDTO;
+
+  // バックエンドから返されたデータをそのまま使用（日付も含まれている）
   if (!display || !display.id) {
-    return buildEmptyDTO(date);
+    // レコードがない場合もバックエンドから日付は返されている
+    return {
+      ...buildEmptyDTO(),
+      performed_date: display.performed_date || "",
+      place: display.place || "",
+      exercises: display.exercises || buildEmptyDTO().exercises,
+    };
   }
+
   return {
     id: display.id,
     performed_date: display.performed_date,
@@ -91,9 +105,11 @@ const Page = async ({ searchParams }: Props) => {
     redirect("/");
   }
 
-  const nowJST = new Date(Date.now() + 9 * 60 * 60 * 1000);
-  const date = searchParams?.date ?? [nowJST.getUTCFullYear(), String(nowJST.getUTCMonth() + 1).padStart(2, "0"), String(nowJST.getUTCDate()).padStart(2, "0")].join("-");
-  const dto = await fetchDTO(date);
+  // バックエンドに日付処理を任せる（dateがundefinedの場合、バックエンドが今日のJST日付を使用）
+  const dto = await fetchWorkoutRecord(searchParams?.date);
+
+  // バックエンドから返された日付を使用
+  const date = dto.performed_date;
   const year = Number(date.slice(0, 4));
   const month = Number(date.slice(5, 7));
   const day = Number(date.slice(8, 10));

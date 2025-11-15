@@ -10,7 +10,6 @@ import (
 	wu "gogym-api/internal/usecase/workout"
 
 	"github.com/labstack/echo/v4"
-
 )
 
 type WorkoutHandler struct {
@@ -34,20 +33,14 @@ func (h *WorkoutHandler) GetWorkoutRecords(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Unauthorized"})
 	}
 
+	// dateクエリパラメータを取得（空文字列の場合はUseCaseで今日のJST日付を使用）
 	date := c.QueryParam("date")
-	if date == "" {
-		slog.ErrorContext(ctx, "Date query parameter is required")
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Date query parameter is required"})
-	}
 
-	domainRecord, err := h.wu.GetWorkoutRecords(ctx, userID, date)
+	response, err := h.wu.GetWorkoutRecords(ctx, userID, date)
 	if err != nil {
 		slog.ErrorContext(ctx, "Failed to get workout records", "userID", userID, "date", date, "error", err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
-
-	// Domain → DTO変換
-	response := dto.WorkoutRecordToDTO(&domainRecord)
 
 	slog.InfoContext(ctx, "Successfully retrieved workout records", "userID", userID, "date", date)
 	return c.JSON(http.StatusOK, response)

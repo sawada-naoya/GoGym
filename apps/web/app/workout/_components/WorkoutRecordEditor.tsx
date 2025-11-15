@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import MonthlyStrip from "./MonthlyStrip";
 import WorkoutSessionMetaEditor from "./WorkoutSessionMetaEditor";
 import WorkoutExercisesEditor from "./WorkoutExercisesEditor";
-import { WorkoutFormDTO } from "./types";
+import { WorkoutFormDTO } from "../_lib/types";
 import { POST, PUT } from "@/lib/api";
 import { useBanner } from "@/components/Banner";
 
