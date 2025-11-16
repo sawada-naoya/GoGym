@@ -1,15 +1,16 @@
 "use client";
 import React from "react";
-import type { WorkoutFormDTO } from "../_lib/types";
+import type { WorkoutFormDTO, WorkoutPartDTO } from "../_lib/types";
 
 type SessionMeta = Pick<WorkoutFormDTO, "started_at" | "ended_at" | "place" | "condition_level" | "workout_part">;
 
 type Props = {
   value: SessionMeta;
+  availableParts: WorkoutPartDTO[];
   onChange: (next: SessionMeta) => void;
 };
 
-const WorkoutSessionMetaEditor: React.FC<Props> = ({ value, onChange }) => {
+const WorkoutSessionMetaEditor: React.FC<Props> = ({ value, availableParts, onChange }) => {
   const setTime = (key: "started_at" | "ended_at", hhmm: string) => {
     onChange({ ...value, [key]: hhmm || null });
   };
@@ -22,20 +23,27 @@ const WorkoutSessionMetaEditor: React.FC<Props> = ({ value, onChange }) => {
     onChange({ ...value, condition_level: n });
   };
 
-  // 部位は自由入力。空なら null、文字があれば custom 扱いで保持。
-  const setPartName = (name: string) => {
-    const trimmed = name.trim();
-    if (!trimmed) {
+  // プルダウンで選択された部位をセット
+  const setPartById = (idStr: string) => {
+    if (!idStr) {
+      // 未選択
       onChange({
         ...value,
         workout_part: { id: null, name: null, source: null },
       });
       return;
     }
-    onChange({
-      ...value,
-      workout_part: { id: null, name: trimmed, source: "custom" },
-    });
+    const selectedPart = availableParts.find((p) => p.id === Number(idStr));
+    if (selectedPart) {
+      onChange({
+        ...value,
+        workout_part: {
+          id: selectedPart.id,
+          name: selectedPart.name,
+          source: selectedPart.isDefault ? "preset" : "custom",
+        },
+      });
+    }
   };
 
   return (
@@ -51,13 +59,20 @@ const WorkoutSessionMetaEditor: React.FC<Props> = ({ value, onChange }) => {
       {/* 場所 */}
       <div className="flex items-center gap-2">
         <label className="text-sm font-medium text-gray-700">場所</label>
-        <input type="text" value={value.place ?? ""} onChange={(e) => setPlace(e.target.value)} placeholder="自宅 / ジム名など" className="w-48 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500" />
+        <input type="text" value={value.place ?? ""} onChange={(e) => setPlace(e.target.value)} placeholder="ジム名など" className="w-48 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500" />
       </div>
 
-      {/* 部位（自由入力） */}
+      {/* 部位（プルダウン） */}
       <div className="flex items-center gap-2">
         <label className="text-sm font-medium text-gray-700">部位</label>
-        <input type="text" value={value.workout_part?.name ?? ""} onChange={(e) => setPartName(e.target.value)} placeholder="例: 胸 / 脚 / 背中" className="w-40 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500" />
+        <select value={value.workout_part?.id?.toString() ?? ""} onChange={(e) => setPartById(e.target.value)} className="w-40 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500 bg-white">
+          <option value=""></option>
+          {availableParts.map((part) => (
+            <option key={part.id} value={part.id}>
+              {part.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* コンディション（1〜5） */}

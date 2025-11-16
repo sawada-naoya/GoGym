@@ -24,6 +24,13 @@ type Reps int
 func (w WeightKg) Valid() bool { return w >= 0 }
 func (r Reps) Valid() bool     { return r >= 0 }
 
+type WorkoutPart struct {
+	ID        ID
+	Name      string
+	IsDefault bool
+	Owner     *ULID // nil ならプリセット
+}
+
 type WorkoutExerciseRef struct {
 	ID       ID
 	Name     string

@@ -78,3 +78,19 @@ func (r *workoutRepository) Create(ctx context.Context, workout dom.WorkoutRecor
 
 	return nil
 }
+
+func (r *workoutRepository) GetWorkoutParts(ctx context.Context, userID string) ([]dom.WorkoutPart, error) {
+	var parts []record.WorkoutPart
+
+	// プリセット（user_id = NULL）とユーザー固有の部位を取得
+	err := r.db.WithContext(ctx).
+		Where("user_id IS NULL OR user_id = ?", userID).
+		Order("is_default DESC, name ASC").
+		Find(&parts).Error
+
+	if err != nil {
+		return nil, fmt.Errorf("error fetching workout parts: %w", err)
+	}
+
+	return mapper.WorkoutPartsToDomain(parts), nil
+}

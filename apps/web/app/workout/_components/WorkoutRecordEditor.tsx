@@ -1,12 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useForm, FormProvider, useWatch } from "react-hook-form";
-import { useSession } from "next-auth/react";
 import MonthlyStrip from "./MonthlyStrip";
 import WorkoutSessionMetaEditor from "./WorkoutSessionMetaEditor";
 import WorkoutExercisesEditor from "./WorkoutExercisesEditor";
-import { WorkoutFormDTO } from "../_lib/types";
-import { POST, PUT } from "@/lib/api";
+import { WorkoutFormDTO, WorkoutPartDTO } from "../_lib/types";
+import { transformFormDataForSubmit } from "../_lib/utils";
+import { createWorkoutRecord, updateWorkoutRecord } from "../_lib/api";
 import { useBanner } from "@/components/Banner";
 
 type Props = {
@@ -14,21 +14,13 @@ type Props = {
   Month: number;
   Day: number;
   defaultValues: WorkoutFormDTO;
+  availableParts: WorkoutPartDTO[];
   isUpdate: boolean;
 };
 
-const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`);
-const toISO = (y: number, m: number, d: number, hm?: string | null) => {
-  if (!hm) return null;
-  const [hh, mm] = hm.split(":").map(Number);
-  return new Date(y, m - 1, d, hh, mm, 0).toISOString();
-};
-
-const WorkoutRecordEditor = ({ Year, Month, Day, defaultValues, isUpdate }: Props) => {
+const WorkoutRecordEditor = ({ Year, Month, Day, defaultValues, availableParts, isUpdate }: Props) => {
   const { success, error } = useBanner();
   const [selectedDay, setSelectedDay] = useState(Day);
-  const { data: session } = useSession();
-  const accessToken = (session as any)?.accessToken;
 
   const form = useForm<WorkoutFormDTO>({
     defaultValues,
@@ -41,24 +33,17 @@ const WorkoutRecordEditor = ({ Year, Month, Day, defaultValues, isUpdate }: Prop
     form.reset(defaultValues);
   }, [defaultValues, form]);
 
-  const performedDate = `${Year}-${pad(Month)}-${pad(selectedDay)}`;
-
   const handleSubmit = async (data: WorkoutFormDTO) => {
-    const body = {
-      ...data,
-      performed_date: performedDate,
-      started_at: toISO(Year, Month, selectedDay, data.started_at),
-      ended_at: toISO(Year, Month, selectedDay, data.ended_at),
-    };
+    const body = transformFormDataForSubmit(data, Year, Month, selectedDay);
 
     try {
       if (isUpdate && data.id) {
-        const res = await PUT(`/api/v1/workouts/records/${data.id}`, { body: body, token: accessToken });
-        if (!res.ok) return error("更新に失敗しました");
+        const result = await updateWorkoutRecord(data.id, body);
+        if (!result.ok) return error(result.error || "更新に失敗しました");
         success("更新しました");
       } else {
-        const res = await POST(`/api/v1/workouts/records`, { body: body, token: accessToken });
-        if (!res.ok) return error("保存に失敗しました");
+        const result = await createWorkoutRecord(body);
+        if (!result.ok) return error(result.error || "保存に失敗しました");
         success("保存しました");
       }
     } catch {
@@ -94,6 +79,7 @@ const WorkoutRecordEditor = ({ Year, Month, Day, defaultValues, isUpdate }: Prop
                   condition_level: form.getValues("condition_level"),
                   workout_part: form.getValues("workout_part"),
                 }}
+                availableParts={availableParts}
                 onChange={(next) => {
                   form.setValue("started_at", next.started_at);
                   form.setValue("ended_at", next.ended_at);

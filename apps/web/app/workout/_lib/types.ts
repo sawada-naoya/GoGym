@@ -1,3 +1,9 @@
+export type WorkoutPartDTO = {
+  id: number;
+  name: string;
+  isDefault: boolean;
+};
+
 export type WorkoutFormDTO = {
   id?: number | null; // 既存ならrecord id
   performed_date: string; // "YYYY-MM-DD"

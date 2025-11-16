@@ -52,3 +52,11 @@ func (i *interactor) CreateWorkoutRecord(ctx context.Context, workout dom.Workou
 	}
 	return nil
 }
+
+func (i *interactor) GetWorkoutParts(ctx context.Context, userID string) ([]dto.WorkoutPartListItemDTO, error) {
+	parts, err := i.repo.GetWorkoutParts(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	return dto.WorkoutPartsToDTO(parts), nil
+}

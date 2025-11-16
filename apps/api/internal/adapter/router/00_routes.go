@@ -10,6 +10,7 @@ import (
 
 func RegisterRoutes(
 	httpCfg configs.HTTPConfig,
+	authCfg configs.AuthConfig,
 	gymHandler *handler.GymHandler,
 	userHandler *handler.UserHandler,
 	reviewHandler *handler.ReviewHandler,
@@ -23,6 +24,6 @@ func RegisterRoutes(
 	UserRoutes(v1, userHandler)
 	ReviewRoutes(v1, reviewHandler)
 	SessionRoutes(v1, sessionHandler)
-	WorkoutRoutes(v1, workoutHandler)
+	WorkoutRoutes(v1, workoutHandler, authCfg)
 	return e
 }

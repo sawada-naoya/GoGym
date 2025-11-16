@@ -82,3 +82,23 @@ func (h *WorkoutHandler) CreateWorkoutRecord(c echo.Context) error {
 	slog.InfoContext(ctx, "Successfully created workout record", "userID", userID)
 	return c.JSON(http.StatusCreated, map[string]string{"message": "Workout record created successfully"})
 }
+
+func (h *WorkoutHandler) GetWorkoutParts(c echo.Context) error {
+	ctx := c.Request().Context()
+	slog.InfoContext(ctx, "GetWorkoutParts Handler")
+
+	userID, ok := c.Get("user_id").(string)
+	if !ok || userID == "" {
+		slog.ErrorContext(ctx, "User ID not found in context")
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Unauthorized"})
+	}
+
+	parts, err := h.wu.GetWorkoutParts(ctx, userID)
+	if err != nil {
+		slog.ErrorContext(ctx, "Failed to get workout parts", "userID", userID, "error", err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	slog.InfoContext(ctx, "Successfully retrieved workout parts", "userID", userID, "count", len(parts))
+	return c.JSON(http.StatusOK, parts)
+}

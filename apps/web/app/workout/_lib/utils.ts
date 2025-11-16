@@ -1,0 +1,144 @@
+import type { WorkoutFormDTO } from "./types";
+
+export type ExerciseRow = WorkoutFormDTO["exercises"][number];
+
+// ==================== Date & Time Formatters ====================
+
+/**
+ * ISO形式の日時文字列をHH:mm形式に変換
+ */
+export const toHHmm = (iso: string | null): string | null => {
+  if (!iso) return null;
+  const d = new Date(iso);
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  return `${hh}:${mm}`;
+};
+
+/**
+ * YYYY-MM-DD形式の日付文字列から年月日を抽出
+ */
+export const extractDateParts = (dateStr: string | null | undefined) => {
+  if (!dateStr || dateStr.length < 10) {
+    // フォールバック: 今日のJST日付を使用
+    const now = new Date();
+    return {
+      year: now.getFullYear(),
+      month: now.getMonth() + 1,
+      day: now.getDate(),
+    };
+  }
+
+  return {
+    year: Number(dateStr.slice(0, 4)),
+    month: Number(dateStr.slice(5, 7)),
+    day: Number(dateStr.slice(8, 10)),
+  };
+};
+
+/**
+ * 数値を2桁にパディング
+ * @example pad(5) => "05"
+ */
+export const pad = (n: number): string => (n < 10 ? `0${n}` : `${n}`);
+
+/**
+ * 年月日とHH:mm形式の時刻をISO形式に変換
+ * @param y - 年
+ * @param m - 月
+ * @param d - 日
+ * @param hm - HH:mm形式の時刻文字列
+ * @returns ISO形式の日時文字列 or null
+ */
+export const toISO = (y: number, m: number, d: number, hm?: string | null): string | null => {
+  if (!hm) return null;
+  const [hh, mm] = hm.split(":").map(Number);
+  return new Date(y, m - 1, d, hh, mm, 0).toISOString();
+};
+
+/**
+ * 年月日から YYYY-MM-DD 形式の日付文字列を生成
+ */
+export const formatDateYMD = (year: number, month: number, day: number): string => {
+  return `${year}-${pad(month)}-${pad(day)}`;
+};
+
+// ==================== Exercise Helpers ====================
+
+/**
+ * Exerciseのセット数を5つに揃える
+ */
+export const ensureFiveSets = (row: ExerciseRow): ExerciseRow => {
+  const sets = row.sets ?? [];
+  if (sets.length >= 5) return row;
+
+  const baseLen = sets.length;
+  const add: ExerciseRow["sets"] = Array.from({ length: 5 - baseLen }, (_, i) => ({
+    set_number: baseLen + i + 1,
+    weight_kg: "" as const,
+    reps: "" as const,
+    note: null,
+  }));
+
+  return { ...row, sets: [...sets, ...add] };
+};
+
+/**
+ * 新しい空のExercise行を作成
+ */
+export const createEmptyExerciseRow = (): ExerciseRow => ({
+  id: null,
+  name: "",
+  workout_part_id: null,
+  is_default: 0,
+  sets: Array.from({ length: 5 }, (_, i) => ({
+    set_number: i + 1,
+    weight_kg: "" as const,
+    reps: "" as const,
+    note: null,
+  })),
+});
+
+/**
+ * Exercise行配列のセル値を更新
+ */
+export const updateExerciseCell = (rows: ExerciseRow[], rowIndex: number, setIndex: number, key: "weight_kg" | "reps", value: string): ExerciseRow[] => {
+  const next = structuredClone(rows);
+  (next[rowIndex].sets[setIndex] as any)[key] = value;
+  return next;
+};
+
+/**
+ * Exerciseのメモを更新（最初のセットに保存）
+ */
+export const updateExerciseNote = (rows: ExerciseRow[], rowIndex: number, note: string): ExerciseRow[] => {
+  const next = structuredClone(rows);
+  if (next[rowIndex].sets[0]) {
+    next[rowIndex].sets[0].note = note || null;
+  }
+  return next;
+};
+
+/**
+ * Exercise名を変更
+ */
+export const updateExerciseName = (rows: ExerciseRow[], rowIndex: number, name: string): ExerciseRow[] => {
+  const next = structuredClone(rows);
+  next[rowIndex].name = name;
+  // 自由入力なので既存IDに紐づけない（新規扱い）
+  next[rowIndex].id = name.trim() ? next[rowIndex].id ?? null : null;
+  next[rowIndex] = ensureFiveSets(next[rowIndex]);
+  return next;
+};
+
+// ==================== Form Data Transformers ====================
+
+/**
+ * フォームデータを送信用に変換
+ */
+export const transformFormDataForSubmit = (data: WorkoutFormDTO, year: number, month: number, day: number) => ({
+  ...data,
+  performed_date: formatDateYMD(year, month, day),
+  started_at: toISO(year, month, day, data.started_at),
+  ended_at: toISO(year, month, day, data.ended_at),
+});

@@ -60,9 +60,8 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     jwt: async ({ token, user }: { token: JWT; user?: User | AdapterUser }) => {
       if (user) {
+        // accessToken は JWT トークン内にのみ保存（サーバー側のみ）
         (token as any).accessToken = (user as any).accessToken;
-      }
-      if (user) {
         token.sub = user.id as string;
         token.name = user.name;
         token.email = user.email as string;
@@ -71,12 +70,14 @@ export const authOptions: NextAuthOptions = {
     },
 
     session: async ({ session, token }: { session: Session; token: JWT }) => {
+      // クライアント側に送信されるセッションにはaccessTokenを含めない
       (session as any).user = {
         id: token.sub,
         name: token.name,
         email: token.email,
       };
-      (session as any).accessToken = (token as any).accessToken;
+      // ⚠️ セキュリティ: accessToken はクライアント側に送信しない
+      // サーバー側で必要な場合は getServerSession() から取得する
       return session;
     },
 

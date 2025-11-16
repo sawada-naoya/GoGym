@@ -7,6 +7,13 @@ import (
 	dom "gogym-api/internal/domain/workout"
 )
 
+// WorkoutPartDTO represents a workout part (e.g., chest, back, legs)
+type WorkoutPartListItemDTO struct {
+	ID        int64  `json:"id"`
+	Name      string `json:"name"`
+	IsDefault bool   `json:"isDefault"`
+}
+
 type WorkoutRecordDTO struct {
 	ID             *int64  `json:"id,omitempty"`        // 既存ならrecord id
 	PerformedDate  string  `json:"performedDate"`       // "YYYY-MM-DD"
@@ -235,4 +242,25 @@ func parseTimeWithDate(date time.Time, hhmmStr string) (time.Time, error) {
 		return time.Time{}, err
 	}
 	return time.Date(date.Year(), date.Month(), date.Day(), t.Hour(), t.Minute(), 0, 0, date.Location()), nil
+}
+
+// WorkoutPartToDTO converts domain.WorkoutPart to WorkoutPartListItemDTO
+func WorkoutPartToDTO(part *dom.WorkoutPart) *WorkoutPartListItemDTO {
+	if part == nil {
+		return nil
+	}
+	return &WorkoutPartListItemDTO{
+		ID:        int64(part.ID),
+		Name:      part.Name,
+		IsDefault: part.IsDefault,
+	}
+}
+
+// WorkoutPartsToDTO converts slice of domain.WorkoutPart to slice of WorkoutPartListItemDTO
+func WorkoutPartsToDTO(parts []dom.WorkoutPart) []WorkoutPartListItemDTO {
+	result := make([]WorkoutPartListItemDTO, len(parts))
+	for i, part := range parts {
+		result[i] = *WorkoutPartToDTO(&part)
+	}
+	return result
 }

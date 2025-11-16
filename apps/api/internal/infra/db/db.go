@@ -29,7 +29,7 @@ func NewDB(cfg configs.DatabaseConfig) (*gorm.DB, error) {
 	// loc: タイムゾーン設定（URLエンコードが必要）
 	// charset/collation: UTF-8（日本語対応）+ 大文字小文字区別なし
 	dsn := fmt.Sprintf(
-		"%s:%s@tcp(%s:%s)/%s?parseTime=true&loc=Local&charset=utf8mb4&collation=utf8mb4_unicode_ci",
+		"%s:%s@tcp(%s:%s)/%s?parseTime=true&loc=Local&charset=utf8mb4&collation=utf8mb4_unicode_ci&interpolateParams=true",
 		cfg.User,
 		cfg.Password,
 		cfg.Host,

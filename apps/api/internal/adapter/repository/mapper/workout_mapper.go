@@ -156,3 +156,25 @@ func conditionLevelToIntPtr(c dom.ConditionLevel) *int {
 	i := int(c)
 	return &i
 }
+
+// WorkoutPartToDomain converts record.WorkoutPart to domain.WorkoutPart
+func WorkoutPartToDomain(rec *record.WorkoutPart) *dom.WorkoutPart {
+	if rec == nil {
+		return nil
+	}
+	return &dom.WorkoutPart{
+		ID:        dom.ID(rec.ID),
+		Name:      rec.Name,
+		IsDefault: rec.IsDefault,
+		Owner:     stringPtrToULIDPtr(rec.UserID),
+	}
+}
+
+// WorkoutPartsToDomain converts slice of record.WorkoutPart to slice of domain.WorkoutPart
+func WorkoutPartsToDomain(recs []record.WorkoutPart) []dom.WorkoutPart {
+	result := make([]dom.WorkoutPart, len(recs))
+	for i, rec := range recs {
+		result[i] = *WorkoutPartToDomain(&rec)
+	}
+	return result
+}
