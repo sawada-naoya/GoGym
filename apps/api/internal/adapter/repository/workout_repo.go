@@ -82,9 +82,9 @@ func (r *workoutRepository) Create(ctx context.Context, workout dom.WorkoutRecor
 func (r *workoutRepository) GetWorkoutParts(ctx context.Context, userID string) ([]dom.WorkoutPart, error) {
 	var parts []record.WorkoutPart
 
-	// プリセット（user_id = NULL）とユーザー固有の部位を取得
+	// ユーザー固有の部位のみを取得
 	err := r.db.WithContext(ctx).
-		Where("user_id IS NULL OR user_id = ?", userID).
+		Where("user_id = ?", userID).
 		Order("is_default DESC, name ASC").
 		Find(&parts).Error
 
@@ -93,4 +93,36 @@ func (r *workoutRepository) GetWorkoutParts(ctx context.Context, userID string) 
 	}
 
 	return mapper.WorkoutPartsToDomain(parts), nil
+}
+
+func (r *workoutRepository) CountUserWorkoutParts(ctx context.Context, userID string) (int64, error) {
+	var count int64
+	err := r.db.WithContext(ctx).
+		Model(&record.WorkoutPart{}).
+		Where("user_id = ?", userID).
+		Count(&count).Error
+
+	if err != nil {
+		return 0, fmt.Errorf("error counting workout parts: %w", err)
+	}
+
+	return count, nil
+}
+
+func (r *workoutRepository) CreateWorkoutParts(ctx context.Context, userID string, parts []dom.WorkoutPart) error {
+	recordParts := make([]record.WorkoutPart, len(parts))
+	for i, part := range parts {
+		recordParts[i] = record.WorkoutPart{
+			Name:      part.Name,
+			IsDefault: part.IsDefault,
+			UserID:    &userID,
+		}
+	}
+
+	err := r.db.WithContext(ctx).Create(&recordParts).Error
+	if err != nil {
+		return fmt.Errorf("error creating workout parts: %w", err)
+	}
+
+	return nil
 }

@@ -102,3 +102,24 @@ func (h *WorkoutHandler) GetWorkoutParts(c echo.Context) error {
 	slog.InfoContext(ctx, "Successfully retrieved workout parts", "userID", userID, "count", len(parts))
 	return c.JSON(http.StatusOK, parts)
 }
+
+func (h *WorkoutHandler) SeedWorkoutParts(c echo.Context) error {
+	ctx := c.Request().Context()
+	slog.InfoContext(ctx, "SeedWorkoutParts Handler")
+
+	userID, ok := c.Get("user_id").(string)
+	if !ok || userID == "" {
+		slog.ErrorContext(ctx, "User ID not found in context")
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Unauthorized"})
+	}
+	fmt.Println("==========userId=============", userID)
+
+	err := h.wu.SeedWorkoutParts(ctx, userID)
+	if err != nil {
+		slog.ErrorContext(ctx, "Failed to seed workout parts", "userID", userID, "error", err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	slog.InfoContext(ctx, "Successfully seeded workout parts", "userID", userID)
+	return c.JSON(http.StatusOK, map[string]string{"message": "Workout parts seeded successfully"})
+}

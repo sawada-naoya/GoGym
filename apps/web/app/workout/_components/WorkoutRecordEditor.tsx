@@ -16,9 +16,10 @@ type Props = {
   defaultValues: WorkoutFormDTO;
   availableParts: WorkoutPartDTO[];
   isUpdate: boolean;
+  token: string;
 };
 
-const WorkoutRecordEditor = ({ Year, Month, Day, defaultValues, availableParts, isUpdate }: Props) => {
+const WorkoutRecordEditor = ({ Year, Month, Day, defaultValues, availableParts, isUpdate, token }: Props) => {
   const { success, error } = useBanner();
   const [selectedDay, setSelectedDay] = useState(Day);
 
@@ -38,11 +39,11 @@ const WorkoutRecordEditor = ({ Year, Month, Day, defaultValues, availableParts, 
 
     try {
       if (isUpdate && data.id) {
-        const result = await updateWorkoutRecord(data.id, body);
+        const result = await updateWorkoutRecord(token, data.id, body);
         if (!result.ok) return error(result.error || "更新に失敗しました");
         success("更新しました");
       } else {
-        const result = await createWorkoutRecord(body);
+        const result = await createWorkoutRecord(token, body);
         if (!result.ok) return error(result.error || "保存に失敗しました");
         success("保存しました");
       }

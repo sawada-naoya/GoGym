@@ -60,3 +60,30 @@ func (i *interactor) GetWorkoutParts(ctx context.Context, userID string) ([]dto.
 	}
 	return dto.WorkoutPartsToDTO(parts), nil
 }
+
+func (i *interactor) SeedWorkoutParts(ctx context.Context, userID string) error {
+	// すでにユーザーの部位が存在するかチェック
+	count, err := i.repo.CountUserWorkoutParts(ctx, userID)
+	if err != nil {
+		return err
+	}
+
+	// すでに存在する場合は何もしない（idempotent）
+	if count > 0 {
+		return nil
+	}
+
+	// ULID型に変換
+	ownerULID := dom.ULID(userID)
+
+	// 5部位のシードデータを作成
+	defaultParts := []dom.WorkoutPart{
+		{Name: "胸", IsDefault: true, Owner: &ownerULID},
+		{Name: "肩", IsDefault: true, Owner: &ownerULID},
+		{Name: "背中", IsDefault: true, Owner: &ownerULID},
+		{Name: "腕", IsDefault: true, Owner: &ownerULID},
+		{Name: "脚", IsDefault: true, Owner: &ownerULID},
+	}
+
+	return i.repo.CreateWorkoutParts(ctx, userID, defaultParts)
+}
