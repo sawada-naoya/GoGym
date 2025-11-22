@@ -1,5 +1,5 @@
 import { auth } from "@/app/api/auth/[...nextauth]/authOptions";
-import WorkoutRecordEditor from "./_components/WorkoutRecordEditor";
+import WorkoutContent from "./content";
 import { fetchWorkoutRecord, fetchWorkoutParts, seedWorkoutParts } from "./_lib/api";
 import { extractDateParts } from "./_lib/utils";
 
@@ -23,7 +23,7 @@ const Page = async ({ searchParams }: Props) => {
   // バックエンドから返された日付を使用（通常は必ず返される）
   const { year, month, day } = extractDateParts(dto.performed_date);
 
-  return <WorkoutRecordEditor Year={year} Month={month} Day={day} defaultValues={dto} availableParts={parts} isUpdate={!!dto.id} token={token} />;
+  return <WorkoutContent Year={year} Month={month} Day={day} defaultValues={dto} availableParts={parts} isUpdate={!!dto.id} token={token} />;
 };
 
 export default Page;

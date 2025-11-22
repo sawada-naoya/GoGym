@@ -1,35 +1,9 @@
 "use server";
 
-import { GET, POST, PUT } from "@/lib/api";
+import { GET, POST, PUT, DELETE_ } from "@/lib/api";
 import type { WorkoutFormDTO, WorkoutPartDTO } from "./types";
+import { buildEmptyDTO } from "./types";
 import { toHHmm } from "./utils";
-
-/**
- * 空のWorkoutFormDTOを生成
- */
-export const buildEmptyDTO = (): WorkoutFormDTO => ({
-  id: null,
-  performed_date: "",
-  started_at: null,
-  ended_at: null,
-  place: "",
-  note: null,
-  condition_level: null,
-  workout_part: { id: null, name: null, source: null },
-  exercises: Array.from({ length: 3 }, () => ({
-    id: null,
-    name: "",
-    workout_part_id: null,
-    is_default: 0,
-    sets: Array.from({ length: 5 }, (_, i) => ({
-      id: null,
-      set_number: i + 1,
-      weight_kg: "",
-      reps: "",
-      note: null,
-    })),
-  })),
-});
 
 /**
  * ワークアウト記録を取得
@@ -55,7 +29,6 @@ export const fetchWorkoutRecord = async (token: string, date?: string): Promise<
       id: null,
       name: "",
       workout_part_id: null,
-      is_default: 0 as 0 | 1, // 型を明示的に指定
       sets: Array.from({ length: 5 }, (_, i) => ({
         id: null,
         set_number: i + 1,
@@ -95,7 +68,6 @@ export const fetchWorkoutRecord = async (token: string, date?: string): Promise<
       id: ex.id,
       name: ex.name,
       workout_part_id: ex.workout_part_id,
-      is_default: ex.is_default,
       sets: (ex.sets ?? []).map((s) => ({
         id: s.id,
         set_number: s.set_number,
@@ -152,4 +124,18 @@ export async function updateWorkoutRecord(token: string, id: number, body: any) 
 
   const res = await PUT(`/api/v1/workouts/records/${id}`, { body, token: token });
   return { ok: res.ok, error: res.ok ? null : "更新に失敗しました" };
+}
+
+// ==================== Workout Exercises CRUD ====================
+
+/**
+ * 種目を一括作成/更新（Upsert）
+ */
+export async function upsertWorkoutExercises(token: string, exercises: Array<{ name: string; workout_part_id: number | null }>) {
+  if (!token) {
+    return { ok: false, error: "認証エラー" };
+  }
+
+  const res = await POST("/api/v1/workouts/exercises/bulk", { body: { exercises }, token });
+  return { ok: res.ok, error: res.ok ? null : "種目の登録に失敗しました", data: res.ok ? res.data : null };
 }

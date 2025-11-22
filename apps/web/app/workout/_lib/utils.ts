@@ -1,4 +1,5 @@
 import type { WorkoutFormDTO } from "./types";
+import { formatDate, formatTimeFromDate, parseDateString } from "@/lib/time";
 
 export type ExerciseRow = WorkoutFormDTO["exercises"][number];
 
@@ -10,9 +11,7 @@ export type ExerciseRow = WorkoutFormDTO["exercises"][number];
 export const toHHmm = (iso: string | null): string | null => {
   if (!iso) return null;
   const d = new Date(iso);
-  const hh = String(d.getHours()).padStart(2, "0");
-  const mm = String(d.getMinutes()).padStart(2, "0");
-  return `${hh}:${mm}`;
+  return formatTimeFromDate(d);
 };
 
 /**
@@ -29,18 +28,8 @@ export const extractDateParts = (dateStr: string | null | undefined) => {
     };
   }
 
-  return {
-    year: Number(dateStr.slice(0, 4)),
-    month: Number(dateStr.slice(5, 7)),
-    day: Number(dateStr.slice(8, 10)),
-  };
+  return parseDateString(dateStr);
 };
-
-/**
- * 数値を2桁にパディング
- * @example pad(5) => "05"
- */
-export const pad = (n: number): string => (n < 10 ? `0${n}` : `${n}`);
 
 /**
  * 年月日とHH:mm形式の時刻をISO形式に変換
@@ -58,9 +47,10 @@ export const toISO = (y: number, m: number, d: number, hm?: string | null): stri
 
 /**
  * 年月日から YYYY-MM-DD 形式の日付文字列を生成
+ * @deprecated lib/time.ts の formatDate を使用してください
  */
 export const formatDateYMD = (year: number, month: number, day: number): string => {
-  return `${year}-${pad(month)}-${pad(day)}`;
+  return formatDate(year, month, day);
 };
 
 // ==================== Exercise Helpers ====================
@@ -90,7 +80,6 @@ export const createEmptyExerciseRow = (): ExerciseRow => ({
   id: null,
   name: "",
   workout_part_id: null,
-  is_default: 0,
   sets: Array.from({ length: 5 }, (_, i) => ({
     set_number: i + 1,
     weight_kg: "" as const,
