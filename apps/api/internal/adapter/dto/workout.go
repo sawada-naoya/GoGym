@@ -5,25 +5,26 @@ import (
 	"time"
 
 	dom "gogym-api/internal/domain/workout"
+	"gogym-api/internal/util"
 )
 
 // WorkoutPartDTO represents a workout part (e.g., chest, back, legs)
 type WorkoutPartListItemDTO struct {
 	ID        int64  `json:"id"`
 	Name      string `json:"name"`
-	IsDefault bool   `json:"isDefault"`
+	IsDefault bool   `json:"is_default"`
 }
 
 type WorkoutRecordDTO struct {
-	ID             *int64  `json:"id,omitempty"`        // 既存ならrecord id
-	PerformedDate  string  `json:"performedDate"`       // "YYYY-MM-DD"
-	StartedAt      *string `json:"startedAt,omitempty"` // "HH:mm"
-	EndedAt        *string `json:"endedAt,omitempty"`   // "HH:mm"
+	ID             *int64  `json:"id,omitempty"`              // 既存ならrecord id
+	PerformedDate  string  `json:"performed_date"`            // "YYYY-MM-DD"
+	StartedAt      *string `json:"started_at,omitempty"`      // "HH:mm"
+	EndedAt        *string `json:"ended_at,omitempty"`        // "HH:mm"
 	Place          string  `json:"place"`
 	Note           *string `json:"note,omitempty"`
-	ConditionLevel *int    `json:"conditionLevel,omitempty"` // 1..5
+	ConditionLevel *int    `json:"condition_level,omitempty"` // 1..5
 
-	WorkoutPart WorkoutPartDTO `json:"workoutPart"`
+	WorkoutPart WorkoutPartDTO `json:"workout_part"`
 	Exercises   []ExerciseDTO  `json:"exercises"`
 }
 
@@ -36,15 +37,15 @@ type WorkoutPartDTO struct {
 type ExerciseDTO struct {
 	ID            *int64   `json:"id,omitempty"`
 	Name          string   `json:"name"` // 種目名
-	WorkoutPartID *int64   `json:"workoutPartId,omitempty"`
-	IsDefault     *bool    `json:"isDefault,omitempty"` // 0|1 は bool で受けて層内で変換
+	WorkoutPartID *int64   `json:"workout_part_id,omitempty"`
+	IsDefault     *bool    `json:"is_default,omitempty"` // 0|1 は bool で受けて層内で変換
 	Sets          []SetDTO `json:"sets"`
 }
 
 type SetDTO struct {
 	ID        *int64   `json:"id,omitempty"`
-	SetNumber int      `json:"setNumber"`
-	WeightKg  *float64 `json:"weightKg,omitempty"` // 空文字→null→nil→層内で検証
+	SetNumber int      `json:"set_number"`
+	WeightKg  *float64 `json:"weight_kg,omitempty"` // 空文字→null→nil→層内で検証
 	Reps      *int     `json:"reps,omitempty"`
 	Note      *string  `json:"note,omitempty"`
 }
@@ -57,9 +58,9 @@ func WorkoutRecordToDTO(record *dom.WorkoutRecord) *WorkoutRecordDTO {
 
 	dto := &WorkoutRecordDTO{
 		ID:             domainIDToInt64Ptr(record.ID),
-		PerformedDate:  record.PerformedDate.Format("2006-01-02"),
-		StartedAt:      timeToHHmm(record.StartedAt),
-		EndedAt:        timeToHHmm(record.EndedAt),
+		PerformedDate:  util.FormatJSTDate(record.PerformedDate),
+		StartedAt:      timeToJSTHHmm(record.StartedAt),
+		EndedAt:        timeToJSTHHmm(record.EndedAt),
 		Place:          stringPtrToString(record.Place),
 		Note:           record.Note,
 		ConditionLevel: conditionLevelToIntPtr(record.Condition),
@@ -113,11 +114,13 @@ func domainIDToInt64Ptr(id *dom.ID) *int64 {
 	return &i
 }
 
-func timeToHHmm(t *time.Time) *string {
+func timeToJSTHHmm(t *time.Time) *string {
 	if t == nil {
 		return nil
 	}
-	hhmm := fmt.Sprintf("%02d:%02d", t.Hour(), t.Minute())
+	// UTC → JST 変換してから HH:mm 形式で返す
+	jstTime := util.ToJST(*t)
+	hhmm := fmt.Sprintf("%02d:%02d", jstTime.Hour(), jstTime.Minute())
 	return &hhmm
 }
 
@@ -142,14 +145,18 @@ func WorkoutRecordDTOToDomain(dto *WorkoutRecordDTO) (*dom.WorkoutRecord, error)
 		return nil, fmt.Errorf("dto is nil")
 	}
 
-	// Parse performedDate
-	performedDate, err := time.Parse("2006-01-02", dto.PerformedDate)
+	// Parse performedDate (JST として解釈)
+	jstLoc, _ := time.LoadLocation("Asia/Tokyo")
+	performedDate, err := time.ParseInLocation("2006-01-02", dto.PerformedDate, jstLoc)
 	if err != nil {
 		return nil, fmt.Errorf("invalid performedDate format: %w", err)
 	}
 
+	// UTC に変換してから WorkoutRecord を作成
+	performedDateUTC := performedDate.UTC()
+
 	// Create WorkoutRecord
-	record, err := dom.NewWorkoutRecord(dom.ULID(""), performedDate) // userID will be set by handler/usecase
+	record, err := dom.NewWorkoutRecord(dom.ULID(""), performedDateUTC) // userID will be set by handler/usecase
 	if err != nil {
 		return nil, fmt.Errorf("failed to create workout record: %w", err)
 	}
@@ -236,12 +243,19 @@ func WorkoutRecordDTOToDomain(dto *WorkoutRecordDTO) (*dom.WorkoutRecord, error)
 }
 
 // parseTimeWithDate combines a date and HH:mm time string
+// フロントエンドからJST形式で受け取った日付時刻をUTCに変換してDBに保存
 func parseTimeWithDate(date time.Time, hhmmStr string) (time.Time, error) {
 	t, err := time.Parse("15:04", hhmmStr)
 	if err != nil {
 		return time.Time{}, err
 	}
-	return time.Date(date.Year(), date.Month(), date.Day(), t.Hour(), t.Minute(), 0, 0, date.Location()), nil
+
+	// JST として解釈
+	jstLoc, _ := time.LoadLocation("Asia/Tokyo")
+	jstTime := time.Date(date.Year(), date.Month(), date.Day(), t.Hour(), t.Minute(), 0, 0, jstLoc)
+
+	// UTC に変換
+	return jstTime.UTC(), nil
 }
 
 // WorkoutPartToDTO converts domain.WorkoutPart to WorkoutPartListItemDTO
