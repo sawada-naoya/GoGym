@@ -23,6 +23,8 @@ const WorkoutRecordEditor = ({ Year, Month, Day, defaultValues, availableParts, 
   const { success, error } = useBanner();
   const [selectedDay, setSelectedDay] = useState(Day);
 
+  console.log("[WorkoutRecordEditor] defaultValues:", defaultValues); // デバッグ用
+
   const form = useForm<WorkoutFormDTO>({
     defaultValues,
     mode: "onBlur",
@@ -74,19 +76,19 @@ const WorkoutRecordEditor = ({ Year, Month, Day, defaultValues, availableParts, 
             <div className="flex items-start justify-between gap-4">
               <WorkoutSessionMetaEditor
                 value={{
-                  started_at: form.getValues("started_at"),
-                  ended_at: form.getValues("ended_at"),
-                  place: form.getValues("place"),
-                  condition_level: form.getValues("condition_level"),
-                  workout_part: form.getValues("workout_part"),
+                  started_at: form.watch("started_at"),
+                  ended_at: form.watch("ended_at"),
+                  place: form.watch("place"),
+                  condition_level: form.watch("condition_level"),
+                  workout_part: form.watch("workout_part"),
                 }}
                 availableParts={availableParts}
                 onChange={(next) => {
-                  form.setValue("started_at", next.started_at);
-                  form.setValue("ended_at", next.ended_at);
-                  form.setValue("place", next.place);
-                  form.setValue("condition_level", next.condition_level);
-                  form.setValue("workout_part", next.workout_part);
+                  form.setValue("started_at", next.started_at, { shouldDirty: true });
+                  form.setValue("ended_at", next.ended_at, { shouldDirty: true });
+                  form.setValue("place", next.place, { shouldDirty: true });
+                  form.setValue("condition_level", next.condition_level, { shouldDirty: true });
+                  form.setValue("workout_part", next.workout_part, { shouldDirty: true });
                 }}
               />
               <button onClick={form.handleSubmit(handleSubmit)} className="px-6 py-2 rounded-md bg-booking-600 text-white disabled:opacity-50 whitespace-nowrap self-center">

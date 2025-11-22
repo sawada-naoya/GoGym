@@ -16,21 +16,19 @@ export const buildEmptyDTO = (): WorkoutFormDTO => ({
   note: null,
   condition_level: null,
   workout_part: { id: null, name: null, source: null },
-  exercises: [
-    {
+  exercises: Array.from({ length: 3 }, () => ({
+    id: null,
+    name: "",
+    workout_part_id: null,
+    is_default: 0,
+    sets: Array.from({ length: 5 }, (_, i) => ({
       id: null,
-      name: "",
-      workout_part_id: null,
-      is_default: 0,
-      sets: Array.from({ length: 5 }, (_, i) => ({
-        id: null,
-        set_number: i + 1,
-        weight_kg: "",
-        reps: "",
-        note: null,
-      })),
-    },
-  ],
+      set_number: i + 1,
+      weight_kg: "",
+      reps: "",
+      note: null,
+    })),
+  })),
 });
 
 /**
@@ -52,15 +50,35 @@ export const fetchWorkoutRecord = async (token: string, date?: string): Promise<
   // バックエンドから返されたデータをそのまま使用（日付も含まれている）
   if (!display || !display.id) {
     // レコードがない場合もバックエンドから日付とplace、exercisesは返されている
+    // 空の3行のエクササイズを作成
+    const emptyExercises = Array.from({ length: 3 }, () => ({
+      id: null,
+      name: "",
+      workout_part_id: null,
+      is_default: 0 as 0 | 1, // 型を明示的に指定
+      sets: Array.from({ length: 5 }, (_, i) => ({
+        id: null,
+        set_number: i + 1,
+        weight_kg: "",
+        reps: "",
+        note: null,
+      })),
+    }));
+
     return {
-      ...buildEmptyDTO(),
-      performed_date: display.performed_date, // バックエンドが設定した日付を使用
-      place: display.place || "",
-      exercises: display.exercises || buildEmptyDTO().exercises,
+      id: null,
+      performed_date: display?.performed_date || "",
+      started_at: null,
+      ended_at: null,
+      place: display?.place || "",
+      note: null,
+      condition_level: null,
+      workout_part: { id: null, name: null, source: null },
+      exercises: display?.exercises?.length > 0 ? display.exercises : emptyExercises,
     };
   }
 
-  const result = {
+  return {
     id: display.id,
     performed_date: display.performed_date,
     started_at: toHHmm(display.started_at),
@@ -87,23 +105,20 @@ export const fetchWorkoutRecord = async (token: string, date?: string): Promise<
       })),
     })),
   };
-
-  // Client Componentに渡すため、プレーンなオブジェクトに変換
-  return JSON.parse(JSON.stringify(result));
 };
 
 /**
  * ワークアウト部位リストを取得
  */
 export const fetchWorkoutParts = async (token: string): Promise<WorkoutPartDTO[]> => {
-  const res = await GET("/api/v1/workouts/parts", { token: token ?? undefined });
+  const res = await GET<WorkoutPartDTO[]>("/api/v1/workouts/parts", { token: token ?? undefined });
 
+  console.log("[fetchWorkoutParts] Response:", res);
   if (!res.ok || !Array.isArray(res.data)) {
     return [];
   }
 
-  // Client Componentに渡すため、プレーンなオブジェクトに変換
-  return JSON.parse(JSON.stringify(res.data));
+  return res.data;
 };
 
 /**

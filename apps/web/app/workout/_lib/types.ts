@@ -1,7 +1,7 @@
 export type WorkoutPartDTO = {
   id: number;
   name: string;
-  isDefault: boolean;
+  is_default: boolean;
 };
 
 export type WorkoutFormDTO = {

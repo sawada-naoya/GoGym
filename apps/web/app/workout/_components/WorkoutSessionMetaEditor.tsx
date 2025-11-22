@@ -33,14 +33,18 @@ const WorkoutSessionMetaEditor: React.FC<Props> = ({ value, availableParts, onCh
       });
       return;
     }
-    const selectedPart = availableParts.find((p) => p.id === Number(idStr));
+    const numId = Number(idStr);
+    const selectedPart = availableParts.find((p) => {
+      return p.id === numId;
+    });
+
     if (selectedPart) {
       onChange({
         ...value,
         workout_part: {
           id: selectedPart.id,
           name: selectedPart.name,
-          source: selectedPart.isDefault ? "preset" : "custom",
+          source: selectedPart.is_default ? "preset" : "custom",
         },
       });
     }
@@ -68,7 +72,7 @@ const WorkoutSessionMetaEditor: React.FC<Props> = ({ value, availableParts, onCh
         <select value={value.workout_part?.id?.toString() ?? ""} onChange={(e) => setPartById(e.target.value)} className="w-40 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500 bg-white">
           <option value=""></option>
           {availableParts.map((part) => (
-            <option key={part.id} value={part.id}>
+            <option key={part.id} value={part.id.toString()}>
               {part.name}
             </option>
           ))}

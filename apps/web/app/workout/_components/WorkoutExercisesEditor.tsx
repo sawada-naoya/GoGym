@@ -9,20 +9,23 @@ type Props = {
 };
 
 const WorkoutExercisesEditor: React.FC<Props> = ({ rows, onChangeRows }) => {
+  // rows が undefined の場合は空配列を使用
+  const safeRows = rows || [];
+
   const handleUpdateCell = (ri: number, si: number, key: "weight_kg" | "reps", val: string) => {
-    onChangeRows(updateExerciseCell(rows, ri, si, key, val));
+    onChangeRows(updateExerciseCell(safeRows, ri, si, key, val));
   };
 
   const handleUpdateNote = (ri: number, note: string) => {
-    onChangeRows(updateExerciseNote(rows, ri, note));
+    onChangeRows(updateExerciseNote(safeRows, ri, note));
   };
 
   const handleChangeName = (ri: number, name: string) => {
-    onChangeRows(updateExerciseName(rows, ri, name));
+    onChangeRows(updateExerciseName(safeRows, ri, name));
   };
 
   const handleAddRow = () => {
-    onChangeRows([...rows, createEmptyExerciseRow()]);
+    onChangeRows([...safeRows, createEmptyExerciseRow()]);
   };
 
   return (
@@ -49,8 +52,8 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ rows, onChangeRows }) => {
         </thead>
 
         <tbody>
-          {/* 最初の1行目は常に表示 */}
-          {rows.slice(0, 1).map((row, ri) => (
+          {/* 最初の3行は常に表示 */}
+          {rows?.slice(0, 3).map((row, ri) => (
             <React.Fragment key={ri}>
               <tr className="hover:bg-gray-50">
                 <td className="px-4 py-3 border-r border-gray-300 align-top border-b">
@@ -85,9 +88,9 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ rows, onChangeRows }) => {
             </React.Fragment>
           ))}
 
-          {/* 2行目以降を表示 */}
-          {rows.slice(1).map((row, idx) => {
-            const ri = idx + 1; // 実際のインデックスは+1
+          {/* 4行目以降を表示 */}
+          {safeRows.slice(3).map((row, idx) => {
+            const ri = idx + 3; // 実際のインデックスは+3
             return (
               <React.Fragment key={ri}>
                 <tr className="hover:bg-gray-50">

@@ -77,7 +77,10 @@ const _request = async <T, E = { message?: string }>(method: HttpMethod, endpoin
     if (res.status === 204) return undefined;
     if (!isJson(res.headers)) return undefined;
     try {
-      return (await res.json()) as X;
+      const json = await res.json();
+      // Next.jsのServer ComponentからClient Componentへの受け渡しに対応するため、
+      // Symbol等の非シリアライズ可能なプロパティを除去
+      return JSON.parse(JSON.stringify(json)) as X;
     } catch {
       return undefined;
     }
