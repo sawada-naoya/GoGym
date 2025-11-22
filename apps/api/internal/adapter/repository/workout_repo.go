@@ -85,7 +85,7 @@ func (r *workoutRepository) GetWorkoutParts(ctx context.Context, userID string) 
 	// ユーザー固有の部位のみを取得
 	err := r.db.WithContext(ctx).
 		Where("user_id = ?", userID).
-		Order("is_default DESC, name ASC").
+		Order("name ASC").
 		Find(&parts).Error
 
 	if err != nil {
@@ -113,15 +113,38 @@ func (r *workoutRepository) CreateWorkoutParts(ctx context.Context, userID strin
 	recordParts := make([]record.WorkoutPart, len(parts))
 	for i, part := range parts {
 		recordParts[i] = record.WorkoutPart{
-			Name:      part.Name,
-			IsDefault: part.IsDefault,
-			UserID:    &userID,
+			Name:   part.Name,
+			UserID: &userID,
 		}
 	}
 
 	err := r.db.WithContext(ctx).Create(&recordParts).Error
 	if err != nil {
 		return fmt.Errorf("error creating workout parts: %w", err)
+	}
+
+	return nil
+}
+
+func (r *workoutRepository) CreateWorkoutExercises(ctx context.Context, userID string, exercises []dom.WorkoutExerciseRef) error {
+	recordExercises := make([]record.WorkoutExercise, len(exercises))
+	for i, exercise := range exercises {
+		var partID *int
+		if exercise.PartID != nil {
+			pid := int(*exercise.PartID)
+			partID = &pid
+		}
+
+		recordExercises[i] = record.WorkoutExercise{
+			Name:          exercise.Name,
+			WorkoutPartID: partID,
+			UserID:        &userID,
+		}
+	}
+
+	err := r.db.WithContext(ctx).Create(&recordExercises).Error
+	if err != nil {
+		return fmt.Errorf("error creating workout exercises: %w", err)
 	}
 
 	return nil

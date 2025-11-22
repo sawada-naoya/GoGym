@@ -45,8 +45,7 @@ type WorkoutExercise struct {
 	ID            int            `gorm:"primaryKey;autoIncrement"`
 	Name          string         `gorm:"type:varchar(100);not null"`
 	WorkoutPartID *int           `gorm:"index"`
-	IsDefault     bool           `gorm:"type:tinyint(1);not null;default:0"`
-	UserID        *string        `gorm:"type:char(26);index"`
+	UserID        *string        `gorm:"type:char(26);index"` // nil ならプリセット
 	CreatedAt     time.Time      `gorm:"autoCreateTime"`
 	UpdatedAt     time.Time      `gorm:"autoUpdateTime"`
 	DeletedAt     gorm.DeletedAt `gorm:"index"`
@@ -58,8 +57,7 @@ type WorkoutExercise struct {
 type WorkoutPart struct {
 	ID        int            `gorm:"primaryKey;autoIncrement"`
 	Name      string         `gorm:"type:varchar(50);not null"`
-	IsDefault bool           `gorm:"type:tinyint(1);not null;default:0"`
-	UserID    *string        `gorm:"type:char(26);index"`
+	UserID    *string        `gorm:"type:char(26);index"` // nil ならプリセット
 	CreatedAt time.Time      `gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `gorm:"autoUpdateTime"`
 	DeletedAt gorm.DeletedAt `gorm:"index"`

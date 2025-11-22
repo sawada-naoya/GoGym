@@ -1,7 +1,6 @@
 CREATE TABLE IF NOT EXISTS workout_parts (
   id          INT AUTO_INCREMENT PRIMARY KEY,
   name        VARCHAR(50) NOT NULL,
-  is_default  TINYINT(1) NOT NULL DEFAULT 0,
   user_id     CHAR(26) NULL,                          -- users.id（NULL=プリセット）
   created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -15,7 +14,6 @@ CREATE TABLE IF NOT EXISTS workout_exercises (
   id                INT AUTO_INCREMENT PRIMARY KEY,
   name              VARCHAR(100) NOT NULL,
   workout_part_id  INT NULL,
-  is_default        TINYINT(1) NOT NULL DEFAULT 0,
   user_id           CHAR(26) NULL,                    -- users.id（NULL=プリセット）
   created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

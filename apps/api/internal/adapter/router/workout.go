@@ -16,4 +16,5 @@ func WorkoutRoutes(e *echo.Group, w *handler.WorkoutHandler, authCfg configs.Aut
 	workout.POST("/records", w.CreateWorkoutRecord)
 	workout.GET("/parts", w.GetWorkoutParts)
 	workout.POST("/seed", w.SeedWorkoutParts)
+	workout.POST("/exercises/bulk", w.CreateWorkoutExercise)
 }

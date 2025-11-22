@@ -11,4 +11,5 @@ type Repository interface {
 	GetWorkoutParts(ctx context.Context, userID string) ([]dom.WorkoutPart, error)
 	CreateWorkoutParts(ctx context.Context, userID string, parts []dom.WorkoutPart) error
 	CountUserWorkoutParts(ctx context.Context, userID string) (int64, error)
+	CreateWorkoutExercises(ctx context.Context, userID string, exercises []dom.WorkoutExerciseRef) error
 }

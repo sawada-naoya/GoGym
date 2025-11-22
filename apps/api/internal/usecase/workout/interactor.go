@@ -76,14 +76,34 @@ func (i *interactor) SeedWorkoutParts(ctx context.Context, userID string) error 
 	// ULID型に変換
 	ownerULID := dom.ULID(userID)
 
-	// 5部位のシードデータを作成
+	// 6部位のシードデータを作成
 	defaultParts := []dom.WorkoutPart{
-		{Name: "胸", IsDefault: true, Owner: &ownerULID},
-		{Name: "肩", IsDefault: true, Owner: &ownerULID},
-		{Name: "背中", IsDefault: true, Owner: &ownerULID},
-		{Name: "腕", IsDefault: true, Owner: &ownerULID},
-		{Name: "脚", IsDefault: true, Owner: &ownerULID},
+		{Name: "胸", Owner: &ownerULID},
+		{Name: "肩", Owner: &ownerULID},
+		{Name: "背中", Owner: &ownerULID},
+		{Name: "腕", Owner: &ownerULID},
+		{Name: "脚", Owner: &ownerULID},
+		{Name: "その他", Owner: &ownerULID},
 	}
 
 	return i.repo.CreateWorkoutParts(ctx, userID, defaultParts)
+}
+
+func (i *interactor) CreateWorkoutExercise(ctx context.Context, userID string, exercises []dto.CreateWorkoutExerciseItem) error {
+	// ユーザーIDをULIDに変換
+	ownerULID := dom.ULID(userID)
+
+	// DTOをドメインモデルに変換
+	domainExercises := make([]dom.WorkoutExerciseRef, 0, len(exercises))
+	for _, ex := range exercises {
+		partID := dom.ID(ex.WorkoutPartID)
+		domainExercises = append(domainExercises, dom.WorkoutExerciseRef{
+			Name:   ex.Name,
+			PartID: &partID,
+			Owner:  &ownerULID, // ユーザー作成の種目なのでOwnerを設定
+		})
+	}
+
+	// リポジトリを通じてデータベースに保存
+	return i.repo.CreateWorkoutExercises(ctx, userID, domainExercises)
 }

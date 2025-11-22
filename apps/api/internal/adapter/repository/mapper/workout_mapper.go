@@ -36,11 +36,10 @@ func WorkoutRecordToDomain(rec *record.WorkoutRecord) *dom.WorkoutRecord {
 // WorkoutSetToDomain converts record.WorkoutSet to domain.WorkoutSet
 func WorkoutSetToDomain(s *record.WorkoutSet) dom.WorkoutSet {
 	exerciseRef := dom.WorkoutExerciseRef{
-		ID:       dom.ID(s.WorkoutExerciseID),
-		Name:     s.Exercise.Name,
-		PartID:   intPtrToDomainIDPtr(s.Exercise.WorkoutPartID),
-		IsPreset: s.Exercise.UserID == nil,
-		Owner:    stringPtrToULIDPtr(s.Exercise.UserID),
+		ID:     dom.ID(s.WorkoutExerciseID),
+		Name:   s.Exercise.Name,
+		PartID: intPtrToDomainIDPtr(s.Exercise.WorkoutPartID),
+		Owner:  stringPtrToULIDPtr(s.Exercise.UserID),
 	}
 
 	return dom.WorkoutSet{
@@ -163,10 +162,9 @@ func WorkoutPartToDomain(rec *record.WorkoutPart) *dom.WorkoutPart {
 		return nil
 	}
 	return &dom.WorkoutPart{
-		ID:        dom.ID(rec.ID),
-		Name:      rec.Name,
-		IsDefault: rec.IsDefault,
-		Owner:     stringPtrToULIDPtr(rec.UserID),
+		ID:    dom.ID(rec.ID),
+		Name:  rec.Name,
+		Owner: stringPtrToULIDPtr(rec.UserID),
 	}
 }
 

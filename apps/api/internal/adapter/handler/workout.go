@@ -123,3 +123,30 @@ func (h *WorkoutHandler) SeedWorkoutParts(c echo.Context) error {
 	slog.InfoContext(ctx, "Successfully seeded workout parts", "userID", userID)
 	return c.JSON(http.StatusOK, map[string]string{"message": "Workout parts seeded successfully"})
 }
+
+func (h *WorkoutHandler) CreateWorkoutExercise(c echo.Context) error {
+	ctx := c.Request().Context()
+	slog.InfoContext(ctx, "CreateWorkoutExercise Handler")
+
+	userID, ok := c.Get("user_id").(string)
+	if !ok || userID == "" {
+		slog.ErrorContext(ctx, "User ID not found in context")
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Unauthorized"})
+	}
+
+	var req dto.CreateWorkoutExerciseRequest
+	err := c.Bind(&req)
+	if err != nil {
+		slog.ErrorContext(ctx, "Failed to bind request", "error", err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request format"})
+	}
+
+	err = h.wu.CreateWorkoutExercise(ctx, userID, req.Exercises)
+	if err != nil {
+		slog.ErrorContext(ctx, "Failed to create workout exercises", "userID", userID, "error", err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	slog.InfoContext(ctx, "Successfully created workout exercises", "userID", userID)
+	return c.JSON(http.StatusCreated, map[string]string{"message": "Workout exercises created successfully"})
+}

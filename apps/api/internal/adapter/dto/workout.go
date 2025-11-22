@@ -10,16 +10,15 @@ import (
 
 // WorkoutPartDTO represents a workout part (e.g., chest, back, legs)
 type WorkoutPartListItemDTO struct {
-	ID        int64  `json:"id"`
-	Name      string `json:"name"`
-	IsDefault bool   `json:"is_default"`
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
 }
 
 type WorkoutRecordDTO struct {
-	ID             *int64  `json:"id,omitempty"`              // 既存ならrecord id
-	PerformedDate  string  `json:"performed_date"`            // "YYYY-MM-DD"
-	StartedAt      *string `json:"started_at,omitempty"`      // "HH:mm"
-	EndedAt        *string `json:"ended_at,omitempty"`        // "HH:mm"
+	ID             *int64  `json:"id,omitempty"`         // 既存ならrecord id
+	PerformedDate  string  `json:"performed_date"`       // "YYYY-MM-DD"
+	StartedAt      *string `json:"started_at,omitempty"` // "HH:mm"
+	EndedAt        *string `json:"ended_at,omitempty"`   // "HH:mm"
 	Place          string  `json:"place"`
 	Note           *string `json:"note,omitempty"`
 	ConditionLevel *int    `json:"condition_level,omitempty"` // 1..5
@@ -38,7 +37,6 @@ type ExerciseDTO struct {
 	ID            *int64   `json:"id,omitempty"`
 	Name          string   `json:"name"` // 種目名
 	WorkoutPartID *int64   `json:"workout_part_id,omitempty"`
-	IsDefault     *bool    `json:"is_default,omitempty"` // 0|1 は bool で受けて層内で変換
 	Sets          []SetDTO `json:"sets"`
 }
 
@@ -48,6 +46,15 @@ type SetDTO struct {
 	WeightKg  *float64 `json:"weight_kg,omitempty"` // 空文字→null→nil→層内で検証
 	Reps      *int     `json:"reps,omitempty"`
 	Note      *string  `json:"note,omitempty"`
+}
+
+type CreateWorkoutExerciseRequest struct {
+	Exercises []CreateWorkoutExerciseItem `json:"exercises"`
+}
+
+type CreateWorkoutExerciseItem struct {
+	Name          string `json:"name"`
+	WorkoutPartID int64  `json:"workout_part_id"`
 }
 
 // DomainToDTO converts domain.WorkoutRecord to WorkoutFormDTO
@@ -75,12 +82,10 @@ func WorkoutRecordToDTO(record *dom.WorkoutRecord) *WorkoutRecordDTO {
 
 		// 初めて見るExerciseの場合、ExerciseDTOを作成
 		if _, exists := exerciseMap[exerciseID]; !exists {
-			isDefault := set.Exercise.IsPreset
 			exerciseMap[exerciseID] = &ExerciseDTO{
 				ID:            domainIDToInt64Ptr(&exerciseID),
 				Name:          set.Exercise.Name,
 				WorkoutPartID: domainIDToInt64Ptr(set.Exercise.PartID),
-				IsDefault:     &isDefault,
 				Sets:          []SetDTO{},
 			}
 		}
@@ -208,9 +213,8 @@ func WorkoutRecordDTOToDomain(dto *WorkoutRecordDTO) (*dom.WorkoutRecord, error)
 			partID := dom.ID(*exercise.WorkoutPartID)
 			exerciseRef.PartID = &partID
 		}
-		if exercise.IsDefault != nil {
-			exerciseRef.IsPreset = *exercise.IsDefault
-		}
+		// Owner は exercise.ID の有無で判定される想定
+		// 既存の exercise.ID がない場合は新規作成されるため、Owner は usecase 層で設定される
 
 		// Convert sets
 		for _, setDTO := range exercise.Sets {
@@ -264,9 +268,8 @@ func WorkoutPartToDTO(part *dom.WorkoutPart) *WorkoutPartListItemDTO {
 		return nil
 	}
 	return &WorkoutPartListItemDTO{
-		ID:        int64(part.ID),
-		Name:      part.Name,
-		IsDefault: part.IsDefault,
+		ID:   int64(part.ID),
+		Name: part.Name,
 	}
 }
 
