@@ -97,13 +97,24 @@ func (i *interactor) CreateWorkoutExercise(ctx context.Context, userID string, e
 	domainExercises := make([]dom.WorkoutExerciseRef, 0, len(exercises))
 	for _, ex := range exercises {
 		partID := dom.ID(ex.WorkoutPartID)
-		domainExercises = append(domainExercises, dom.WorkoutExerciseRef{
+		exerciseRef := dom.WorkoutExerciseRef{
 			Name:   ex.Name,
 			PartID: &partID,
 			Owner:  &ownerULID, // ユーザー作成の種目なのでOwnerを設定
-		})
+		}
+
+		// IDがある場合は設定（update対象）
+		if ex.ID != nil {
+			exerciseRef.ID = dom.ID(*ex.ID)
+		}
+
+		domainExercises = append(domainExercises, exerciseRef)
 	}
 
-	// リポジトリを通じてデータベースに保存
-	return i.repo.CreateWorkoutExercises(ctx, userID, domainExercises)
+	// リポジトリを通じてデータベースに保存（upsert）
+	return i.repo.UpsertWorkoutExercises(ctx, userID, domainExercises)
+}
+
+func (i *interactor) DeleteWorkoutExercise(ctx context.Context, userID string, exerciseID int64) error {
+	return i.repo.DeleteWorkoutExercise(ctx, userID, exerciseID)
 }

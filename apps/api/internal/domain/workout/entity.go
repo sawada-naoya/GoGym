@@ -25,9 +25,10 @@ func (w WeightKg) Valid() bool { return w >= 0 }
 func (r Reps) Valid() bool     { return r >= 0 }
 
 type WorkoutPart struct {
-	ID    ID
-	Name  string
-	Owner *ULID // nil ならプリセット、値があればユーザー作成
+	ID        ID
+	Name      string
+	Owner     *ULID                // nil ならプリセット、値があればユーザー作成
+	Exercises []WorkoutExerciseRef // この部位に紐づく種目
 }
 
 type WorkoutExerciseRef struct {

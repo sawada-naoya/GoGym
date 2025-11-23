@@ -12,4 +12,5 @@ type WorkoutUseCase interface {
 	GetWorkoutParts(ctx context.Context, userID string) ([]dto.WorkoutPartListItemDTO, error)
 	SeedWorkoutParts(ctx context.Context, userID string) error
 	CreateWorkoutExercise(ctx context.Context, userID string, exercises []dto.CreateWorkoutExerciseItem) error
+	DeleteWorkoutExercise(ctx context.Context, userID string, exerciseID int64) error
 }

@@ -150,3 +150,29 @@ func (h *WorkoutHandler) CreateWorkoutExercise(c echo.Context) error {
 	slog.InfoContext(ctx, "Successfully created workout exercises", "userID", userID)
 	return c.JSON(http.StatusCreated, map[string]string{"message": "Workout exercises created successfully"})
 }
+
+func (h *WorkoutHandler) DeleteWorkoutExercise(c echo.Context) error {
+	ctx := c.Request().Context()
+	slog.InfoContext(ctx, "DeleteWorkoutExercise Handler")
+
+	userID, ok := c.Get("user_id").(string)
+	if !ok || userID == "" {
+		slog.ErrorContext(ctx, "User ID not found in context")
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Unauthorized"})
+	}
+
+	exerciseIDStr := c.Param("id")
+	var exerciseID int64
+	if _, err := fmt.Sscanf(exerciseIDStr, "%d", &exerciseID); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid exercise ID format"})
+	}
+
+	err := h.wu.DeleteWorkoutExercise(ctx, userID, exerciseID)
+	if err != nil {
+		slog.ErrorContext(ctx, "Failed to delete workout exercise", "userID", userID, "exerciseID", exerciseID, "error", err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	slog.InfoContext(ctx, "Successfully deleted workout exercise", "userID", userID, "exerciseID", exerciseID)
+	return c.JSON(http.StatusOK, map[string]string{"message": "Workout exercise deleted successfully"})
+}

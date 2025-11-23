@@ -11,6 +11,7 @@ import (
 	workoutUsecase "gogym-api/internal/usecase/workout"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type workoutRepository struct {
@@ -82,8 +83,9 @@ func (r *workoutRepository) Create(ctx context.Context, workout dom.WorkoutRecor
 func (r *workoutRepository) GetWorkoutParts(ctx context.Context, userID string) ([]dom.WorkoutPart, error) {
 	var parts []record.WorkoutPart
 
-	// ユーザー固有の部位のみを取得
+	// ユーザー固有の部位を取得し、Exercisesもプリロード
 	err := r.db.WithContext(ctx).
+		Preload("Exercises", "user_id = ?", userID).
 		Where("user_id = ?", userID).
 		Order("name ASC").
 		Find(&parts).Error
@@ -126,25 +128,52 @@ func (r *workoutRepository) CreateWorkoutParts(ctx context.Context, userID strin
 	return nil
 }
 
-func (r *workoutRepository) CreateWorkoutExercises(ctx context.Context, userID string, exercises []dom.WorkoutExerciseRef) error {
-	recordExercises := make([]record.WorkoutExercise, len(exercises))
-	for i, exercise := range exercises {
+func (r *workoutRepository) DeleteWorkoutExercise(ctx context.Context, userID string, exerciseID int64) error {
+	// 論理削除
+	err := r.db.WithContext(ctx).
+		Where("id = ? AND user_id = ?", exerciseID, userID).
+		Delete(&record.WorkoutExercise{}).Error
+
+	if err != nil {
+		return fmt.Errorf("error deleting workout exercise: %w", err)
+	}
+
+	return nil
+}
+
+func (r *workoutRepository) UpsertWorkoutExercises(ctx context.Context, userID string, exercises []dom.WorkoutExerciseRef) error {
+	recordExercises := make([]record.WorkoutExercise, 0, len(exercises))
+	for _, exercise := range exercises {
 		var partID *int
 		if exercise.PartID != nil {
 			pid := int(*exercise.PartID)
 			partID = &pid
 		}
 
-		recordExercises[i] = record.WorkoutExercise{
+		recordExercise := record.WorkoutExercise{
 			Name:          exercise.Name,
 			WorkoutPartID: partID,
 			UserID:        &userID,
 		}
+
+		// IDがある場合は設定（update対象）
+		if exercise.ID != 0 {
+			recordExercise.ID = int(exercise.ID)
+		}
+
+		recordExercises = append(recordExercises, recordExercise)
 	}
 
-	err := r.db.WithContext(ctx).Create(&recordExercises).Error
+	// OnConflict: IDが衝突したらnameとworkout_part_idを更新、衝突しなければinsert
+	err := r.db.WithContext(ctx).
+		Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "id"}},
+			DoUpdates: clause.AssignmentColumns([]string{"name", "workout_part_id"}),
+		}).
+		Create(&recordExercises).Error
+
 	if err != nil {
-		return fmt.Errorf("error creating workout exercises: %w", err)
+		return fmt.Errorf("error upserting workout exercises: %w", err)
 	}
 
 	return nil

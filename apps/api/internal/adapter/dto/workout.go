@@ -10,8 +10,9 @@ import (
 
 // WorkoutPartDTO represents a workout part (e.g., chest, back, legs)
 type WorkoutPartListItemDTO struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
+	ID        int64                         `json:"id"`
+	Name      string                        `json:"name"`
+	Exercises []WorkoutExerciseListItemDTO `json:"exercises"`
 }
 
 type WorkoutRecordDTO struct {
@@ -53,8 +54,15 @@ type CreateWorkoutExerciseRequest struct {
 }
 
 type CreateWorkoutExerciseItem struct {
+	ID            *int64 `json:"id,omitempty"` // nil = insert, value = update
 	Name          string `json:"name"`
 	WorkoutPartID int64  `json:"workout_part_id"`
+}
+
+type WorkoutExerciseListItemDTO struct {
+	ID            int64  `json:"id"`
+	Name          string `json:"name"`
+	WorkoutPartID *int64 `json:"workout_part_id,omitempty"`
 }
 
 // DomainToDTO converts domain.WorkoutRecord to WorkoutFormDTO
@@ -267,9 +275,27 @@ func WorkoutPartToDTO(part *dom.WorkoutPart) *WorkoutPartListItemDTO {
 	if part == nil {
 		return nil
 	}
+
+	// Exercisesを変換
+	exercises := make([]WorkoutExerciseListItemDTO, 0, len(part.Exercises))
+	for _, ex := range part.Exercises {
+		var partIDPtr *int64
+		if ex.PartID != nil {
+			pid := int64(*ex.PartID)
+			partIDPtr = &pid
+		}
+
+		exercises = append(exercises, WorkoutExerciseListItemDTO{
+			ID:            int64(ex.ID),
+			Name:          ex.Name,
+			WorkoutPartID: partIDPtr,
+		})
+	}
+
 	return &WorkoutPartListItemDTO{
-		ID:   int64(part.ID),
-		Name: part.Name,
+		ID:        int64(part.ID),
+		Name:      part.Name,
+		Exercises: exercises,
 	}
 }
 

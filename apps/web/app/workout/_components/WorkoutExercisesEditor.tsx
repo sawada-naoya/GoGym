@@ -19,6 +19,17 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExe
   // workoutExercises が undefined の場合は空配列を使用
   const safeExercises = workoutExercises || [];
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [partExercises, setPartExercises] = useState<Array<{ id: number; name: string }>>([]);
+
+  // 部位が変更されたら種目リストを更新
+  React.useEffect(() => {
+    if (!selectedPart?.id) {
+      setPartExercises([]);
+      return;
+    }
+    const part = workoutParts.find((p) => p.id === selectedPart.id);
+    setPartExercises(part?.exercises || []);
+  }, [selectedPart, workoutParts]);
 
   const handleUpdateCell = (ri: number, si: number, key: "weight_kg" | "reps", val: string) => {
     onChangeExercises(updateExerciseCell(safeExercises, ri, si, key, val));
@@ -82,7 +93,7 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExe
         </div>
       </div>
 
-      {/* 種目選択モーダル */}
+      {/* 種目追加モーダル */}
       <ExerciseManageModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} workoutParts={workoutParts} onSuccess={handleSuccess} />
 
       {/* テーブル */}
@@ -109,12 +120,18 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExe
           </thead>
 
           <tbody>
-            {/* 最初の3行は常に表示 */}
-            {workoutExercises?.slice(0, 3).map((row, ri) => (
+            {workoutExercises?.map((row, ri) => (
               <React.Fragment key={ri}>
                 <tr className="hover:bg-gray-50">
                   <td className="px-4 py-3 border-r border-gray-300 align-top border-b">
-                    <input value={row.name} onChange={(e) => handleChangeName(ri, e.target.value)} placeholder="種目名" className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-booking-500" />
+                    <select value={row.name} onChange={(e) => handleChangeName(ri, e.target.value)} className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-booking-500 bg-white">
+                      <option value="">種目を選択</option>
+                      {partExercises.map((ex) => (
+                        <option key={ex.id} value={ex.name}>
+                          {ex.name}
+                        </option>
+                      ))}
+                    </select>
                   </td>
 
                   {row.sets.slice(0, 5).map((s, si) => (
@@ -152,7 +169,14 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExe
                 <React.Fragment key={ri}>
                   <tr className="hover:bg-gray-50">
                     <td className="px-4 py-3 border-r border-gray-300 align-top border-b">
-                      <input value={row.name} onChange={(e) => handleChangeName(ri, e.target.value)} placeholder="種目名（例：ベンチプレス）" className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-booking-500" />
+                      <select value={row.name} onChange={(e) => handleChangeName(ri, e.target.value)} className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-booking-500 bg-white">
+                        <option value="">種目を選択</option>
+                        {partExercises.map((ex) => (
+                          <option key={ex.id} value={ex.name}>
+                            {ex.name}
+                          </option>
+                        ))}
+                      </select>
                     </td>
 
                     {row.sets.slice(0, 5).map((s, si) => (

@@ -24,8 +24,8 @@ export const fetchWorkoutRecord = async (token: string, date?: string): Promise<
   // バックエンドから返されたデータをそのまま使用（日付も含まれている）
   if (!display || !display.id) {
     // レコードがない場合もバックエンドから日付とplace、exercisesは返されている
-    // 空の3行のエクササイズを作成
-    const emptyExercises = Array.from({ length: 3 }, () => ({
+    // 空の1行のエクササイズを作成
+    const emptyExercises = Array.from({ length: 1 }, () => ({
       id: null,
       name: "",
       workout_part_id: null,
@@ -85,7 +85,6 @@ export const fetchWorkoutRecord = async (token: string, date?: string): Promise<
 export const fetchWorkoutParts = async (token: string): Promise<WorkoutPartDTO[]> => {
   const res = await GET<WorkoutPartDTO[]>("/api/v1/workouts/parts", { token: token ?? undefined });
 
-  console.log("[fetchWorkoutParts] Response:", res);
   if (!res.ok || !Array.isArray(res.data)) {
     return [];
   }
@@ -131,11 +130,23 @@ export async function updateWorkoutRecord(token: string, id: number, body: any) 
 /**
  * 種目を一括作成/更新（Upsert）
  */
-export async function upsertWorkoutExercises(token: string, exercises: Array<{ name: string; workout_part_id: number | null }>) {
+export async function upsertWorkoutExercises(token: string, exercises: Array<{ id?: number; name: string; workout_part_id: number | null }>) {
   if (!token) {
     return { ok: false, error: "認証エラー" };
   }
 
   const res = await POST("/api/v1/workouts/exercises/bulk", { body: { exercises }, token });
   return { ok: res.ok, error: res.ok ? null : "種目の登録に失敗しました", data: res.ok ? res.data : null };
+}
+
+/**
+ * 種目を削除
+ */
+export async function deleteWorkoutExercise(token: string, exerciseID: number) {
+  if (!token) {
+    return { ok: false, error: "認証エラー" };
+  }
+
+  const res = await DELETE_(`/api/v1/workouts/exercises/${exerciseID}`, { token });
+  return { ok: res.ok, error: res.ok ? null : "種目の削除に失敗しました" };
 }

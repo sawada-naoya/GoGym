@@ -161,10 +161,35 @@ func WorkoutPartToDomain(rec *record.WorkoutPart) *dom.WorkoutPart {
 	if rec == nil {
 		return nil
 	}
+
+	// Exercisesを変換
+	exercises := make([]dom.WorkoutExerciseRef, 0, len(rec.Exercises))
+	for _, ex := range rec.Exercises {
+		var partIDPtr *dom.ID
+		if ex.WorkoutPartID != nil {
+			pid := dom.ID(*ex.WorkoutPartID)
+			partIDPtr = &pid
+		}
+
+		var ownerPtr *dom.ULID
+		if ex.UserID != nil {
+			owner := dom.ULID(*ex.UserID)
+			ownerPtr = &owner
+		}
+
+		exercises = append(exercises, dom.WorkoutExerciseRef{
+			ID:     dom.ID(ex.ID),
+			Name:   ex.Name,
+			PartID: partIDPtr,
+			Owner:  ownerPtr,
+		})
+	}
+
 	return &dom.WorkoutPart{
-		ID:    dom.ID(rec.ID),
-		Name:  rec.Name,
-		Owner: stringPtrToULIDPtr(rec.UserID),
+		ID:        dom.ID(rec.ID),
+		Name:      rec.Name,
+		Owner:     stringPtrToULIDPtr(rec.UserID),
+		Exercises: exercises,
 	}
 }
 
