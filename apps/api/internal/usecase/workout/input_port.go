@@ -7,7 +7,7 @@ import (
 )
 
 type WorkoutUseCase interface {
-	GetWorkoutRecords(ctx context.Context, userID string, date string) (dto.WorkoutRecordDTO, error)
+	GetWorkoutRecords(ctx context.Context, userID string, date string, partID string) (dto.WorkoutRecordDTO, error)
 	CreateWorkoutRecord(ctx context.Context, workout dom.WorkoutRecord) error
 	GetWorkoutParts(ctx context.Context, userID string) ([]dto.WorkoutPartListItemDTO, error)
 	SeedWorkoutParts(ctx context.Context, userID string) error

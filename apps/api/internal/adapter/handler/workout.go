@@ -35,14 +35,16 @@ func (h *WorkoutHandler) GetWorkoutRecords(c echo.Context) error {
 
 	// dateクエリパラメータを取得（空文字列の場合はUseCaseで今日のJST日付を使用）
 	date := c.QueryParam("date")
+	// part_idクエリパラメータを取得（オプション：部位で絞り込む場合）
+	partIDStr := c.QueryParam("part_id")
 
-	response, err := h.wu.GetWorkoutRecords(ctx, userID, date)
+	response, err := h.wu.GetWorkoutRecords(ctx, userID, date, partIDStr)
 	if err != nil {
-		slog.ErrorContext(ctx, "Failed to get workout records", "userID", userID, "date", date, "error", err)
+		slog.ErrorContext(ctx, "Failed to get workout records", "userID", userID, "date", date, "part_id", partIDStr, "error", err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	slog.InfoContext(ctx, "Successfully retrieved workout records", "userID", userID, "date", date)
+	slog.InfoContext(ctx, "Successfully retrieved workout records", "userID", userID, "date", date, "part_id", partIDStr)
 	return c.JSON(http.StatusOK, response)
 }
 
@@ -112,7 +114,6 @@ func (h *WorkoutHandler) SeedWorkoutParts(c echo.Context) error {
 		slog.ErrorContext(ctx, "User ID not found in context")
 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Unauthorized"})
 	}
-	fmt.Println("==========userId=============", userID)
 
 	err := h.wu.SeedWorkoutParts(ctx, userID)
 	if err != nil {

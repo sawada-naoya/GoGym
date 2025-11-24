@@ -128,6 +128,14 @@ export const updateExerciseName = (rows: ExerciseRow[], rowIndex: number, name: 
 export const transformFormDataForSubmit = (data: WorkoutFormDTO, year: number, month: number, day: number) => ({
   ...data,
   performed_date: formatDateYMD(year, month, day),
-  started_at: toISO(year, month, day, data.started_at),
-  ended_at: toISO(year, month, day, data.ended_at),
+  started_at: data.started_at || null, // HH:mm形式のまま送る
+  ended_at: data.ended_at || null, // HH:mm形式のまま送る
+  exercises: data.exercises.map((ex) => ({
+    ...ex,
+    sets: ex.sets.map((s) => ({
+      ...s,
+      weight_kg: s.weight_kg === "" || s.weight_kg === null ? null : Number(s.weight_kg),
+      reps: s.reps === "" || s.reps === null ? null : Number(s.reps),
+    })),
+  })),
 });

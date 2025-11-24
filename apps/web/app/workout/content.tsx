@@ -5,8 +5,9 @@ import WorkoutMetadataEditor from "./_components/WorkoutMetadataEditor";
 import WorkoutExercisesEditor from "./_components/WorkoutExercisesEditor";
 import { WorkoutFormDTO, WorkoutPartDTO } from "./_lib/types";
 import { transformFormDataForSubmit } from "./_lib/utils";
-import { createWorkoutRecord, updateWorkoutRecord } from "./_lib/api";
+import { createWorkoutRecord, updateWorkoutRecord, fetchWorkoutRecord } from "./_lib/api";
 import { useBanner } from "@/components/Banner";
+import { formatDate } from "@/lib/time";
 
 type Props = {
   Year: number;
@@ -23,6 +24,7 @@ const WorkoutContent = ({ Year, Month, Day, defaultValues, availableParts, isUpd
   const [selectedDay, setSelectedDay] = useState(Day);
   const [selectedYear, setSelectedYear] = useState(Year);
   const [selectedMonth, setSelectedMonth] = useState(Month);
+  const [isLoadingPart, setIsLoadingPart] = useState(false);
 
   const form = useForm<WorkoutFormDTO>({
     defaultValues,
@@ -30,10 +32,32 @@ const WorkoutContent = ({ Year, Month, Day, defaultValues, availableParts, isUpd
   });
 
   const rows = useWatch({ control: form.control, name: "exercises" });
+  const selectedPart = useWatch({ control: form.control, name: "workout_part" });
 
   useEffect(() => {
     form.reset(defaultValues);
   }, [defaultValues, form]);
+
+  // 部位変更時にレコードを再取得
+  useEffect(() => {
+    if (!selectedPart?.id) return;
+
+    const fetchPartRecords = async () => {
+      setIsLoadingPart(true);
+      try {
+        const date = formatDate(selectedYear, selectedMonth, selectedDay);
+        const data = await fetchWorkoutRecord(token, date, selectedPart.id);
+        // 部位とexercisesのみ更新（メタデータは維持）
+        form.setValue("exercises", data.exercises, { shouldDirty: false });
+      } catch (err) {
+        console.error("Failed to fetch part records:", err);
+      } finally {
+        setIsLoadingPart(false);
+      }
+    };
+
+    fetchPartRecords();
+  }, [selectedPart?.id, selectedYear, selectedMonth, selectedDay, token, form]);
 
   const handleSubmit = async (data: WorkoutFormDTO) => {
     const body = transformFormDataForSubmit(data, Year, Month, selectedDay);

@@ -4,6 +4,7 @@ import type { ExerciseRow } from "../_lib/utils";
 import type { WorkoutPartDTO, WorkoutFormDTO } from "../_lib/types";
 import { updateExerciseCell, updateExerciseNote, updateExerciseName, createEmptyExerciseRow } from "../_lib/utils";
 import ExerciseManageModal from "./ExerciseManageModal";
+import { useSession } from "next-auth/react";
 
 type Props = {
   workoutExercises: ExerciseRow[];
@@ -20,6 +21,8 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExe
   const safeExercises = workoutExercises || [];
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [partExercises, setPartExercises] = useState<Array<{ id: number; name: string }>>([]);
+  const { data: session } = useSession();
+  const token = session?.user?.accessToken || "";
 
   // 部位が変更されたら種目リストを更新
   React.useEffect(() => {
@@ -40,7 +43,12 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExe
   };
 
   const handleChangeName = (ri: number, name: string) => {
-    onChangeExercises(updateExerciseName(safeExercises, ri, name));
+    // 選択された種目のIDを取得
+    const selectedExercise = partExercises.find((ex) => ex.name === name);
+    const next = structuredClone(safeExercises);
+    next[ri].name = name;
+    next[ri].id = selectedExercise?.id || null;
+    onChangeExercises(next);
   };
 
   const handleAddRow = () => {
@@ -120,11 +128,11 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExe
           </thead>
 
           <tbody>
-            {workoutExercises?.map((row, ri) => (
+            {safeExercises.map((row, ri) => (
               <React.Fragment key={ri}>
                 <tr className="hover:bg-gray-50">
                   <td className="px-4 py-3 border-r border-gray-300 align-top border-b">
-                    <select value={row.name} onChange={(e) => handleChangeName(ri, e.target.value)} className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-booking-500 bg-white">
+                    <select value={row.name} onChange={(e) => handleChangeName(ri, e.target.value)} className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-booking-500 bg-white text-sm truncate">
                       <option value="">種目を選択</option>
                       {partExercises.map((ex) => (
                         <option key={ex.id} value={ex.name}>
@@ -138,13 +146,13 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExe
                     <React.Fragment key={si}>
                       <td className="px-2 py-2 border-r border-gray-200 border-b">
                         <div className="flex items-center gap-1">
-                          <input type="number" value={s.weight_kg as any} onChange={(e) => handleUpdateCell(ri, si, "weight_kg", e.target.value)} className="w-14 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-booking-500" />
+                          <input type="number" value={s.weight_kg as any} onChange={(e) => handleUpdateCell(ri, si, "weight_kg", e.target.value)} className="w-14 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-booking-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                           <span className="text-xs text-gray-600">kg</span>
                         </div>
                       </td>
                       <td className="px-2 py-2 border-r border-gray-300 border-b">
                         <div className="flex items-center gap-1">
-                          <input type="number" value={s.reps as any} onChange={(e) => handleUpdateCell(ri, si, "reps", e.target.value)} className="w-14 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-booking-500" />
+                          <input type="number" value={s.reps as any} onChange={(e) => handleUpdateCell(ri, si, "reps", e.target.value)} className="w-14 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-booking-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                           <span className="text-xs text-gray-600">rep</span>
                         </div>
                       </td>
@@ -155,58 +163,12 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExe
                 <tr className="border-b border-gray-300 hover:bg-gray-50">
                   <td colSpan={11} className="px-4 py-2">
                     <div className="flex items-center gap-2">
-                      <input type="text" value={row.sets[0]?.note ?? ""} placeholder="メモ" onChange={(e) => handleUpdateNote(ri, e.target.value)} className="flex-1 px-3 py-2 text-sm text-gray-700 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-booking-500" />
+                      <input type="text" value={row.sets[0]?.note ?? ""} placeholder="メモ" onChange={(e) => handleUpdateNote(ri, e.target.value)} className="flex-1 px-3 py-2 text-sm text-gray-700 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-booking-500 truncate" />
                     </div>
                   </td>
                 </tr>
               </React.Fragment>
             ))}
-
-            {/* 4行目以降を表示 */}
-            {safeExercises.slice(3).map((row, idx) => {
-              const ri = idx + 3; // 実際のインデックスは+3
-              return (
-                <React.Fragment key={ri}>
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 border-r border-gray-300 align-top border-b">
-                      <select value={row.name} onChange={(e) => handleChangeName(ri, e.target.value)} className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-booking-500 bg-white">
-                        <option value="">種目を選択</option>
-                        {partExercises.map((ex) => (
-                          <option key={ex.id} value={ex.name}>
-                            {ex.name}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-
-                    {row.sets.slice(0, 5).map((s, si) => (
-                      <React.Fragment key={si}>
-                        <td className="px-2 py-2 border-r border-gray-200 border-b">
-                          <div className="flex items-center gap-1">
-                            <input type="number" value={s.weight_kg as any} onChange={(e) => handleUpdateCell(ri, si, "weight_kg", e.target.value)} className="w-14 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-booking-500" />
-                            <span className="text-xs text-gray-600">kg</span>
-                          </div>
-                        </td>
-                        <td className="px-2 py-2 border-r border-gray-300 border-b">
-                          <div className="flex items-center gap-1">
-                            <input type="number" value={s.reps as any} onChange={(e) => handleUpdateCell(ri, si, "reps", e.target.value)} className="w-14 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-booking-500" />
-                            <span className="text-xs text-gray-600">rep</span>
-                          </div>
-                        </td>
-                      </React.Fragment>
-                    ))}
-                  </tr>
-
-                  <tr className="border-b border-gray-300 hover:bg-gray-50">
-                    <td colSpan={11} className="px-4 py-2">
-                      <div className="flex items-center gap-2">
-                        <input type="text" value={row.sets[0]?.note ?? ""} placeholder="メモ" onChange={(e) => handleUpdateNote(ri, e.target.value)} className="flex-1 px-3 py-2 text-sm text-gray-700 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-booking-500" />
-                      </div>
-                    </td>
-                  </tr>
-                </React.Fragment>
-              );
-            })}
 
             <tr className="h-24 border-b border-gray-200">
               <td colSpan={12} className="px-4 py-3 text-center text-gray-400">

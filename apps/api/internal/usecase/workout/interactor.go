@@ -2,6 +2,7 @@ package workout
 
 import (
 	"context"
+	"fmt"
 	dto "gogym-api/internal/adapter/dto"
 	dom "gogym-api/internal/domain/workout"
 	"time"
@@ -17,7 +18,7 @@ func NewInteractor(repo Repository) WorkoutUseCase {
 	}
 }
 
-func (i *interactor) GetWorkoutRecords(ctx context.Context, userID string, dateParam string) (dto.WorkoutRecordDTO, error) {
+func (i *interactor) GetWorkoutRecords(ctx context.Context, userID string, dateParam string, partIDStr string) (dto.WorkoutRecordDTO, error) {
 	// dateが空文字列の場合は今日のJST日付を使用
 	date := dateParam
 	if date == "" {
@@ -25,7 +26,16 @@ func (i *interactor) GetWorkoutRecords(ctx context.Context, userID string, dateP
 		date = time.Now().In(jst).Format("2006-01-02")
 	}
 
-	records, err := i.repo.GetRecordsByDate(ctx, userID, date)
+	// partIDStrが空でない場合、int64に変換
+	var partID *int64
+	if partIDStr != "" {
+		var pid int64
+		if _, err := fmt.Sscanf(partIDStr, "%d", &pid); err == nil {
+			partID = &pid
+		}
+	}
+
+	records, err := i.repo.GetRecordsByDateAndPart(ctx, userID, date, partID)
 	if err != nil {
 		return dto.WorkoutRecordDTO{}, err
 	}
@@ -46,7 +56,8 @@ func (i *interactor) GetWorkoutRecords(ctx context.Context, userID string, dateP
 func (i *interactor) CreateWorkoutRecord(ctx context.Context, workout dom.WorkoutRecord) error {
 	// Domain logic can be added here (validation, business rules, etc.)
 
-	err := i.repo.Create(ctx, workout)
+	// 同日同部位ならupsert、それ以外は新規作成
+	err := i.repo.UpsertWorkoutRecord(ctx, workout)
 	if err != nil {
 		return err
 	}

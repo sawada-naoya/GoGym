@@ -10,8 +10,8 @@ import (
 
 // WorkoutPartDTO represents a workout part (e.g., chest, back, legs)
 type WorkoutPartListItemDTO struct {
-	ID        int64                         `json:"id"`
-	Name      string                        `json:"name"`
+	ID        int64                        `json:"id"`
+	Name      string                       `json:"name"`
 	Exercises []WorkoutExerciseListItemDTO `json:"exercises"`
 }
 
@@ -168,10 +168,12 @@ func WorkoutRecordDTOToDomain(dto *WorkoutRecordDTO) (*dom.WorkoutRecord, error)
 	// UTC に変換してから WorkoutRecord を作成
 	performedDateUTC := performedDate.UTC()
 
-	// Create WorkoutRecord
-	record, err := dom.NewWorkoutRecord(dom.ULID(""), performedDateUTC) // userID will be set by handler/usecase
-	if err != nil {
-		return nil, fmt.Errorf("failed to create workout record: %w", err)
+	// Create WorkoutRecord with placeholder userID (will be set by handler/usecase)
+	record := &dom.WorkoutRecord{
+		UserID:        dom.ULID(""), // will be set by handler
+		PerformedDate: performedDateUTC,
+		Condition:     dom.CondUnknown,
+		Sets:          []dom.WorkoutSet{},
 	}
 
 	// Set ID if exists
@@ -226,23 +228,23 @@ func WorkoutRecordDTOToDomain(dto *WorkoutRecordDTO) (*dom.WorkoutRecord, error)
 
 		// Convert sets
 		for _, setDTO := range exercise.Sets {
+			// Skip empty sets (both weight and reps are nil)
+			if setDTO.WeightKg == nil || setDTO.Reps == nil {
+				continue
+			}
+
 			workoutSet := dom.WorkoutSet{
 				Exercise:  exerciseRef,
 				SetNumber: setDTO.SetNumber,
+				Weight:    dom.WeightKg(*setDTO.WeightKg),
+				Reps:      dom.Reps(*setDTO.Reps),
+				Note:      setDTO.Note,
 			}
 
 			if setDTO.ID != nil {
 				id := dom.ID(*setDTO.ID)
 				workoutSet.ID = &id
 			}
-
-			if setDTO.WeightKg != nil {
-				workoutSet.Weight = dom.WeightKg(*setDTO.WeightKg)
-			}
-			if setDTO.Reps != nil {
-				workoutSet.Reps = dom.Reps(*setDTO.Reps)
-			}
-			workoutSet.Note = setDTO.Note
 
 			// Add set to record
 			if err := record.AddSet(workoutSet); err != nil {

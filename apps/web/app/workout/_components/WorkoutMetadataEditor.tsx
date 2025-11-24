@@ -94,7 +94,7 @@ const WorkoutMetadataEditor = ({ form, selectedYear, selectedMonth, selectedDay,
         {/* 場所 */}
         <div className="flex items-center gap-2">
           <label className="text-sm font-medium text-gray-700">場所</label>
-          <input type="text" value={form.watch("place") ?? ""} onChange={(e) => form.setValue("place", e.target.value, { shouldDirty: true })} placeholder="ジム名など" className="w-48 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500" />
+          <input type="text" value={form.watch("place") ?? ""} onChange={(e) => form.setValue("place", e.target.value, { shouldDirty: true })} placeholder="ジム名など" className="w-80 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500" />
         </div>
 
         {/* コンディション（1〜5） */}

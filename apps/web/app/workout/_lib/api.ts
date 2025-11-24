@@ -8,10 +8,16 @@ import { toHHmm } from "./utils";
 /**
  * ワークアウト記録を取得
  * @param date - YYYY-MM-DD形式の日付（省略時は今日のJST日付をバックエンドで使用）
+ * @param partID - 部位ID（指定時はその部位のみのレコードを取得）
  */
-export const fetchWorkoutRecord = async (token: string, date?: string): Promise<WorkoutFormDTO> => {
-  // dateがある場合はクエリパラメータに含める、ない場合はバックエンドが今日のJST日付を使用
-  const url = date ? `/api/v1/workouts/records?date=${date}` : "/api/v1/workouts/records";
+export const fetchWorkoutRecord = async (token: string, date?: string, partID?: number | null): Promise<WorkoutFormDTO> => {
+  // クエリパラメータを組み立て
+  const params = new URLSearchParams();
+  if (date) params.append("date", date);
+  if (partID) params.append("part_id", partID.toString());
+
+  const queryString = params.toString();
+  const url = queryString ? `/api/v1/workouts/records?${queryString}` : "/api/v1/workouts/records";
   const res = await GET(url, { token: token ?? undefined });
 
   if (!res.ok) {

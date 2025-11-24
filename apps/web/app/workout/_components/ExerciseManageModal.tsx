@@ -133,7 +133,7 @@ const ExerciseManageModal: React.FC<Props> = ({ isOpen, onClose, workoutParts, o
       if (result.ok) {
         success("種目を登録しました");
         onSuccess?.();
-        onClose();
+        // モーダルは閉じない
       } else {
         error(result.error || "登録に失敗しました");
       }
