@@ -75,12 +75,13 @@ export const ensureFiveSets = (row: ExerciseRow): ExerciseRow => {
 
 /**
  * 新しい空のExercise行を作成
+ * @param setCount - 初期セット数（デフォルト: 5）
  */
-export const createEmptyExerciseRow = (): ExerciseRow => ({
+export const createEmptyExerciseRow = (setCount: number = 5): ExerciseRow => ({
   id: null,
   name: "",
   workout_part_id: null,
-  sets: Array.from({ length: 5 }, (_, i) => ({
+  sets: Array.from({ length: setCount }, (_, i) => ({
     set_number: i + 1,
     weight_kg: "" as const,
     reps: "" as const,
