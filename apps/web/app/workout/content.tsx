@@ -5,7 +5,7 @@ import WorkoutMetadataEditor from "./_components/WorkoutMetadataEditor";
 import WorkoutExercisesEditor from "./_components/WorkoutExercisesEditor";
 import { WorkoutFormDTO, WorkoutPartDTO } from "./_lib/types";
 import { transformFormDataForSubmit } from "./_lib/utils";
-import { createWorkoutRecord, updateWorkoutRecord, fetchWorkoutRecord } from "./_lib/api";
+import { createWorkoutRecord, updateWorkoutRecord, fetchWorkoutRecord, fetchWorkoutParts } from "./_lib/api";
 import { useBanner } from "@/components/Banner";
 import { formatDate } from "@/lib/time";
 
@@ -19,12 +19,13 @@ type Props = {
   token: string;
 };
 
-const WorkoutContent = ({ Year, Month, Day, defaultValues, availableParts, isUpdate, token }: Props) => {
+const WorkoutContent = ({ Year, Month, Day, defaultValues, availableParts: initialParts, isUpdate, token }: Props) => {
   const { success, error } = useBanner();
   const [selectedDay, setSelectedDay] = useState(Day);
   const [selectedYear, setSelectedYear] = useState(Year);
   const [selectedMonth, setSelectedMonth] = useState(Month);
   const [isLoadingPart, setIsLoadingPart] = useState(false);
+  const [availableParts, setAvailableParts] = useState<WorkoutPartDTO[]>(initialParts);
 
   const form = useForm<WorkoutFormDTO>({
     defaultValues,
@@ -33,6 +34,13 @@ const WorkoutContent = ({ Year, Month, Day, defaultValues, availableParts, isUpd
 
   const rows = useWatch({ control: form.control, name: "exercises" });
   const selectedPart = useWatch({ control: form.control, name: "workout_part" });
+
+  // Props の Year, Month, Day が変わったら state を同期
+  useEffect(() => {
+    setSelectedYear(Year);
+    setSelectedMonth(Month);
+    setSelectedDay(Day);
+  }, [Year, Month, Day]);
 
   useEffect(() => {
     form.reset(defaultValues);
@@ -60,7 +68,7 @@ const WorkoutContent = ({ Year, Month, Day, defaultValues, availableParts, isUpd
   }, [selectedPart?.id, selectedYear, selectedMonth, selectedDay, token, form]);
 
   const handleSubmit = async (data: WorkoutFormDTO) => {
-    const body = transformFormDataForSubmit(data, Year, Month, selectedDay);
+    const body = transformFormDataForSubmit(data, selectedYear, selectedMonth, selectedDay);
 
     try {
       if (isUpdate && data.id) {
@@ -74,6 +82,15 @@ const WorkoutContent = ({ Year, Month, Day, defaultValues, availableParts, isUpd
       }
     } catch {
       error("通信エラーが発生しました");
+    }
+  };
+
+  const refetchWorkoutParts = async () => {
+    try {
+      const parts = await fetchWorkoutParts(token);
+      setAvailableParts(parts);
+    } catch (err) {
+      console.error("Failed to refetch workout parts:", err);
     }
   };
 
@@ -97,6 +114,7 @@ const WorkoutContent = ({ Year, Month, Day, defaultValues, availableParts, isUpd
             onPartChange={(part) => form.setValue("workout_part", part, { shouldDirty: true })}
             isUpdate={isUpdate}
             onSubmit={form.handleSubmit(handleSubmit)}
+            onRefetchParts={refetchWorkoutParts}
           />
         </div>
       </div>

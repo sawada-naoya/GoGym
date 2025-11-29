@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import { useState, useEffect, Fragment } from "react";
 import type { ExerciseRow } from "../_lib/utils";
 import type { WorkoutPartDTO, WorkoutFormDTO } from "../_lib/types";
 import { updateExerciseCell, updateExerciseNote, updateExerciseName, createEmptyExerciseRow } from "../_lib/utils";
@@ -14,18 +14,19 @@ type Props = {
   onPartChange: (part: WorkoutFormDTO["workout_part"]) => void;
   isUpdate: boolean;
   onSubmit: () => void;
+  onRefetchParts: () => void;
 };
 
-const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExercises, workoutParts, selectedPart, onPartChange, isUpdate, onSubmit }) => {
+const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExercises, workoutParts, selectedPart, onPartChange, isUpdate, onSubmit, onRefetchParts }) => {
   // workoutExercises が undefined の場合は空配列を使用
   const safeExercises = workoutExercises || [];
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [partExercises, setPartExercises] = useState<Array<{ id: number; name: string }>>([]);
+  const [partExercises, setPartExercises] = useState<Array<{ id: number; name: string; workout_part_id: number | null }>>([]);
   const { data: session } = useSession();
   const token = session?.user?.accessToken || "";
 
   // 部位が変更されたら種目リストを更新
-  React.useEffect(() => {
+  useEffect(() => {
     if (!selectedPart?.id) {
       setPartExercises([]);
       return;
@@ -43,11 +44,12 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExe
   };
 
   const handleChangeName = (ri: number, name: string) => {
-    // 選択された種目のIDを取得
+    // 選択された種目のIDと部位IDを取得
     const selectedExercise = partExercises.find((ex) => ex.name === name);
     const next = structuredClone(safeExercises);
     next[ri].name = name;
     next[ri].id = selectedExercise?.id || null;
+    next[ri].workout_part_id = selectedExercise?.workout_part_id || selectedPart?.id || null;
     onChangeExercises(next);
   };
 
@@ -71,9 +73,9 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExe
     }
   };
 
-  // 種目登録成功時にページをリロード
+  // 種目登録成功時に部位データを再取得
   const handleSuccess = () => {
-    window.location.reload();
+    onRefetchParts();
   };
 
   return (
@@ -96,7 +98,7 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExe
             + 種目追加
           </button>
           <button onClick={onSubmit} className="px-5 py-2 rounded-md bg-booking-600 text-white hover:bg-booking-700 transition-colors disabled:opacity-50 whitespace-nowrap">
-            {isUpdate ? "修正" : "登録"}
+            {isUpdate ? "更新" : "登録"}
           </button>
         </div>
       </div>
@@ -119,17 +121,17 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExe
             <tr className="border-b border-gray-300 bg-gray-50">
               <th className="px-4 py-2 border-r border-gray-300" />
               {[1, 2, 3, 4, 5].map((n) => (
-                <React.Fragment key={n}>
+                <Fragment key={n}>
                   <th className="px-2 py-2 text-center text-sm font-medium text-gray-600 border-r border-gray-200">重量</th>
                   <th className="px-2 py-2 text-center text-sm font-medium text-gray-600 border-r border-gray-300">回数</th>
-                </React.Fragment>
+                </Fragment>
               ))}
             </tr>
           </thead>
 
           <tbody>
             {safeExercises.map((row, ri) => (
-              <React.Fragment key={ri}>
+              <Fragment key={ri}>
                 <tr className="hover:bg-gray-50">
                   <td className="px-4 py-3 border-r border-gray-300 align-top border-b">
                     <select value={row.name} onChange={(e) => handleChangeName(ri, e.target.value)} className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-booking-500 bg-white text-sm truncate">
@@ -143,20 +145,30 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExe
                   </td>
 
                   {row.sets.slice(0, 5).map((s, si) => (
-                    <React.Fragment key={si}>
+                    <Fragment key={si}>
                       <td className="px-2 py-2 border-r border-gray-200 border-b">
                         <div className="flex items-center gap-1">
-                          <input type="number" value={s.weight_kg as any} onChange={(e) => handleUpdateCell(ri, si, "weight_kg", e.target.value)} className="w-14 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-booking-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                          <input
+                            type="number"
+                            value={s.weight_kg as any}
+                            onChange={(e) => handleUpdateCell(ri, si, "weight_kg", e.target.value)}
+                            className="w-14 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-booking-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
                           <span className="text-xs text-gray-600">kg</span>
                         </div>
                       </td>
                       <td className="px-2 py-2 border-r border-gray-300 border-b">
                         <div className="flex items-center gap-1">
-                          <input type="number" value={s.reps as any} onChange={(e) => handleUpdateCell(ri, si, "reps", e.target.value)} className="w-14 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-booking-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                          <input
+                            type="number"
+                            value={s.reps as any}
+                            onChange={(e) => handleUpdateCell(ri, si, "reps", e.target.value)}
+                            className="w-14 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-booking-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
                           <span className="text-xs text-gray-600">rep</span>
                         </div>
                       </td>
-                    </React.Fragment>
+                    </Fragment>
                   ))}
                 </tr>
 
@@ -167,7 +179,7 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExe
                     </div>
                   </td>
                 </tr>
-              </React.Fragment>
+              </Fragment>
             ))}
 
             <tr className="h-24 border-b border-gray-200">

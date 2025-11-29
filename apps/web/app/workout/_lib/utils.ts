@@ -124,6 +124,7 @@ export const updateExerciseName = (rows: ExerciseRow[], rowIndex: number, name: 
 
 /**
  * フォームデータを送信用に変換
+ * 空のセット（weight_kg と reps が両方とも空）は除外
  */
 export const transformFormDataForSubmit = (data: WorkoutFormDTO, year: number, month: number, day: number) => ({
   ...data,
@@ -132,10 +133,13 @@ export const transformFormDataForSubmit = (data: WorkoutFormDTO, year: number, m
   ended_at: data.ended_at || null, // HH:mm形式のまま送る
   exercises: data.exercises.map((ex) => ({
     ...ex,
-    sets: ex.sets.map((s) => ({
-      ...s,
-      weight_kg: s.weight_kg === "" || s.weight_kg === null ? null : Number(s.weight_kg),
-      reps: s.reps === "" || s.reps === null ? null : Number(s.reps),
-    })),
+    sets: ex.sets
+      .map((s) => ({
+        ...s,
+        id: null, // 新規作成時はIDをnullにする（upsert時にバックエンドで処理）
+        weight_kg: s.weight_kg === "" || s.weight_kg === null ? null : Number(s.weight_kg),
+        reps: s.reps === "" || s.reps === null ? null : Number(s.reps),
+      }))
+      .filter((s) => s.weight_kg !== null || s.reps !== null), // 空のセットを除外
   })),
 });

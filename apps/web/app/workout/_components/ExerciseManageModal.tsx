@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import type { WorkoutPartDTO } from "../_lib/types";
 import { upsertWorkoutExercises, deleteWorkoutExercise } from "../_lib/api";
@@ -27,7 +27,7 @@ const ExerciseManageModal: React.FC<Props> = ({ isOpen, onClose, workoutParts, o
   const [deleteTarget, setDeleteTarget] = useState<{ index: number; exercise: ExerciseFormItem } | null>(null);
 
   // 部位選択時に既存種目をフォームにセット
-  React.useEffect(() => {
+  useEffect(() => {
     if (!selectedPart) {
       setExercises([{ name: "" }]);
       return;
@@ -44,7 +44,7 @@ const ExerciseManageModal: React.FC<Props> = ({ isOpen, onClose, workoutParts, o
   }, [selectedPart, workoutParts]);
 
   // モーダルが開いたときにリセット
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
       setExercises([{ name: "" }]);
       setSelectedPart(null);

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 export default function MonthlyStrip({ year, month, selectedDay, onSelectDay }: { year: number; month: number; selectedDay: number; onSelectDay: (d: number) => void }) {
   const daysOfWeek = ["日", "月", "火", "水", "木", "金", "土"];

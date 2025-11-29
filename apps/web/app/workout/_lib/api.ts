@@ -3,7 +3,7 @@
 import { GET, POST, PUT, DELETE_ } from "@/lib/api";
 import type { WorkoutFormDTO, WorkoutPartDTO } from "./types";
 import { buildEmptyDTO } from "./types";
-import { toHHmm } from "./utils";
+import { ensureFiveSets } from "./utils";
 
 /**
  * ワークアウト記録を取得
@@ -60,8 +60,8 @@ export const fetchWorkoutRecord = async (token: string, date?: string, partID?: 
   return {
     id: display.id,
     performed_date: display.performed_date,
-    started_at: toHHmm(display.started_at),
-    ended_at: toHHmm(display.ended_at),
+    started_at: display.started_at ?? null,
+    ended_at: display.ended_at ?? null,
     place: display.place ?? "",
     note: display.note ?? null,
     condition_level: display.condition_level ?? null,
@@ -70,18 +70,22 @@ export const fetchWorkoutRecord = async (token: string, date?: string, partID?: 
       name: display.workout_part?.name ?? null,
       source: display.workout_part?.source ?? null,
     },
-    exercises: display.exercises.map((ex) => ({
-      id: ex.id,
-      name: ex.name,
-      workout_part_id: ex.workout_part_id,
-      sets: (ex.sets ?? []).map((s) => ({
-        id: s.id,
-        set_number: s.set_number,
-        weight_kg: s.weight_kg,
-        reps: s.reps,
-        note: s.note ?? null,
-      })),
-    })),
+    exercises: display.exercises.map((ex) => {
+      const exercise = {
+        id: ex.id,
+        name: ex.name,
+        workout_part_id: ex.workout_part_id,
+        sets: (ex.sets ?? []).map((s) => ({
+          id: s.id,
+          set_number: s.set_number,
+          weight_kg: s.weight_kg,
+          reps: s.reps,
+          note: s.note ?? null,
+        })),
+      };
+      // 5セットに揃える
+      return ensureFiveSets(exercise);
+    }),
   };
 };
 
