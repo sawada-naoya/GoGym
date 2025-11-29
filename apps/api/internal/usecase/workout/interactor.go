@@ -64,6 +64,17 @@ func (i *interactor) CreateWorkoutRecord(ctx context.Context, workout dom.Workou
 	return nil
 }
 
+func (i *interactor) UpsertWorkoutRecord(ctx context.Context, workout dom.WorkoutRecord) error {
+	// Domain logic can be added here (validation, business rules, etc.)
+
+	// 同日同部位ならupsert、それ以外は新規作成
+	err := i.repo.UpsertWorkoutRecord(ctx, workout)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (i *interactor) GetWorkoutParts(ctx context.Context, userID string) ([]dto.WorkoutPartListItemDTO, error) {
 	parts, err := i.repo.GetWorkoutParts(ctx, userID)
 	if err != nil {

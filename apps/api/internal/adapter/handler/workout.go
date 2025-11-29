@@ -85,6 +85,47 @@ func (h *WorkoutHandler) CreateWorkoutRecord(c echo.Context) error {
 	return c.JSON(http.StatusCreated, map[string]string{"message": "Workout record created successfully"})
 }
 
+func (h *WorkoutHandler) UpdateWorkoutRecord(c echo.Context) error {
+	ctx := c.Request().Context()
+	slog.InfoContext(ctx, "UpdateWorkoutRecord Handler")
+
+	userID, ok := c.Get("user_id").(string)
+	if !ok || userID == "" {
+		slog.ErrorContext(ctx, "User ID not found in context")
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Unauthorized"})
+	}
+
+	// パスパラメータから record ID を取得（使用しない可能性もあるが、一応取得）
+	// recordID := c.Param("id")
+
+	var req dto.WorkoutRecordDTO
+	err := c.Bind(&req)
+	if err != nil {
+		slog.ErrorContext(ctx, "Failed to bind request", "error", err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request format"})
+	}
+
+	// dto → domain変換
+	domainRecord, err := dto.WorkoutRecordDTOToDomain(&req)
+	if err != nil {
+		slog.ErrorContext(ctx, "Failed to convert DTO to domain model", "error", err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": fmt.Sprintf("Invalid request data: %v", err)})
+	}
+
+	// Set userID
+	domainRecord.UserID = dom.ULID(userID)
+
+	// Upsert を使用（同日同部位の場合は更新、異なる場合は新規作成）
+	err = h.wu.UpsertWorkoutRecord(ctx, *domainRecord)
+	if err != nil {
+		slog.ErrorContext(ctx, "Failed to update workout record", "userID", userID, "error", err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	slog.InfoContext(ctx, "Successfully updated workout record", "userID", userID)
+	return c.JSON(http.StatusOK, map[string]string{"message": "Workout record updated successfully"})
+}
+
 func (h *WorkoutHandler) GetWorkoutParts(c echo.Context) error {
 	ctx := c.Request().Context()
 	slog.InfoContext(ctx, "GetWorkoutParts Handler")

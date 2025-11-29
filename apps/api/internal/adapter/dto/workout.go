@@ -36,7 +36,7 @@ type WorkoutPartDTO struct {
 
 type ExerciseDTO struct {
 	ID            *int64   `json:"id,omitempty"`
-	Name          string   `json:"name"` // 種目名
+	Name          string   `json:"name"`
 	WorkoutPartID *int64   `json:"workout_part_id,omitempty"`
 	Sets          []SetDTO `json:"sets"`
 }
@@ -79,14 +79,22 @@ func WorkoutRecordToDTO(record *dom.WorkoutRecord) *WorkoutRecordDTO {
 		Place:          stringPtrToString(record.Place),
 		Note:           record.Note,
 		ConditionLevel: conditionLevelToIntPtr(record.Condition),
-		WorkoutPart:    WorkoutPartDTO{}, // WorkoutPart情報がない場合は空
+		WorkoutPart:    WorkoutPartDTO{}, // 最初のセットから部位情報を取得
 		Exercises:      []ExerciseDTO{},
 	}
 
-	// Setsを Exercise ごとにグループ化
+	// Setsを Exercise ごとにグループ化し、最初の部位情報を取得
 	exerciseMap := make(map[dom.ID]*ExerciseDTO)
+	var firstPartID *int64
+
 	for _, set := range record.Sets {
 		exerciseID := set.Exercise.ID
+
+		// 最初のセットから部位IDを取得
+		if firstPartID == nil && set.Exercise.PartID != nil {
+			partID := int64(*set.Exercise.PartID)
+			firstPartID = &partID
+		}
 
 		// 初めて見るExerciseの場合、ExerciseDTOを作成
 		if _, exists := exerciseMap[exerciseID]; !exists {
@@ -110,6 +118,15 @@ func WorkoutRecordToDTO(record *dom.WorkoutRecord) *WorkoutRecordDTO {
 		})
 	}
 
+	// WorkoutPart情報を設定
+	if firstPartID != nil {
+		dto.WorkoutPart = WorkoutPartDTO{
+			ID:     firstPartID,
+			Name:   nil, // 部位名はフロントエンドで workout_parts から取得
+			Source: stringPtr("custom"),
+		}
+	}
+
 	// Mapから配列に変換
 	for _, exercise := range exerciseMap {
 		dto.Exercises = append(dto.Exercises, *exercise)
@@ -127,8 +144,12 @@ func domainIDToInt64Ptr(id *dom.ID) *int64 {
 	return &i
 }
 
+func stringPtr(s string) *string {
+	return &s
+}
+
 func timeToJSTHHmm(t *time.Time) *string {
-	if t == nil {
+	if t == nil || t.IsZero() {
 		return nil
 	}
 	// UTC → JST 変換してから HH:mm 形式で返す
@@ -158,15 +179,15 @@ func WorkoutRecordDTOToDomain(dto *WorkoutRecordDTO) (*dom.WorkoutRecord, error)
 		return nil, fmt.Errorf("dto is nil")
 	}
 
-	// Parse performedDate (JST として解釈)
-	jstLoc, _ := time.LoadLocation("Asia/Tokyo")
-	performedDate, err := time.ParseInLocation("2006-01-02", dto.PerformedDate, jstLoc)
+	// Parse performedDate as UTC midnight to avoid timezone shift
+	// "2025-11-25" should be stored as "2025-11-25 00:00:00 UTC" regardless of JST
+	performedDate, err := time.Parse("2006-01-02", dto.PerformedDate)
 	if err != nil {
 		return nil, fmt.Errorf("invalid performedDate format: %w", err)
 	}
 
-	// UTC に変換してから WorkoutRecord を作成
-	performedDateUTC := performedDate.UTC()
+	// Ensure it's UTC midnight
+	performedDateUTC := time.Date(performedDate.Year(), performedDate.Month(), performedDate.Day(), 0, 0, 0, 0, time.UTC)
 
 	// Create WorkoutRecord with placeholder userID (will be set by handler/usecase)
 	record := &dom.WorkoutRecord{
