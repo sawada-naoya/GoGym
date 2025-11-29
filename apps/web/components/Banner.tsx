@@ -1,6 +1,6 @@
 // components/ui/Banner.tsx
 "use client";
-import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
 
 /* types */
 export type BannerVariant = "success" | "error" | "info" | "warning";

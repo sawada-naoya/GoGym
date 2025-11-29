@@ -68,9 +68,11 @@ func provideHTTP(c *configs.Config) configs.HTTPConfig { return c.HTTP }
 
 func provideDB(c *configs.Config) configs.DatabaseConfig { return c.Database }
 
+func provideAuth(c *configs.Config) configs.AuthConfig { return c.Auth }
+
 func BuildServer(cfg *configs.Config) (*echo.Echo, func(), error) {
 	wire.Build(
-		provideHTTP, provideDB, // cfg → サブ設定
+		provideHTTP, provideDB, provideAuth, // cfg → サブ設定
 		InfraSet,      // db
 		RepositorySet, // repo
 		UsecaseSet,    // usecase（内側でauth/serviceを吸収）

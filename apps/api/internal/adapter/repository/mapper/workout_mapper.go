@@ -36,11 +36,10 @@ func WorkoutRecordToDomain(rec *record.WorkoutRecord) *dom.WorkoutRecord {
 // WorkoutSetToDomain converts record.WorkoutSet to domain.WorkoutSet
 func WorkoutSetToDomain(s *record.WorkoutSet) dom.WorkoutSet {
 	exerciseRef := dom.WorkoutExerciseRef{
-		ID:       dom.ID(s.WorkoutExerciseID),
-		Name:     s.Exercise.Name,
-		PartID:   intPtrToDomainIDPtr(s.Exercise.WorkoutPartID),
-		IsPreset: s.Exercise.UserID == nil,
-		Owner:    stringPtrToULIDPtr(s.Exercise.UserID),
+		ID:     dom.ID(s.WorkoutExerciseID),
+		Name:   s.Exercise.Name,
+		PartID: intPtrToDomainIDPtr(s.Exercise.WorkoutPartID),
+		Owner:  stringPtrToULIDPtr(s.Exercise.UserID),
 	}
 
 	return dom.WorkoutSet{
@@ -155,4 +154,50 @@ func conditionLevelToIntPtr(c dom.ConditionLevel) *int {
 	}
 	i := int(c)
 	return &i
+}
+
+// WorkoutPartToDomain converts record.WorkoutPart to domain.WorkoutPart
+func WorkoutPartToDomain(rec *record.WorkoutPart) *dom.WorkoutPart {
+	if rec == nil {
+		return nil
+	}
+
+	// Exercisesを変換
+	exercises := make([]dom.WorkoutExerciseRef, 0, len(rec.Exercises))
+	for _, ex := range rec.Exercises {
+		var partIDPtr *dom.ID
+		if ex.WorkoutPartID != nil {
+			pid := dom.ID(*ex.WorkoutPartID)
+			partIDPtr = &pid
+		}
+
+		var ownerPtr *dom.ULID
+		if ex.UserID != nil {
+			owner := dom.ULID(*ex.UserID)
+			ownerPtr = &owner
+		}
+
+		exercises = append(exercises, dom.WorkoutExerciseRef{
+			ID:     dom.ID(ex.ID),
+			Name:   ex.Name,
+			PartID: partIDPtr,
+			Owner:  ownerPtr,
+		})
+	}
+
+	return &dom.WorkoutPart{
+		ID:        dom.ID(rec.ID),
+		Name:      rec.Name,
+		Owner:     stringPtrToULIDPtr(rec.UserID),
+		Exercises: exercises,
+	}
+}
+
+// WorkoutPartsToDomain converts slice of record.WorkoutPart to slice of domain.WorkoutPart
+func WorkoutPartsToDomain(recs []record.WorkoutPart) []dom.WorkoutPart {
+	result := make([]dom.WorkoutPart, len(recs))
+	for i, rec := range recs {
+		result[i] = *WorkoutPartToDomain(&rec)
+	}
+	return result
 }

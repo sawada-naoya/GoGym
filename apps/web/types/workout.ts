@@ -16,7 +16,6 @@ export type WorkoutRecord = {
 export type WorkoutPart = {
   id: number;
   name: string;
-  is_default: 0 | 1;
   user_id: string | null;
 
   WorkoutExercises?: WorkoutExercise[];
@@ -26,7 +25,6 @@ export type WorkoutExercise = {
   id: number;
   name: string;
   workout_part_id: number | null;
-  is_default: 0 | 1;
   user_id: string | null;
 
   sets: WorkoutSet[];

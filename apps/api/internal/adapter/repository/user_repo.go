@@ -6,6 +6,7 @@ import (
 	"gogym-api/internal/adapter/repository/record"
 	dom "gogym-api/internal/domain/user"
 
+	"github.com/oklog/ulid/v2"
 	"gorm.io/gorm"
 )
 
@@ -26,6 +27,23 @@ func (r *UserRepository) Create(ctx context.Context, user *dom.User) error {
 	}
 
 	return nil
+}
+
+func (r *UserRepository) FindByID(ctx context.Context, id ulid.ULID) (*dom.User, error) {
+	var recordUser record.User
+
+	err := r.db.WithContext(ctx).
+		Model(&record.User{}).
+		Where("id = ?", id.String()).
+		First(&recordUser).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, dom.NewDomainError("user_not_found")
+		}
+		return nil, err
+	}
+
+	return mapper.ToUserEntity(&recordUser), nil
 }
 
 func (r *UserRepository) FindByEmail(ctx context.Context, email dom.Email) (*dom.User, error) {

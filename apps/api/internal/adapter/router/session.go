@@ -9,4 +9,5 @@ import (
 func SessionRoutes(e *echo.Group, sh *handler.SessionHandler) {
 	sessions := e.Group("/sessions")
 	sessions.POST("/login", sh.Login)
+	sessions.POST("/refresh", sh.RefreshToken)
 }

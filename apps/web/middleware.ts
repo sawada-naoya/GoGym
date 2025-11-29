@@ -1,11 +1,28 @@
-import { withAuth } from "next-auth/middleware";
+import { auth } from "@/app/api/auth/[...nextauth]/authOptions";
+import { NextResponse } from "next/server";
 
-export default withAuth({
-  pages: {
-    signIn: "/",
-  },
+export default auth((req) => {
+  // 認証が必要なページで未認証の場合はログインページへ
+  const isAuthRequired = req.nextUrl.pathname.startsWith("/workout");
+
+  if (isAuthRequired && !req.auth) {
+    const url = new URL("/", req.url);
+    return NextResponse.redirect(url);
+  }
+
+  return NextResponse.next();
 });
 
 export const config = {
-  matcher: ["/:user_id/workout/:path*", "/dashboard/:path*", "/settings/:path*"],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api/auth (authentication endpoints)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     */
+    "/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\.png$).*)",
+  ],
 };

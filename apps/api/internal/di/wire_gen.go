@@ -26,6 +26,7 @@ import (
 
 func BuildServer(cfg *configs.Config) (*echo.Echo, func(), error) {
 	httpConfig := provideHTTP(cfg)
+	authConfig := provideAuth(cfg)
 	databaseConfig := provideDB(cfg)
 	gormDB, err := db.NewDB(databaseConfig)
 	if err != nil {
@@ -47,7 +48,7 @@ func BuildServer(cfg *configs.Config) (*echo.Echo, func(), error) {
 	workoutRepository := repository.NewWorkoutRepository(gormDB)
 	workoutUseCase := workout.NewInteractor(workoutRepository)
 	workoutHandler := handler.NewWorkoutHandler(workoutUseCase)
-	echoEcho := router.RegisterRoutes(httpConfig, gymHandler, userHandler, reviewHandler, sessionHandler, workoutHandler)
+	echoEcho := router.RegisterRoutes(httpConfig, authConfig, gymHandler, userHandler, reviewHandler, sessionHandler, workoutHandler)
 	return echoEcho, func() {
 	}, nil
 }
@@ -71,3 +72,5 @@ var InfraSet = wire.NewSet(db.NewDB)
 func provideHTTP(c *configs.Config) configs.HTTPConfig { return c.HTTP }
 
 func provideDB(c *configs.Config) configs.DatabaseConfig { return c.Database }
+
+func provideAuth(c *configs.Config) configs.AuthConfig { return c.Auth }

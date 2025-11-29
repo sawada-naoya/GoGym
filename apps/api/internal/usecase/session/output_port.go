@@ -8,10 +8,12 @@ import (
 	"context"
 
 	userDom "gogym-api/internal/domain/user"
+	"github.com/oklog/ulid/v2"
 )
 
 type UserRepository interface {
 	FindByEmail(ctx context.Context, email userDom.Email) (*userDom.User, error)
+	FindByID(ctx context.Context, id ulid.ULID) (*userDom.User, error)
 }
 
 type PasswordHasher interface {

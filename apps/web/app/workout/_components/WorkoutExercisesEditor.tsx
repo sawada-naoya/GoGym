@@ -1,138 +1,199 @@
 "use client";
-import React from "react";
-import type { WorkoutFormDTO } from "./types";
-
-type Row = WorkoutFormDTO["exercises"][number];
+import { useState, useEffect, Fragment } from "react";
+import type { ExerciseRow } from "../_lib/utils";
+import type { WorkoutPartDTO, WorkoutFormDTO } from "../_lib/types";
+import { updateExerciseCell, updateExerciseNote, updateExerciseName, createEmptyExerciseRow } from "../_lib/utils";
+import ExerciseManageModal from "./ExerciseManageModal";
+import { useSession } from "next-auth/react";
 
 type Props = {
-  rows: Row[];
-  onChangeRows: (rows: Row[]) => void;
+  workoutExercises: ExerciseRow[];
+  onChangeExercises: (exercises: ExerciseRow[]) => void;
+  workoutParts: WorkoutPartDTO[];
+  selectedPart: WorkoutFormDTO["workout_part"];
+  onPartChange: (part: WorkoutFormDTO["workout_part"]) => void;
+  isUpdate: boolean;
+  onSubmit: () => void;
+  onRefetchParts: () => void;
 };
 
-const WorkoutExercisesEditor: React.FC<Props> = ({ rows, onChangeRows }) => {
-  const updateCell = (ri: number, si: number, key: "weightKg" | "reps", val: string) => {
-    const next = structuredClone(rows) as Row[];
-    (next[ri].sets[si] as any)[key] = val; // 入力中は "" を許容
-    onChangeRows(next);
-  };
+const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExercises, workoutParts, selectedPart, onPartChange, isUpdate, onSubmit, onRefetchParts }) => {
+  // workoutExercises が undefined の場合は空配列を使用
+  const safeExercises = workoutExercises || [];
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [partExercises, setPartExercises] = useState<Array<{ id: number; name: string; workout_part_id: number | null }>>([]);
+  const { data: session } = useSession();
+  const token = session?.user?.accessToken || "";
 
-  const updateExerciseNote = (ri: number, note: string) => {
-    const next = structuredClone(rows) as Row[];
-    // 最初のセット（set_number=1）にメモを保存
-    if (next[ri].sets[0]) {
-      next[ri].sets[0].note = note || null;
+  // 部位が変更されたら種目リストを更新
+  useEffect(() => {
+    if (!selectedPart?.id) {
+      setPartExercises([]);
+      return;
     }
-    onChangeRows(next);
+    const part = workoutParts.find((p) => p.id === selectedPart.id);
+    setPartExercises(part?.exercises || []);
+  }, [selectedPart, workoutParts]);
+
+  const handleUpdateCell = (ri: number, si: number, key: "weight_kg" | "reps", val: string) => {
+    onChangeExercises(updateExerciseCell(safeExercises, ri, si, key, val));
   };
 
-  const ensureFiveSets = (row: Row): Row => {
-    const sets = row.sets ?? [];
-    if (sets.length >= 5) return row;
-    const baseLen = sets.length;
-    const add: Row["sets"] = Array.from({ length: 5 - baseLen }, (_, i) => ({
-      set_number: baseLen + i + 1,
-      weight_kg: "" as const,
-      reps: "" as const,
-      note: null,
-    }));
-    return { ...row, sets: [...sets, ...add] };
+  const handleUpdateNote = (ri: number, note: string) => {
+    onChangeExercises(updateExerciseNote(safeExercises, ri, note));
   };
 
-  const changeExerciseName = (ri: number, name: string) => {
-    const next = structuredClone(rows) as Row[];
+  const handleChangeName = (ri: number, name: string) => {
+    // 選択された種目のIDと部位IDを取得
+    const selectedExercise = partExercises.find((ex) => ex.name === name);
+    const next = structuredClone(safeExercises);
     next[ri].name = name;
-    // 自由入力なので既存IDに紐づけない（新規扱い）。既存を維持したいならここで条件分岐。
-    next[ri].id = name.trim() ? next[ri].id ?? null : null;
-    next[ri] = ensureFiveSets(next[ri]);
-    onChangeRows(next);
+    next[ri].id = selectedExercise?.id || null;
+    next[ri].workout_part_id = selectedExercise?.workout_part_id || selectedPart?.id || null;
+    onChangeExercises(next);
   };
 
-  const addExerciseRow = () => {
-    onChangeRows([
-      ...rows,
-      {
-        id: null,
-        name: "",
-        workout_part_id: null,
-        is_default: 0,
-        sets: Array.from({ length: 5 }, (_, i) => ({
-          set_number: i + 1,
-          weight_kg: "" as const,
-          reps: "" as const,
-          note: null,
-        })),
-      },
-    ]);
+  const handleAddRow = () => {
+    onChangeExercises([...safeExercises, createEmptyExerciseRow()]);
+  };
+
+  const handlePartChange = (idStr: string) => {
+    if (!idStr) {
+      onPartChange({ id: null, name: null, source: null });
+      return;
+    }
+    const numId = Number(idStr);
+    const part = workoutParts.find((p) => p.id === numId);
+    if (part) {
+      onPartChange({
+        id: part.id,
+        name: part.name,
+        source: "custom", // すべてカスタム扱い（is_default削除により）
+      });
+    }
+  };
+
+  // 種目登録成功時に部位データを再取得
+  const handleSuccess = () => {
+    onRefetchParts();
   };
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse">
-        <thead>
-          <tr className="border-b-2 border-gray-300">
-            <th className="px-4 py-3 text-left font-medium text-gray-700 border-r border-gray-300 min-w-[240px]">種目</th>
-            {[1, 2, 3, 4, 5].map((n) => (
-              <th key={n} colSpan={2} className="px-4 py-3 text-center font-medium text-gray-700 border-r border-gray-300">
-                {n}セット
-              </th>
+    <div className="bg-white rounded-lg shadow mb-6 p-6">
+      {/* ヘッダー: 部位選択とアクションボタン */}
+      <div className="flex items-center justify-between gap-3 mb-6">
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium text-gray-700">部位</label>
+          <select value={selectedPart?.id?.toString() ?? ""} onChange={(e) => handlePartChange(e.target.value)} className="w-40 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500 bg-white">
+            <option value=""></option>
+            {workoutParts.map((part) => (
+              <option key={part.id} value={part.id.toString()}>
+                {part.name}
+              </option>
             ))}
-          </tr>
-          <tr className="border-b border-gray-300 bg-gray-50">
-            <th className="px-4 py-2 border-r border-gray-300" />
-            {[1, 2, 3, 4, 5].map((n) => (
-              <React.Fragment key={n}>
-                <th className="px-2 py-2 text-center text-sm font-medium text-gray-600 border-r border-gray-200">重量</th>
-                <th className="px-2 py-2 text-center text-sm font-medium text-gray-600 border-r border-gray-300">回数</th>
-              </React.Fragment>
+          </select>
+        </div>
+        <div className="flex gap-2">
+          <button type="button" onClick={() => setIsModalOpen(true)} className="px-4 py-2 rounded-md bg-booking-50 text-booking-700 hover:bg-booking-100 transition-colors whitespace-nowrap text-sm border border-booking-300">
+            + 種目追加
+          </button>
+          <button onClick={onSubmit} className="px-5 py-2 rounded-md bg-booking-600 text-white hover:bg-booking-700 transition-colors disabled:opacity-50 whitespace-nowrap">
+            {isUpdate ? "更新" : "登録"}
+          </button>
+        </div>
+      </div>
+
+      {/* 種目追加モーダル */}
+      <ExerciseManageModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} workoutParts={workoutParts} onSuccess={handleSuccess} />
+
+      {/* テーブル */}
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="border-b-2 border-gray-300">
+              <th className="px-4 py-3 text-left font-medium text-gray-700 border-r border-gray-300 min-w-[240px]">種目</th>
+              {[1, 2, 3, 4, 5].map((n) => (
+                <th key={n} colSpan={2} className="px-4 py-3 text-center font-medium text-gray-700 border-r border-gray-300">
+                  {n}セット
+                </th>
+              ))}
+            </tr>
+            <tr className="border-b border-gray-300 bg-gray-50">
+              <th className="px-4 py-2 border-r border-gray-300" />
+              {[1, 2, 3, 4, 5].map((n) => (
+                <Fragment key={n}>
+                  <th className="px-2 py-2 text-center text-sm font-medium text-gray-600 border-r border-gray-200">重量</th>
+                  <th className="px-2 py-2 text-center text-sm font-medium text-gray-600 border-r border-gray-300">回数</th>
+                </Fragment>
+              ))}
+            </tr>
+          </thead>
+
+          <tbody>
+            {safeExercises.map((row, ri) => (
+              <Fragment key={ri}>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-3 border-r border-gray-300 align-top border-b">
+                    <select value={row.name} onChange={(e) => handleChangeName(ri, e.target.value)} className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-booking-500 bg-white text-sm truncate">
+                      <option value="">種目を選択</option>
+                      {partExercises.map((ex) => (
+                        <option key={ex.id} value={ex.name}>
+                          {ex.name}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+
+                  {row.sets.slice(0, 5).map((s, si) => (
+                    <Fragment key={si}>
+                      <td className="px-2 py-2 border-r border-gray-200 border-b">
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="number"
+                            value={s.weight_kg as any}
+                            onChange={(e) => handleUpdateCell(ri, si, "weight_kg", e.target.value)}
+                            className="w-14 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-booking-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          <span className="text-xs text-gray-600">kg</span>
+                        </div>
+                      </td>
+                      <td className="px-2 py-2 border-r border-gray-300 border-b">
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="number"
+                            value={s.reps as any}
+                            onChange={(e) => handleUpdateCell(ri, si, "reps", e.target.value)}
+                            className="w-14 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-booking-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          <span className="text-xs text-gray-600">rep</span>
+                        </div>
+                      </td>
+                    </Fragment>
+                  ))}
+                </tr>
+
+                <tr className="border-b border-gray-300 hover:bg-gray-50">
+                  <td colSpan={11} className="px-4 py-2">
+                    <div className="flex items-center gap-2">
+                      <input type="text" value={row.sets[0]?.note ?? ""} placeholder="メモ" onChange={(e) => handleUpdateNote(ri, e.target.value)} className="flex-1 px-3 py-2 text-sm text-gray-700 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-booking-500 truncate" />
+                    </div>
+                  </td>
+                </tr>
+              </Fragment>
             ))}
-          </tr>
-        </thead>
 
-        <tbody>
-          {rows.map((row, ri) => (
-            <React.Fragment key={ri}>
-              <tr className="hover:bg-gray-50">
-                <td className="px-4 py-3 border-r border-gray-300 align-top border-b border-gray-300">
-                  <input value={row.name} onChange={(e) => changeExerciseName(ri, e.target.value)} placeholder="種目名（例：ベンチプレス）" className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-booking-500" />
-                </td>
-
-                {row.sets.slice(0, 5).map((s, si) => (
-                  <React.Fragment key={si}>
-                    <td className="px-2 py-2 border-r border-gray-200 border-b border-gray-200">
-                      <div className="flex items-center gap-1">
-                        <input type="number" value={s.weight_kg as any} onChange={(e) => updateCell(ri, si, "weightKg", e.target.value)} className="w-14 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-booking-500" />
-                        <span className="text-xs text-gray-600">kg</span>
-                      </div>
-                    </td>
-                    <td className="px-2 py-2 border-r border-gray-300 border-b border-gray-200">
-                      <div className="flex items-center gap-1">
-                        <input type="number" value={s.reps as any} onChange={(e) => updateCell(ri, si, "reps", e.target.value)} className="w-14 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-booking-500" />
-                        <span className="text-xs text-gray-600">rep</span>
-                      </div>
-                    </td>
-                  </React.Fragment>
-                ))}
-              </tr>
-
-              <tr className="border-b border-gray-300 hover:bg-gray-50">
-                <td colSpan={11} className="px-4 py-2">
-                  <div className="flex items-center gap-2">
-                    <input type="text" value={row.sets[0]?.note ?? ""} placeholder="メモ" onChange={(e) => updateExerciseNote(ri, e.target.value)} className="flex-1 px-3 py-2 text-sm text-gray-700 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-booking-500" />
-                  </div>
-                </td>
-              </tr>
-            </React.Fragment>
-          ))}
-
-          <tr className="h-24 border-b border-gray-200">
-            <td colSpan={12} className="px-4 py-3 text-center text-gray-400">
-              <button className="text-booking-600 hover:text-booking-700 font-medium" onClick={addExerciseRow}>
-                + 種目を追加
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            <tr className="h-24 border-b border-gray-200">
+              <td colSpan={12} className="px-4 py-3 text-center text-gray-400">
+                <button className="inline-flex items-center justify-center w-10 h-10 text-booking-600 hover:text-booking-700 hover:bg-booking-50 rounded-full transition-colors" onClick={handleAddRow}>
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

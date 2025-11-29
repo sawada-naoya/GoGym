@@ -14,6 +14,7 @@ import (
 	dom "gogym-api/internal/domain/user"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/oklog/ulid/v2"
 )
 
 type interactor struct {
@@ -76,17 +77,33 @@ func (i *interactor) CreateSession(ctx context.Context, email string) (dto.Token
 	}
 
 	now := time.Now()
-	accessTTL := 24 * time.Hour
+	accessTTL := 15 * time.Minute    // アクセストークンは短めに設定
+	refreshTTL := 7 * 24 * time.Hour // リフレッシュトークンは7日間
 
-	claims := jwt.MapClaims{
+	secret := []byte(os.Getenv("JWT_SECRET"))
+
+	// アクセストークン生成
+	accessClaims := jwt.MapClaims{
 		"sub": user.ID,
 		"exp": now.Add(accessTTL).Unix(),
 		"iat": now.Unix(),
 		"typ": "access",
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	secret := []byte(os.Getenv("JWT_SECRET"))
-	tokenString, err := token.SignedString(secret)
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
+	accessTokenString, err := accessToken.SignedString(secret)
+	if err != nil {
+		return dto.TokenResponse{}, err
+	}
+
+	// リフレッシュトークン生成
+	refreshClaims := jwt.MapClaims{
+		"sub": user.ID,
+		"exp": now.Add(refreshTTL).Unix(),
+		"iat": now.Unix(),
+		"typ": "refresh",
+	}
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
+	refreshTokenString, err := refreshToken.SignedString(secret)
 	if err != nil {
 		return dto.TokenResponse{}, err
 	}
@@ -97,7 +114,94 @@ func (i *interactor) CreateSession(ctx context.Context, email string) (dto.Token
 			Name:  user.Name,
 			Email: user.Email.String(),
 		},
-		AccessToken: tokenString,
-		ExpiresIn:   int64(accessTTL.Seconds()),
+		AccessToken:  accessTokenString,
+		RefreshToken: refreshTokenString,
+		ExpiresIn:    int64(accessTTL.Seconds()),
+	}, nil
+}
+
+func (i *interactor) RefreshToken(ctx context.Context, refreshToken string) (dto.TokenResponse, error) {
+	secret := []byte(os.Getenv("JWT_SECRET"))
+
+	// リフレッシュトークンを検証
+	token, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, dom.NewDomainError("unexpected_signing_method")
+		}
+		return secret, nil
+	})
+
+	if err != nil || !token.Valid {
+		return dto.TokenResponse{}, dom.NewDomainError("invalid_refresh_token")
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return dto.TokenResponse{}, dom.NewDomainError("invalid_token_claims")
+	}
+
+	// トークンタイプを確認
+	if typ, ok := claims["typ"].(string); !ok || typ != "refresh" {
+		return dto.TokenResponse{}, dom.NewDomainError("invalid_token_type")
+	}
+
+	// ユーザーIDを取得
+	userIDStr, ok := claims["sub"].(string)
+	if !ok {
+		return dto.TokenResponse{}, dom.NewDomainError("user_id_not_found")
+	}
+
+	// ULIDに変換
+	userID, err := ulid.Parse(userIDStr)
+	if err != nil {
+		return dto.TokenResponse{}, dom.NewDomainError("invalid_user_id")
+	}
+
+	// ユーザー情報を取得
+	user, err := i.ur.FindByID(ctx, userID)
+	if err != nil || user == nil {
+		return dto.TokenResponse{}, dom.NewDomainError("user_not_found")
+	}
+
+	// 新しいアクセストークンとリフレッシュトークンを生成
+	now := time.Now()
+	accessTTL := 15 * time.Minute
+	refreshTTL := 7 * 24 * time.Hour
+
+	// 新しいアクセストークン生成
+	accessClaims := jwt.MapClaims{
+		"sub": user.ID,
+		"exp": now.Add(accessTTL).Unix(),
+		"iat": now.Unix(),
+		"typ": "access",
+	}
+	accessTokenObj := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
+	accessTokenString, err := accessTokenObj.SignedString(secret)
+	if err != nil {
+		return dto.TokenResponse{}, err
+	}
+
+	// 新しいリフレッシュトークン生成
+	refreshClaims := jwt.MapClaims{
+		"sub": user.ID,
+		"exp": now.Add(refreshTTL).Unix(),
+		"iat": now.Unix(),
+		"typ": "refresh",
+	}
+	refreshTokenObj := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
+	refreshTokenString, err := refreshTokenObj.SignedString(secret)
+	if err != nil {
+		return dto.TokenResponse{}, err
+	}
+
+	return dto.TokenResponse{
+		User: dto.UserResponse{
+			ID:    user.ID.String(),
+			Name:  user.Name,
+			Email: user.Email.String(),
+		},
+		AccessToken:  accessTokenString,
+		RefreshToken: refreshTokenString,
+		ExpiresIn:    int64(accessTTL.Seconds()),
 	}, nil
 }
