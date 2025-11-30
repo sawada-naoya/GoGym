@@ -2,7 +2,6 @@ package workout
 
 import (
 	"context"
-	"fmt"
 	dto "gogym-api/internal/adapter/dto"
 	dom "gogym-api/internal/domain/workout"
 	"time"
@@ -18,7 +17,7 @@ func NewInteractor(repo Repository) WorkoutUseCase {
 	}
 }
 
-func (i *interactor) GetWorkoutRecords(ctx context.Context, userID string, dateParam string, partIDStr string) (dto.WorkoutRecordDTO, error) {
+func (i *interactor) GetWorkoutRecords(ctx context.Context, userID string, dateParam string) (dto.WorkoutRecordDTO, error) {
 	// dateが空文字列の場合は今日のJST日付を使用
 	date := dateParam
 	if date == "" {
@@ -26,16 +25,7 @@ func (i *interactor) GetWorkoutRecords(ctx context.Context, userID string, dateP
 		date = time.Now().In(jst).Format("2006-01-02")
 	}
 
-	// partIDStrが空でない場合、int64に変換
-	var partID *int64
-	if partIDStr != "" {
-		var pid int64
-		if _, err := fmt.Sscanf(partIDStr, "%d", &pid); err == nil {
-			partID = &pid
-		}
-	}
-
-	records, err := i.repo.GetRecordsByDateAndPart(ctx, userID, date, partID)
+	records, err := i.repo.GetRecordsByDateAndPart(ctx, userID, date, nil)
 	if err != nil {
 		return dto.WorkoutRecordDTO{}, err
 	}
@@ -139,4 +129,70 @@ func (i *interactor) CreateWorkoutExercise(ctx context.Context, userID string, e
 
 func (i *interactor) DeleteWorkoutExercise(ctx context.Context, userID string, exerciseID int64) error {
 	return i.repo.DeleteWorkoutExercise(ctx, userID, exerciseID)
+}
+
+func (i *interactor) GetLastWorkoutRecord(ctx context.Context, userID string, exerciseID int64) (*dto.ExerciseDTO, error) {
+	// 最後のワークアウトレコードを取得
+	record, err := i.repo.GetLastWorkoutRecord(ctx, userID, exerciseID)
+	if err != nil {
+		return nil, err
+	}
+
+	// レコードが空の場合はnilを返す
+	if record.ID == nil || len(record.Sets) == 0 {
+		return nil, nil
+	}
+
+	// 該当するエクササイズIDのセットだけをフィルタリング
+	var exerciseSets []dom.WorkoutSet
+	var exerciseName string
+	var workoutPartID *int64
+
+	for _, set := range record.Sets {
+		if int64(set.Exercise.ID) == exerciseID {
+			exerciseSets = append(exerciseSets, set)
+			if exerciseName == "" {
+				exerciseName = set.Exercise.Name
+				if set.Exercise.PartID != nil {
+					partID := int64(*set.Exercise.PartID)
+					workoutPartID = &partID
+				}
+			}
+		}
+	}
+
+	// 該当するセットが見つからない場合
+	if len(exerciseSets) == 0 {
+		return nil, nil
+	}
+
+	// ExerciseDTOに変換して返す
+	exerciseDTO := dto.ExerciseDTO{
+		ID:            &exerciseID,
+		Name:          exerciseName,
+		WorkoutPartID: workoutPartID,
+		Sets:          []dto.SetDTO{},
+	}
+
+	// セット情報を追加
+	for _, set := range exerciseSets {
+		var setID *int64
+		if set.ID != nil {
+			id := int64(*set.ID)
+			setID = &id
+		}
+
+		weight := float64(set.Weight)
+		reps := int(set.Reps)
+
+		exerciseDTO.Sets = append(exerciseDTO.Sets, dto.SetDTO{
+			ID:        setID,
+			SetNumber: set.SetNumber,
+			WeightKg:  &weight,
+			Reps:      &reps,
+			Note:      set.Note,
+		})
+	}
+
+	return &exerciseDTO, nil
 }

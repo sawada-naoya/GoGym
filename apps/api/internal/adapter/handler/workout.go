@@ -35,16 +35,14 @@ func (h *WorkoutHandler) GetWorkoutRecords(c echo.Context) error {
 
 	// dateクエリパラメータを取得（空文字列の場合はUseCaseで今日のJST日付を使用）
 	date := c.QueryParam("date")
-	// part_idクエリパラメータを取得（オプション：部位で絞り込む場合）
-	partIDStr := c.QueryParam("part_id")
 
-	response, err := h.wu.GetWorkoutRecords(ctx, userID, date, partIDStr)
+	response, err := h.wu.GetWorkoutRecords(ctx, userID, date)
 	if err != nil {
-		slog.ErrorContext(ctx, "Failed to get workout records", "userID", userID, "date", date, "part_id", partIDStr, "error", err)
+		slog.ErrorContext(ctx, "Failed to get workout records", "userID", userID, "date", date, "error", err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	slog.InfoContext(ctx, "Successfully retrieved workout records", "userID", userID, "date", date, "part_id", partIDStr)
+	slog.InfoContext(ctx, "Successfully retrieved workout records", "userID", userID, "date", date)
 	return c.JSON(http.StatusOK, response)
 }
 
@@ -217,4 +215,30 @@ func (h *WorkoutHandler) DeleteWorkoutExercise(c echo.Context) error {
 
 	slog.InfoContext(ctx, "Successfully deleted workout exercise", "userID", userID, "exerciseID", exerciseID)
 	return c.JSON(http.StatusOK, map[string]string{"message": "Workout exercise deleted successfully"})
+}
+
+func (h *WorkoutHandler) GetLastWorkoutRecord(c echo.Context) error {
+	ctx := c.Request().Context()
+	slog.InfoContext(ctx, "GetLastWorkoutRecord Handler")
+
+	userID, ok := c.Get("user_id").(string)
+	if !ok || userID == "" {
+		slog.ErrorContext(ctx, "User ID not found in context")
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Unauthorized"})
+	}
+
+	exerciseIDStr := c.Param("id")
+	var exerciseID int64
+	if _, err := fmt.Sscanf(exerciseIDStr, "%d", &exerciseID); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid exercise ID format"})
+	}
+
+	response, err := h.wu.GetLastWorkoutRecord(ctx, userID, exerciseID)
+	if err != nil {
+		slog.ErrorContext(ctx, "Failed to get last workout record", "userID", userID, "exerciseID", exerciseID, "error", err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	slog.InfoContext(ctx, "Successfully retrieved last workout record", "userID", userID, "exerciseID", exerciseID)
+	return c.JSON(http.StatusOK, response)
 }

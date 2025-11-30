@@ -19,7 +19,6 @@ export const buildEmptyDTO = (): WorkoutFormDTO => ({
   place: "",
   note: null,
   condition_level: null,
-  workout_part: { id: null, name: null, source: null },
   exercises: Array.from({ length: 1 }, () => ({
     id: null,
     name: "",
@@ -34,6 +33,19 @@ export const buildEmptyDTO = (): WorkoutFormDTO => ({
   })),
 });
 
+export type ExerciseDTO = {
+  id?: number | null;
+  name: string;
+  workout_part_id: number | null;
+  sets: {
+    id?: number | null;
+    set_number: number;
+    weight_kg: number | string;
+    reps: number | string;
+    note: string | null;
+  }[];
+};
+
 export type WorkoutFormDTO = {
   id?: number | null; // 既存ならrecord id
   performed_date: string; // "YYYY-MM-DD"
@@ -42,12 +54,6 @@ export type WorkoutFormDTO = {
   place: string;
   note: string | null;
   condition_level: 1 | 2 | 3 | 4 | 5 | null;
-
-  workout_part: {
-    id: number | null;
-    name: string | null;
-    source: "preset" | "custom" | null;
-  };
 
   exercises: {
     id?: number | null; // workout_exercises.id（既存なら）

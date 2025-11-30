@@ -65,8 +65,8 @@ export const ensureFiveSets = (row: ExerciseRow): ExerciseRow => {
   const baseLen = sets.length;
   const add: ExerciseRow["sets"] = Array.from({ length: 5 - baseLen }, (_, i) => ({
     set_number: baseLen + i + 1,
-    weight_kg: "" as const,
-    reps: "" as const,
+    weight_kg: 0,
+    reps: 0,
     note: null,
   }));
 
@@ -75,15 +75,16 @@ export const ensureFiveSets = (row: ExerciseRow): ExerciseRow => {
 
 /**
  * 新しい空のExercise行を作成
+ * @param setCount - 初期セット数（デフォルト: 5）
  */
-export const createEmptyExerciseRow = (): ExerciseRow => ({
+export const createEmptyExerciseRow = (setCount: number = 5): ExerciseRow => ({
   id: null,
   name: "",
   workout_part_id: null,
-  sets: Array.from({ length: 5 }, (_, i) => ({
+  sets: Array.from({ length: setCount }, (_, i) => ({
     set_number: i + 1,
-    weight_kg: "" as const,
-    reps: "" as const,
+    weight_kg: 0,
+    reps: 0,
     note: null,
   })),
 });
@@ -128,7 +129,7 @@ export const updateExerciseName = (rows: ExerciseRow[], rowIndex: number, name: 
  */
 export const transformFormDataForSubmit = (data: WorkoutFormDTO, year: number, month: number, day: number) => ({
   ...data,
-  performed_date: formatDateYMD(year, month, day),
+  performed_date: formatDate(year, month, day),
   started_at: data.started_at || null, // HH:mm形式のまま送る
   ended_at: data.ended_at || null, // HH:mm形式のまま送る
   exercises: data.exercises.map((ex) => ({

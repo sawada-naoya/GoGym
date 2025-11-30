@@ -140,11 +140,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return null as any;
       }
 
-      // サーバーサイドで auth() を使用する場合は accessToken を含める
-      // クライアントサイドには送信されない（Server Components/Server Actions のみ）
+      // SECURITY FIX: クライアント側にaccessTokenを送信しない
+      // サーバー側で必要な場合は、auth() を呼んでtokenから直接取得する
       if (session.user) {
         session.user.id = token.sub as string;
-        session.user.accessToken = token.accessToken as string;
+        // accessTokenはsessionに含めない（セキュリティリスク）
       }
       return session;
     },
