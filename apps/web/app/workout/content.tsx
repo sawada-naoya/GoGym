@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useForm, FormProvider, useWatch } from "react-hook-form";
 import WorkoutMetadataEditor from "./_components/WorkoutMetadataEditor";
 import WorkoutExercisesEditor from "./_components/WorkoutExercisesEditor";
-import { WorkoutFormDTO, WorkoutPartDTO } from "./_lib/types";
+import { WorkoutFormDTO, WorkoutPartDTO, ExerciseDTO } from "./_lib/types";
 import { transformFormDataForSubmit } from "./_lib/utils";
 import { buildEmptyDTO } from "./_lib/types";
 import { useBanner } from "@/components/Banner";
@@ -46,8 +46,8 @@ const fetchWorkoutRecord = async (token: string, date?: string, partID?: number 
       sets: Array.from({ length: 1 }, (_, i) => ({
         id: null,
         set_number: i + 1,
-        weight_kg: "",
-        reps: "",
+        weight_kg: 0,
+        reps: 0,
         note: null,
       })),
     }));
@@ -128,6 +128,23 @@ async function updateWorkoutRecord(token: string, id: number, body: any) {
 
   const res = await PUT(`/api/v1/workouts/records/${id}`, { body, token: token });
   return { ok: res.ok, error: res.ok ? null : "更新に失敗しました" };
+}
+
+/**
+ * 前回のエクササイズ記録を取得
+ */
+async function fetchLastExerciseRecord(token: string, exerciseID: number): Promise<ExerciseDTO | null> {
+  if (!token || !exerciseID) {
+    return null;
+  }
+
+  const res = await GET<ExerciseDTO>(`/api/v1/workouts/exercises/${exerciseID}/last`, { token });
+
+  if (!res.ok || !res.data) {
+    return null;
+  }
+
+  return res.data;
 }
 
 const WorkoutContent = ({ Year, Month, Day, defaultValues, availableParts: initialParts, isUpdate, token }: Props) => {
@@ -223,6 +240,8 @@ const WorkoutContent = ({ Year, Month, Day, defaultValues, availableParts: initi
             onSubmit={form.handleSubmit(handleSubmit)}
             onRefetchParts={refetchWorkoutParts}
             dataKey={`${selectedYear}-${selectedMonth}-${selectedDay}-${selectedPart?.id || "none"}`}
+            onFetchLastRecord={fetchLastExerciseRecord}
+            token={token}
           />
         </div>
       </div>

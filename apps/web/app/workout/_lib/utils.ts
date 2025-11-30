@@ -65,8 +65,8 @@ export const ensureFiveSets = (row: ExerciseRow): ExerciseRow => {
   const baseLen = sets.length;
   const add: ExerciseRow["sets"] = Array.from({ length: 5 - baseLen }, (_, i) => ({
     set_number: baseLen + i + 1,
-    weight_kg: "" as const,
-    reps: "" as const,
+    weight_kg: 0,
+    reps: 0,
     note: null,
   }));
 
@@ -83,8 +83,8 @@ export const createEmptyExerciseRow = (setCount: number = 5): ExerciseRow => ({
   workout_part_id: null,
   sets: Array.from({ length: setCount }, (_, i) => ({
     set_number: i + 1,
-    weight_kg: "" as const,
-    reps: "" as const,
+    weight_kg: 0,
+    reps: 0,
     note: null,
   })),
 });

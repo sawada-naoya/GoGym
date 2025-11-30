@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, Fragment } from "react";
 import type { ExerciseRow } from "../_lib/utils";
-import type { WorkoutPartDTO, WorkoutFormDTO } from "../_lib/types";
+import type { WorkoutPartDTO, WorkoutFormDTO, ExerciseDTO } from "../_lib/types";
 import { updateExerciseCell, updateExerciseNote, createEmptyExerciseRow } from "../_lib/utils";
 import ExerciseManageModal from "./ExerciseManageModal";
 import { useIsMobile, useMobileExerciseAdjustment } from "../_hooks";
@@ -16,13 +16,16 @@ type Props = {
   onSubmit: () => void;
   onRefetchParts: () => void;
   dataKey?: string; // データを識別するキー（日付など）
+  onFetchLastRecord: (token: string, exerciseID: number) => Promise<ExerciseDTO | null>;
+  token: string;
 };
 
-const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExercises, workoutParts, selectedPart, onPartChange, isUpdate, onSubmit, onRefetchParts, dataKey }) => {
+const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExercises, workoutParts, selectedPart, onPartChange, isUpdate, onSubmit, onRefetchParts, dataKey, onFetchLastRecord, token }) => {
   // workoutExercises が undefined または空の場合は1つの空種目を用意
   const safeExercises = workoutExercises && workoutExercises.length > 0 ? workoutExercises : [createEmptyExerciseRow(1)];
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [partExercises, setPartExercises] = useState<Array<{ id: number; name: string; workout_part_id: number | null }>>([]);
+  const [lastRecords, setLastRecords] = useState<Map<number, ExerciseDTO>>(new Map());
 
   // カスタムフック: モバイル判定
   const isMobile = useIsMobile();
@@ -39,6 +42,31 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExe
     const part = workoutParts.find((p) => p.id === selectedPart.id);
     setPartExercises(part?.exercises || []);
   }, [selectedPart, workoutParts]);
+
+  // 種目が選択されたら前回の記録を取得
+  useEffect(() => {
+    const fetchPreviousRecords = async () => {
+      const newLastRecords = new Map<number, ExerciseDTO>();
+
+      for (const exercise of safeExercises) {
+        // 種目にIDがある場合のみ前回記録を取得
+        if (exercise.id) {
+          try {
+            const lastRecord = await onFetchLastRecord(token, exercise.id);
+            if (lastRecord) {
+              newLastRecords.set(exercise.id, lastRecord);
+            }
+          } catch (err) {
+            console.error(`Failed to fetch last record for exercise ${exercise.id}:`, err);
+          }
+        }
+      }
+
+      setLastRecords(newLastRecords);
+    };
+
+    fetchPreviousRecords();
+  }, [safeExercises.map((e) => e.id).join(","), token, onFetchLastRecord]);
 
   const handleUpdateCell = (ri: number, si: number, key: "weight_kg" | "reps", val: string) => {
     onChangeExercises(updateExerciseCell(safeExercises, ri, si, key, val));
@@ -75,8 +103,8 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExe
     const newSetNumber = next[ri].sets.length + 1;
     next[ri].sets.push({
       set_number: newSetNumber,
-      weight_kg: "",
-      reps: "",
+      weight_kg: 0,
+      reps: 0,
       note: null,
     });
     onChangeExercises(next);
@@ -85,6 +113,57 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExe
   const handleRemoveExercise = (ri: number) => {
     if (safeExercises.length === 1) return;
     onChangeExercises(safeExercises.filter((_, i) => i !== ri));
+  };
+
+  const handleCopyLastRecord = (ri: number) => {
+    const row = safeExercises[ri];
+    if (!row.id) return;
+
+    const lastRecord = lastRecords.get(row.id);
+    if (!lastRecord || !lastRecord.sets || lastRecord.sets.length === 0) return;
+
+    const next = structuredClone(safeExercises);
+
+    // 前回記録のセット数に合わせてセットを調整
+    const lastSets = lastRecord.sets;
+    next[ri].sets = lastSets.map((lastSet, index) => ({
+      id: null, // 新規セットなのでIDはnull
+      set_number: index + 1,
+      weight_kg: String(lastSet.weight_kg || ""),
+      reps: String(lastSet.reps || ""),
+      note: lastSet.note || null,
+    }));
+
+    onChangeExercises(next);
+  };
+
+  const handleDuplicateSet = (ri: number, si: number) => {
+    const row = safeExercises[ri];
+    if (!row.sets || row.sets.length >= 5) return; // 最大5セット
+
+    const currentSet = row.sets[si];
+
+    const next = structuredClone(safeExercises);
+
+    // 現在のセットの内容をコピーして直後に追加
+    const newSet = {
+      id: null, // 新規セットなのでIDはnull
+      set_number: si + 2, // 一時的なセット番号（後で再計算される）
+      weight_kg: currentSet.weight_kg || 0,
+      reps: currentSet.reps || 0,
+      note: null, // メモはコピーしない
+    };
+
+    // 押されたセットの直後（si + 1の位置）に挿入
+    next[ri].sets.splice(si + 1, 0, newSet);
+
+    // セット番号を再計算（1から順番に振り直す）
+    next[ri].sets = next[ri].sets.map((s, index) => ({
+      ...s,
+      set_number: index + 1,
+    }));
+
+    onChangeExercises(next);
   };
 
   const handlePartChange = (idStr: string) => {
@@ -137,8 +216,8 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExe
       <div className="md:hidden space-y-2">
         {safeExercises.map((row, ri) => (
           <div key={ri} className="bg-white rounded-xl shadow-sm border border-gray-100 p-3">
-            {/* 種目名と削除ボタン */}
-            <div className="flex items-center justify-between mb-2">
+            {/* 種目名とボタン */}
+            <div className="flex items-center gap-2 mb-2">
               <select value={row.name} onChange={(e) => handleChangeName(ri, e.target.value)} className="flex-1 px-2 py-1.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-booking-500 focus:border-booking-500 bg-white text-xs font-semibold transition-colors">
                 <option value="">種目を選択</option>
                 {partExercises.map((ex) => (
@@ -147,7 +226,14 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExe
                   </option>
                 ))}
               </select>
-              <button type="button" onClick={() => handleRemoveExercise(ri)} className="ml-2 p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" disabled={safeExercises.length === 1}>
+              {row.id && lastRecords.get(row.id) && (
+                <button type="button" onClick={() => handleCopyLastRecord(ri)} className="p-1.5 text-booking-600 hover:text-booking-700 bg-booking-50 hover:bg-booking-100 rounded-lg transition-colors border border-booking-200" title="前回記録をコピー">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                </button>
+              )}
+              <button type="button" onClick={() => handleRemoveExercise(ri)} className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" disabled={safeExercises.length === 1}>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
@@ -156,33 +242,48 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExe
 
             {/* セットリスト（縦並び） */}
             <div className="space-y-1 mb-1.5">
-              {row.sets.map((s, si) => (
-                <div key={si} className="flex items-center gap-1.5 bg-gradient-to-r from-gray-50 to-gray-50/50 rounded-lg p-1.5 border border-gray-100">
-                  <span className="text-xs font-bold text-gray-600 w-5">{si + 1}</span>
-                  <input
-                    type="number"
-                    value={s.weight_kg as any}
-                    onChange={(e) => handleUpdateCell(ri, si, "weight_kg", e.target.value)}
-                    placeholder="0"
-                    className="w-14 px-1.5 py-1 text-xs font-semibold border-2 border-gray-200 rounded-md text-center focus:outline-none focus:ring-2 focus:ring-booking-400 focus:border-booking-400 bg-white transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                  <span className="text-[10px] font-medium text-gray-600">kg</span>
-                  <span className="text-gray-300 text-xs font-bold">×</span>
-                  <input
-                    type="number"
-                    value={s.reps as any}
-                    onChange={(e) => handleUpdateCell(ri, si, "reps", e.target.value)}
-                    placeholder="0"
-                    className="w-14 px-1.5 py-1 text-xs font-semibold border-2 border-gray-200 rounded-md text-center focus:outline-none focus:ring-2 focus:ring-booking-400 focus:border-booking-400 bg-white transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                  <span className="text-[10px] font-medium text-gray-600">回</span>
-                  <button type="button" onClick={() => handleRemoveSet(ri, si)} className="ml-auto p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors" disabled={row.sets.length === 1}>
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              ))}
+              {row.sets.map((s, si) => {
+                const lastRecord = row.id ? lastRecords.get(row.id) : null;
+                const lastSet = lastRecord?.sets?.[si];
+
+                return (
+                  <div key={si} className="flex items-center gap-1 bg-gradient-to-r from-gray-50 to-gray-50/50 rounded-lg p-1.5 border border-gray-100">
+                    <span className="text-xs font-bold text-gray-600 w-4 flex-shrink-0">{si + 1}</span>
+                    <input
+                      type="number"
+                      value={s.weight_kg as any}
+                      onChange={(e) => handleUpdateCell(ri, si, "weight_kg", e.target.value)}
+                      className="w-12 px-1 py-1 text-xs font-semibold border-2 border-gray-200 rounded-md text-center focus:outline-none focus:ring-2 focus:ring-booking-400 focus:border-booking-400 bg-white transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <span className="text-[9px] font-medium text-gray-600">kg</span>
+                    <span className="text-gray-300 text-xs font-bold">×</span>
+                    <input
+                      type="number"
+                      value={s.reps as any}
+                      onChange={(e) => handleUpdateCell(ri, si, "reps", e.target.value)}
+                      className="w-12 px-1 py-1 text-xs font-semibold border-2 border-gray-200 rounded-md text-center focus:outline-none focus:ring-2 focus:ring-booking-400 focus:border-booking-400 bg-white transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <span className="text-[9px] font-medium text-gray-600">回</span>
+                    {lastSet && (
+                      <span className="text-[9px] text-gray-500 ml-1">
+                        前回 : {lastSet.weight_kg}kg×{lastSet.reps}
+                      </span>
+                    )}
+                    <div className="ml-auto flex items-center gap-0.5">
+                      <button type="button" onClick={() => handleDuplicateSet(ri, si)} className="p-0.5 text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 rounded transition-colors border border-purple-200 disabled:opacity-30 disabled:cursor-not-allowed" disabled={row.sets.length >= 5} title="下にコピー">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 13l-3 3m0 0l-3-3m3 3V8m0 13a9 9 0 110-18 9 9 0 010 18z" />
+                        </svg>
+                      </button>
+                      <button type="button" onClick={() => handleRemoveSet(ri, si)} className="p-0.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed" disabled={row.sets.length === 1}>
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
             {/* セット追加ボタン（5セット未満の場合のみ表示） */}
@@ -274,30 +375,45 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExe
                 <Fragment key={ri}>
                   <tr className="hover:bg-gray-50">
                     <td className="px-4 py-3 border-r border-gray-300 align-top border-b">
-                      <select value={row.name} onChange={(e) => handleChangeName(ri, e.target.value)} className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-booking-500 bg-white text-sm truncate">
-                        <option value="">種目を選択</option>
-                        {partExercises.map((ex) => (
-                          <option key={ex.id} value={ex.name}>
-                            {ex.name}
-                          </option>
-                        ))}
-                      </select>
+                      <div className="flex items-center gap-2">
+                        <select value={row.name} onChange={(e) => handleChangeName(ri, e.target.value)} className="flex-1 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-booking-500 bg-white text-sm truncate">
+                          <option value="">種目を選択</option>
+                          {partExercises.map((ex) => (
+                            <option key={ex.id} value={ex.name}>
+                              {ex.name}
+                            </option>
+                          ))}
+                        </select>
+                        {row.id && lastRecords.get(row.id) && (
+                          <button type="button" onClick={() => handleCopyLastRecord(ri)} className="p-1 text-booking-600 hover:text-booking-700 hover:bg-booking-50 rounded transition-colors flex-shrink-0" title="前回記録をコピー">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
                     </td>
 
                     {[0, 1, 2, 3, 4].map((si) => {
                       const s = row.sets[si];
+                      const lastRecord = row.id ? lastRecords.get(row.id) : null;
+                      const lastSet = lastRecord?.sets?.[si];
+
                       return (
                         <Fragment key={si}>
                           <td className="px-2 py-2 border-r border-gray-200 border-b">
                             {s ? (
-                              <div className="flex items-center gap-1">
-                                <input
-                                  type="number"
-                                  value={s.weight_kg as any}
-                                  onChange={(e) => handleUpdateCell(ri, si, "weight_kg", e.target.value)}
-                                  className="w-14 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-booking-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                />
-                                <span className="text-xs text-gray-600">kg</span>
+                              <div className="flex flex-col gap-0.5">
+                                <div className="flex items-center gap-1">
+                                  <input
+                                    type="number"
+                                    value={s.weight_kg as any}
+                                    onChange={(e) => handleUpdateCell(ri, si, "weight_kg", e.target.value)}
+                                    className="w-14 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-booking-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                  />
+                                  <span className="text-xs text-gray-600">kg</span>
+                                </div>
+                                {lastSet && <span className="text-[10px] text-gray-500 text-center">前回: {lastSet.weight_kg}kg</span>}
                               </div>
                             ) : (
                               <div className="h-8"></div>
@@ -305,14 +421,17 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ workoutExercises, onChangeExe
                           </td>
                           <td className="px-2 py-2 border-r border-gray-300 border-b">
                             {s ? (
-                              <div className="flex items-center gap-1">
-                                <input
-                                  type="number"
-                                  value={s.reps as any}
-                                  onChange={(e) => handleUpdateCell(ri, si, "reps", e.target.value)}
-                                  className="w-14 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-booking-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                />
-                                <span className="text-xs text-gray-600">rep</span>
+                              <div className="flex flex-col gap-0.5">
+                                <div className="flex items-center gap-1">
+                                  <input
+                                    type="number"
+                                    value={s.reps as any}
+                                    onChange={(e) => handleUpdateCell(ri, si, "reps", e.target.value)}
+                                    className="w-14 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-booking-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                  />
+                                  <span className="text-xs text-gray-600">rep</span>
+                                </div>
+                                {lastSet && <span className="text-[10px] text-gray-500 text-center">前回: {lastSet.reps}回</span>}
                               </div>
                             ) : (
                               <div className="h-8"></div>

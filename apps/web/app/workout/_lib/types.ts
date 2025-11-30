@@ -34,6 +34,19 @@ export const buildEmptyDTO = (): WorkoutFormDTO => ({
   })),
 });
 
+export type ExerciseDTO = {
+  id?: number | null;
+  name: string;
+  workout_part_id: number | null;
+  sets: {
+    id?: number | null;
+    set_number: number;
+    weight_kg: number | string;
+    reps: number | string;
+    note: string | null;
+  }[];
+};
+
 export type WorkoutFormDTO = {
   id?: number | null; // 既存ならrecord id
   performed_date: string; // "YYYY-MM-DD"

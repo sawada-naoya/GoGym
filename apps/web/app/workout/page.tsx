@@ -105,6 +105,11 @@ const fetchWorkoutRecord = async (token: string, date?: string, partID?: number 
   };
 };
 
+/**
+ * 直近のワークアウト記録を取得
+ */
+
+
 const Page = async ({ searchParams }: Props) => {
   const session = await auth();
   const token = session?.user?.accessToken!;
