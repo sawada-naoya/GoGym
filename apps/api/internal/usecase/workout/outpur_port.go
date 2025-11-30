@@ -15,4 +15,5 @@ type Repository interface {
 	CountUserWorkoutParts(ctx context.Context, userID string) (int64, error)
 	UpsertWorkoutExercises(ctx context.Context, userID string, exercises []dom.WorkoutExerciseRef) error
 	DeleteWorkoutExercise(ctx context.Context, userID string, exerciseID int64) error
+	GetLastWorkoutRecord(ctx context.Context, userID string, exerciseID int64) (dom.WorkoutRecord, error)
 }

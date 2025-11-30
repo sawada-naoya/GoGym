@@ -359,3 +359,37 @@ func (r *workoutRepository) UpsertWorkoutExercises(ctx context.Context, userID s
 
 	return nil
 }
+
+func (r *workoutRepository) GetLastWorkoutRecord(ctx context.Context, userID string, exerciseID int64) (dom.WorkoutRecord, error) {
+	var rec record.WorkoutRecord
+
+	// サブクエリ: 指定したエクササイズを含む最新のレコードIDを取得
+	// performed_date（実施日）とid（より新しいレコード）で最新を判定
+	subQuery := r.db.Table("workout_records").
+		Select("workout_records.id").
+		Joins("INNER JOIN workout_sets ON workout_sets.workout_record_id = workout_records.id").
+		Where("workout_records.user_id = ? AND workout_sets.workout_exercise_id = ?", userID, exerciseID).
+		Order("workout_records.performed_date DESC, workout_records.id DESC").
+		Limit(1)
+
+	err := r.db.WithContext(ctx).
+		Preload("Sets", "workout_exercise_id = ?", exerciseID). // 指定エクササイズのセットのみ取得
+		Preload("Sets.Exercise").
+		Preload("Sets.Exercise.Part").
+		Where("user_id = ? AND id = (?)", userID, subQuery).
+		First(&rec).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return dom.WorkoutRecord{}, nil
+		}
+		return dom.WorkoutRecord{}, fmt.Errorf("error fetching last workout record: %w", err)
+	}
+
+	domainRecord := mapper.WorkoutRecordToDomain(&rec)
+	if domainRecord == nil {
+		return dom.WorkoutRecord{}, fmt.Errorf("failed to convert record to domain")
+	}
+
+	return *domainRecord, nil
+}

@@ -65,6 +65,8 @@ type WorkoutExerciseListItemDTO struct {
 	WorkoutPartID *int64 `json:"workout_part_id,omitempty"`
 }
 
+
+
 // DomainToDTO converts domain.WorkoutRecord to WorkoutFormDTO
 func WorkoutRecordToDTO(record *dom.WorkoutRecord) *WorkoutRecordDTO {
 	if record == nil {
