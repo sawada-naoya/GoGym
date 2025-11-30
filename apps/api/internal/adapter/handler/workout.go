@@ -35,16 +35,14 @@ func (h *WorkoutHandler) GetWorkoutRecords(c echo.Context) error {
 
 	// dateクエリパラメータを取得（空文字列の場合はUseCaseで今日のJST日付を使用）
 	date := c.QueryParam("date")
-	// part_idクエリパラメータを取得（オプション：部位で絞り込む場合）
-	partIDStr := c.QueryParam("part_id")
 
-	response, err := h.wu.GetWorkoutRecords(ctx, userID, date, partIDStr)
+	response, err := h.wu.GetWorkoutRecords(ctx, userID, date)
 	if err != nil {
-		slog.ErrorContext(ctx, "Failed to get workout records", "userID", userID, "date", date, "part_id", partIDStr, "error", err)
+		slog.ErrorContext(ctx, "Failed to get workout records", "userID", userID, "date", date, "error", err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	slog.InfoContext(ctx, "Successfully retrieved workout records", "userID", userID, "date", date, "part_id", partIDStr)
+	slog.InfoContext(ctx, "Successfully retrieved workout records", "userID", userID, "date", date)
 	return c.JSON(http.StatusOK, response)
 }
 

@@ -129,7 +129,7 @@ export const updateExerciseName = (rows: ExerciseRow[], rowIndex: number, name: 
  */
 export const transformFormDataForSubmit = (data: WorkoutFormDTO, year: number, month: number, day: number) => ({
   ...data,
-  performed_date: formatDateYMD(year, month, day),
+  performed_date: formatDate(year, month, day),
   started_at: data.started_at || null, // HH:mm形式のまま送る
   ended_at: data.ended_at || null, // HH:mm形式のまま送る
   exercises: data.exercises.map((ex) => ({

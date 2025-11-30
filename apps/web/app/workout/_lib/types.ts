@@ -19,7 +19,6 @@ export const buildEmptyDTO = (): WorkoutFormDTO => ({
   place: "",
   note: null,
   condition_level: null,
-  workout_part: { id: null, name: null, source: null },
   exercises: Array.from({ length: 1 }, () => ({
     id: null,
     name: "",
@@ -55,12 +54,6 @@ export type WorkoutFormDTO = {
   place: string;
   note: string | null;
   condition_level: 1 | 2 | 3 | 4 | 5 | null;
-
-  workout_part: {
-    id: number | null;
-    name: string | null;
-    source: "preset" | "custom" | null;
-  };
 
   exercises: {
     id?: number | null; // workout_exercises.id（既存なら）

@@ -21,12 +21,11 @@ type Props = {
 };
 
 /**
- * ワークアウト記録を取得
+ * ワークアウト記録を取得（その日の全種目を取得）
  */
-const fetchWorkoutRecord = async (token: string, date?: string, partID?: number | null): Promise<WorkoutFormDTO> => {
+const fetchWorkoutRecord = async (token: string, date?: string): Promise<WorkoutFormDTO> => {
   const params = new URLSearchParams();
   if (date) params.append("date", date);
-  if (partID) params.append("part_id", partID.toString());
 
   const queryString = params.toString();
   const url = queryString ? `/api/v1/workouts/records?${queryString}` : "/api/v1/workouts/records";
@@ -39,30 +38,7 @@ const fetchWorkoutRecord = async (token: string, date?: string, partID?: number 
   const display = res.data as WorkoutFormDTO;
 
   if (!display || !display.id) {
-    const emptyExercises = Array.from({ length: 1 }, () => ({
-      id: null,
-      name: "",
-      workout_part_id: null,
-      sets: Array.from({ length: 1 }, (_, i) => ({
-        id: null,
-        set_number: i + 1,
-        weight_kg: 0,
-        reps: 0,
-        note: null,
-      })),
-    }));
-
-    return {
-      id: null,
-      performed_date: display?.performed_date || "",
-      started_at: null,
-      ended_at: null,
-      place: display?.place || "",
-      note: null,
-      condition_level: null,
-      workout_part: { id: null, name: null, source: null },
-      exercises: display?.exercises?.length > 0 ? display.exercises : emptyExercises,
-    };
+    return buildEmptyDTO();
   }
 
   return {
@@ -73,11 +49,6 @@ const fetchWorkoutRecord = async (token: string, date?: string, partID?: number 
     place: display.place ?? "",
     note: display.note ?? null,
     condition_level: display.condition_level ?? null,
-    workout_part: {
-      id: display.workout_part?.id ?? null,
-      name: display.workout_part?.name ?? null,
-      source: display.workout_part?.source ?? null,
-    },
     exercises: display.exercises.map((ex) => ({
       id: ex.id,
       name: ex.name,
@@ -154,13 +125,16 @@ const WorkoutContent = ({ Year, Month, Day, defaultValues, availableParts: initi
   const [selectedMonth, setSelectedMonth] = useState(Month);
   const [availableParts, setAvailableParts] = useState<WorkoutPartDTO[]>(initialParts);
 
+  // 既存データがある場合、最初のexerciseの部位を初期選択
+  const initialPartId = defaultValues.exercises?.[0]?.workout_part_id ?? null;
+  const [selectedPartId, setSelectedPartId] = useState<number | null>(initialPartId);
+
   const form = useForm<WorkoutFormDTO>({
     defaultValues,
     mode: "onBlur",
   });
 
-  const rows = useWatch({ control: form.control, name: "exercises" });
-  const selectedPart = useWatch({ control: form.control, name: "workout_part" });
+  const allExercises = useWatch({ control: form.control, name: "exercises" });
 
   // Props の Year, Month, Day が変わったら state を同期
   useEffect(() => {
@@ -171,25 +145,10 @@ const WorkoutContent = ({ Year, Month, Day, defaultValues, availableParts: initi
 
   useEffect(() => {
     form.reset(defaultValues);
-  }, [defaultValues, form]);
-
-  // 部位変更時にレコードを再取得
-  useEffect(() => {
-    if (!selectedPart?.id) return;
-
-    const fetchPartRecords = async () => {
-      try {
-        const date = formatDate(selectedYear, selectedMonth, selectedDay);
-        const data = await fetchWorkoutRecord(token, date, selectedPart.id);
-        // 部位とexercisesのみ更新（メタデータは維持）
-        form.setValue("exercises", data.exercises, { shouldDirty: false });
-      } catch (err) {
-        console.error("Failed to fetch part records:", err);
-      }
-    };
-
-    fetchPartRecords();
-  }, [selectedPart?.id, selectedYear, selectedMonth, selectedDay, token, form]);
+    // defaultValuesが変わったら部位も再設定
+    const newPartId = defaultValues.exercises?.[0]?.workout_part_id ?? null;
+    setSelectedPartId(newPartId);
+  }, [defaultValues]);
 
   const handleSubmit = async (data: WorkoutFormDTO) => {
     const body = transformFormDataForSubmit(data, selectedYear, selectedMonth, selectedDay);
@@ -231,15 +190,15 @@ const WorkoutContent = ({ Year, Month, Day, defaultValues, availableParts: initi
 
           {/* 種目エディター（部位選択・種目・セット） */}
           <WorkoutExercisesEditor
-            workoutExercises={rows ?? defaultValues.exercises}
+            allExercises={allExercises ?? defaultValues.exercises}
             onChangeExercises={(next) => form.setValue("exercises", next, { shouldDirty: true })}
             workoutParts={availableParts}
-            selectedPart={form.watch("workout_part")}
-            onPartChange={(part) => form.setValue("workout_part", part, { shouldDirty: true })}
+            selectedPartId={selectedPartId}
+            onPartChange={setSelectedPartId}
             isUpdate={isUpdate}
             onSubmit={form.handleSubmit(handleSubmit)}
             onRefetchParts={refetchWorkoutParts}
-            dataKey={`${selectedYear}-${selectedMonth}-${selectedDay}-${selectedPart?.id || "none"}`}
+            dataKey={`${selectedYear}-${selectedMonth}-${selectedDay}`}
             onFetchLastRecord={fetchLastExerciseRecord}
             token={token}
           />

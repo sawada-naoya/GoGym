@@ -72,7 +72,6 @@ const fetchWorkoutRecord = async (token: string, date?: string, partID?: number 
       place: display?.place || "",
       note: null,
       condition_level: null,
-      workout_part: { id: null, name: null, source: null },
       exercises: display?.exercises?.length > 0 ? display.exercises : emptyExercises,
     };
   }
@@ -85,11 +84,6 @@ const fetchWorkoutRecord = async (token: string, date?: string, partID?: number 
     place: display.place ?? "",
     note: display.note ?? null,
     condition_level: display.condition_level ?? null,
-    workout_part: {
-      id: display.workout_part?.id ?? null,
-      name: display.workout_part?.name ?? null,
-      source: display.workout_part?.source ?? null,
-    },
     exercises: display.exercises.map((ex) => ({
       id: ex.id,
       name: ex.name,
@@ -108,7 +102,6 @@ const fetchWorkoutRecord = async (token: string, date?: string, partID?: number 
 /**
  * 直近のワークアウト記録を取得
  */
-
 
 const Page = async ({ searchParams }: Props) => {
   const session = await auth();
