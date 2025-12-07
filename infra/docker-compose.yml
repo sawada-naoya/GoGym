@@ -47,8 +47,6 @@ services:
       - CORS_ALLOW_ORIGINS=${CORS_ALLOW_ORIGINS}
     depends_on:
       - mysql
-    volumes:
-      - ../apps/api:/app
     networks:
       - gogym-network
     restart: unless-stopped
@@ -66,10 +64,6 @@ services:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
     depends_on:
       - api
-    volumes:
-      - ../apps/web:/app
-      - /app/node_modules
-      - /app/.next
     networks:
       - gogym-network
     restart: unless-stopped
