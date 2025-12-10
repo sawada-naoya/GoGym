@@ -134,18 +134,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
 
     session: async ({ session, token }) => {
-      // リフレッシュトークンエラーがある場合はセッションを無効化してログアウトさせる
       if (token.error) {
-        // セッションをnullにすることで、ユーザーを未認証状態にする
         return null as any;
       }
 
-      // SECURITY FIX: クライアント側にaccessTokenを送信しない
-      // サーバー側で必要な場合は、auth() を呼んでtokenから直接取得する
       if (session.user) {
         session.user.id = token.sub as string;
-        // accessTokenはsessionに含めない（セキュリティリスク）
+        (session.user as any).accessToken = token.accessToken;
+        (session as any).refreshToken = token.refreshToken;
+        (session as any).expiresAt = token.expiresAt;
       }
+
       return session;
     },
   },
