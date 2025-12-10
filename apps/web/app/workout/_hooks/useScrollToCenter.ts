@@ -6,7 +6,10 @@ import { useEffect, RefObject } from "react";
  * @param containerRef スクロールコンテナのref
  * @param selectedElementRef 選択された要素のref
  */
-export const useScrollToCenter = (containerRef: RefObject<HTMLElement>, selectedElementRef: RefObject<HTMLElement>) => {
+export const useScrollToCenter = <T extends HTMLElement = HTMLElement, U extends HTMLElement = HTMLElement>(
+  containerRef: RefObject<T | null>,
+  selectedElementRef: RefObject<U | null>
+) => {
   useEffect(() => {
     if (containerRef.current && selectedElementRef.current) {
       const container = containerRef.current;
