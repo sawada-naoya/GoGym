@@ -8,7 +8,7 @@
 
 - Docker & Docker Compose
 - Node.js 20以上
-- Go 1.24
+- Go 1.25
 - Air（Go ホットリロード）
 
 ### 起動方法
