@@ -13,7 +13,6 @@ func RegisterRoutes(
 	authCfg configs.AuthConfig,
 	gymHandler *handler.GymHandler,
 	userHandler *handler.UserHandler,
-	reviewHandler *handler.ReviewHandler,
 	sessionHandler *handler.SessionHandler,
 	workoutHandler *handler.WorkoutHandler,
 ) *echo.Echo {
