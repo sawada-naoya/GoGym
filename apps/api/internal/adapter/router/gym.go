@@ -7,11 +7,4 @@ import (
 )
 
 func GymRoutes(e *echo.Group, g *handler.GymHandler) {
-	gym := e.Group("/gyms")
-	// おすすめジム取得
-	gym.GET("/recommended", g.GetRecommendedGyms)
-
-	// 特定ジム取得
-	gym.GET("/:id", g.GetGym)
-
 }

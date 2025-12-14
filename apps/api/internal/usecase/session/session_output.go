@@ -8,11 +8,12 @@ import (
 	"context"
 
 	dom "gogym-api/internal/domain/entities"
+
 	"github.com/oklog/ulid/v2"
 )
 
 type UserRepository interface {
-	FindByEmail(ctx context.Context, email dom.Email) (*dom.User, error)
+	FindByEmail(ctx context.Context, email string) (*dom.User, error)
 	FindByID(ctx context.Context, id ulid.ULID) (*dom.User, error)
 }
 
