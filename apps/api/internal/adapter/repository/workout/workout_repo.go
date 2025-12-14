@@ -1,4 +1,4 @@
-package repository
+package workout
 
 import (
 	"context"
@@ -6,9 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"gogym-api/internal/adapter/repository/mapper"
-	"gogym-api/internal/adapter/repository/record"
-	dom "gogym-api/internal/domain/workout"
+	dom "gogym-api/internal/domain/entities"
 	workoutUsecase "gogym-api/internal/usecase/workout"
 
 	"gorm.io/gorm"
@@ -26,9 +24,9 @@ func NewWorkoutRepository(db *gorm.DB) workoutUsecase.Repository {
 // insertWorkoutSets は WorkoutSet を1件ずつインサートするヘルパー関数
 // GORM の Create() はリレーション（Sets）も自動作成するため、
 // ID の重複を防ぐために Sets を nil にした後、手動で1件ずつ作成する
-func (r *workoutRepository) insertWorkoutSets(tx *gorm.DB, recordID int, sets []record.WorkoutSet) error {
+func (r *workoutRepository) insertWorkoutSets(tx *gorm.DB, recordID int, sets []WorkoutSet) error {
 	for i := range sets {
-		newSet := record.WorkoutSet{
+		newSet := WorkoutSet{
 			WorkoutRecordID:   recordID,
 			WorkoutExerciseID: sets[i].WorkoutExerciseID,
 			SetNumber:         sets[i].SetNumber,
@@ -47,7 +45,7 @@ func (r *workoutRepository) insertWorkoutSets(tx *gorm.DB, recordID int, sets []
 // GetRecordsByDate は指定日付のワークアウトレコードを取得（全部位）
 // レコードが存在しない場合は空のドメインモデルを返す
 func (r *workoutRepository) GetRecordsByDate(ctx context.Context, userID string, date string) (dom.WorkoutRecord, error) {
-	var rec record.WorkoutRecord
+	var rec WorkoutRecord
 	err := r.db.WithContext(ctx).
 		Preload("Sets").
 		Preload("Sets.Exercise").
@@ -62,7 +60,7 @@ func (r *workoutRepository) GetRecordsByDate(ctx context.Context, userID string,
 		return dom.WorkoutRecord{}, fmt.Errorf("error fetching workout records: %w", err)
 	}
 
-	domainRecord := mapper.WorkoutRecordToDomain(&rec)
+	domainRecord := ToEntity(&rec)
 	if domainRecord == nil {
 		return dom.WorkoutRecord{}, fmt.Errorf("failed to convert record to domain")
 	}
@@ -78,7 +76,7 @@ func (r *workoutRepository) GetRecordsByDateAndPart(ctx context.Context, userID 
 	}
 
 	// 指定部位の種目のみを含むセットを Preload でフィルタリング
-	var rec record.WorkoutRecord
+	var rec WorkoutRecord
 	err := r.db.WithContext(ctx).
 		Preload("Sets.Exercise.Part", "workout_parts.id = ?", *partID).
 		Preload("Sets", "workout_exercise_id IN (SELECT id FROM workout_exercises WHERE workout_part_id = ?)", *partID).
@@ -93,7 +91,7 @@ func (r *workoutRepository) GetRecordsByDateAndPart(ctx context.Context, userID 
 		return dom.WorkoutRecord{}, fmt.Errorf("error fetching workout records: %w", err)
 	}
 
-	domainRecord := mapper.WorkoutRecordToDomain(&rec)
+	domainRecord := ToEntity(&rec)
 	if domainRecord == nil {
 		return dom.WorkoutRecord{}, fmt.Errorf("failed to convert record to domain")
 	}
@@ -104,7 +102,7 @@ func (r *workoutRepository) GetRecordsByDateAndPart(ctx context.Context, userID 
 // CreateWorkoutRecord は新規ワークアウトレコードを作成
 // トランザクション内で Record と Sets を別々に作成し、ID の重複を防ぐ
 func (r *workoutRepository) CreateWorkoutRecord(ctx context.Context, workout dom.WorkoutRecord) error {
-	recordWorkout := mapper.WorkoutRecordToRecord(&workout)
+	recordWorkout := FromEntity(&workout)
 	if recordWorkout == nil {
 		return fmt.Errorf("failed to convert domain workout record to repository record")
 	}
@@ -127,7 +125,7 @@ func (r *workoutRepository) CreateWorkoutRecord(ctx context.Context, workout dom
 // - 同じ日付 & 同じ部位: メタデータ（時刻・場所・コンディション）を更新し、セットを置き換え
 // - 異なる部位: 新規作成
 func (r *workoutRepository) UpsertWorkoutRecord(ctx context.Context, workout dom.WorkoutRecord) error {
-	recordWorkout := mapper.WorkoutRecordToRecord(&workout)
+	recordWorkout := FromEntity(&workout)
 	if recordWorkout == nil {
 		return fmt.Errorf("failed to convert domain workout record to repository record")
 	}
@@ -155,14 +153,14 @@ func (r *workoutRepository) UpsertWorkoutRecord(ctx context.Context, workout dom
 }
 
 // getPartIDFromFirstSet は最初のセットから部位IDを取得
-func (r *workoutRepository) getPartIDFromFirstSet(ctx context.Context, sets []record.WorkoutSet) (*int, error) {
+func (r *workoutRepository) getPartIDFromFirstSet(ctx context.Context, sets []WorkoutSet) (*int, error) {
 	if len(sets) == 0 {
 		// セットが空の場合は部位を特定できない（全レコード検索になってしまう）
 		// エラーを返すか、新規作成を強制する
 		return nil, nil
 	}
 
-	var exercise record.WorkoutExercise
+	var exercise WorkoutExercise
 	if err := r.db.WithContext(ctx).First(&exercise, sets[0].WorkoutExerciseID).Error; err != nil {
 		return nil, fmt.Errorf("failed to fetch exercise: %w", err)
 	}
@@ -176,8 +174,8 @@ func (r *workoutRepository) getPartIDFromFirstSet(ctx context.Context, sets []re
 }
 
 // findExistingRecord は同日同部位のレコードを検索
-func (r *workoutRepository) findExistingRecord(tx *gorm.DB, userID string, performedDate time.Time, partID *int) (*record.WorkoutRecord, error) {
-	var existingRecord record.WorkoutRecord
+func (r *workoutRepository) findExistingRecord(tx *gorm.DB, userID string, performedDate time.Time, partID *int) (*WorkoutRecord, error) {
+	var existingRecord WorkoutRecord
 
 	query := tx.
 		Preload("Sets.Exercise").
@@ -200,7 +198,7 @@ func (r *workoutRepository) findExistingRecord(tx *gorm.DB, userID string, perfo
 }
 
 // createRecordWithSets は新規レコードとセットを作成
-func (r *workoutRepository) createRecordWithSets(tx *gorm.DB, recordWorkout *record.WorkoutRecord) error {
+func (r *workoutRepository) createRecordWithSets(tx *gorm.DB, recordWorkout *WorkoutRecord) error {
 	sets := recordWorkout.Sets
 	recordWorkout.Sets = nil
 	recordWorkout.ID = 0 // 新規作成なのでIDをクリア（オートインクリメント）
@@ -213,12 +211,11 @@ func (r *workoutRepository) createRecordWithSets(tx *gorm.DB, recordWorkout *rec
 }
 
 // updateRecordAndReplaceSets は既存レコードのメタデータを更新し、セットを置き換え
-func (r *workoutRepository) updateRecordAndReplaceSets(tx *gorm.DB, existing *record.WorkoutRecord, new *record.WorkoutRecord, partID *int) error {
-	// メタデータ（時刻・場所・コンディション）を更新
+func (r *workoutRepository) updateRecordAndReplaceSets(tx *gorm.DB, existing *WorkoutRecord, new *WorkoutRecord, partID *int) error {
+	// メタデータ（時刻・コンディション・ノート）を更新
 	updates := map[string]interface{}{
 		"started_at":      new.StartedAt,
 		"ended_at":        new.EndedAt,
-		"place":           new.Place,
 		"note":            new.Note,
 		"condition_level": new.ConditionLevel,
 	}
@@ -242,14 +239,14 @@ func (r *workoutRepository) deleteSetsByPart(tx *gorm.DB, recordID int, partID *
 	}
 
 	var existingSetIDs []int
-	tx.Model(&record.WorkoutSet{}).
+	tx.Model(&WorkoutSet{}).
 		Joins("JOIN workout_exercises ON workout_exercises.id = workout_sets.workout_exercise_id").
 		Where("workout_sets.workout_record_id = ? AND workout_exercises.workout_part_id = ?", recordID, *partID).
 		Pluck("workout_sets.id", &existingSetIDs)
 
 	if len(existingSetIDs) > 0 {
 		// 物理削除（Unscoped）を使用してユニーク制約の問題を回避
-		if err := tx.Unscoped().Delete(&record.WorkoutSet{}, existingSetIDs).Error; err != nil {
+		if err := tx.Unscoped().Delete(&WorkoutSet{}, existingSetIDs).Error; err != nil {
 			return err
 		}
 	}
@@ -260,7 +257,7 @@ func (r *workoutRepository) deleteSetsByPart(tx *gorm.DB, recordID int, partID *
 // GetWorkoutParts はユーザーのワークアウト部位一覧を取得
 // 各部位に紐づく種目もプリロード
 func (r *workoutRepository) GetWorkoutParts(ctx context.Context, userID string) ([]dom.WorkoutPart, error) {
-	var parts []record.WorkoutPart
+	var parts []WorkoutPart
 
 	err := r.db.WithContext(ctx).
 		Preload("Exercises", "user_id = ?", userID).
@@ -272,14 +269,14 @@ func (r *workoutRepository) GetWorkoutParts(ctx context.Context, userID string) 
 		return nil, fmt.Errorf("error fetching workout parts: %w", err)
 	}
 
-	return mapper.WorkoutPartsToDomain(parts), nil
+	return WorkoutPartsToDomain(parts), nil
 }
 
 // CountUserWorkoutParts はユーザーのワークアウト部位数をカウント
 func (r *workoutRepository) CountUserWorkoutParts(ctx context.Context, userID string) (int64, error) {
 	var count int64
 	err := r.db.WithContext(ctx).
-		Model(&record.WorkoutPart{}).
+		Model(&WorkoutPart{}).
 		Where("user_id = ?", userID).
 		Count(&count).Error
 
@@ -292,9 +289,9 @@ func (r *workoutRepository) CountUserWorkoutParts(ctx context.Context, userID st
 
 // CreateWorkoutParts は複数のワークアウト部位を一括作成
 func (r *workoutRepository) CreateWorkoutParts(ctx context.Context, userID string, parts []dom.WorkoutPart) error {
-	recordParts := make([]record.WorkoutPart, len(parts))
+	recordParts := make([]WorkoutPart, len(parts))
 	for i, part := range parts {
-		recordParts[i] = record.WorkoutPart{
+		recordParts[i] = WorkoutPart{
 			Name:   part.Name,
 			UserID: &userID,
 		}
@@ -312,7 +309,7 @@ func (r *workoutRepository) CreateWorkoutParts(ctx context.Context, userID strin
 func (r *workoutRepository) DeleteWorkoutExercise(ctx context.Context, userID string, exerciseID int64) error {
 	err := r.db.WithContext(ctx).
 		Where("id = ? AND user_id = ?", exerciseID, userID).
-		Delete(&record.WorkoutExercise{}).Error
+		Delete(&WorkoutExercise{}).Error
 
 	if err != nil {
 		return fmt.Errorf("error deleting workout exercise: %w", err)
@@ -325,7 +322,7 @@ func (r *workoutRepository) DeleteWorkoutExercise(ctx context.Context, userID st
 // - ID が指定されていれば更新、なければ新規作成
 // - OnConflict で ID 衝突時は name と workout_part_id を更新
 func (r *workoutRepository) UpsertWorkoutExercises(ctx context.Context, userID string, exercises []dom.WorkoutExerciseRef) error {
-	recordExercises := make([]record.WorkoutExercise, 0, len(exercises))
+	recordExercises := make([]WorkoutExercise, 0, len(exercises))
 	for _, exercise := range exercises {
 		var partID *int
 		if exercise.PartID != nil {
@@ -333,7 +330,7 @@ func (r *workoutRepository) UpsertWorkoutExercises(ctx context.Context, userID s
 			partID = &pid
 		}
 
-		recordExercise := record.WorkoutExercise{
+		recordExercise := WorkoutExercise{
 			Name:          exercise.Name,
 			WorkoutPartID: partID,
 			UserID:        &userID,
@@ -361,7 +358,7 @@ func (r *workoutRepository) UpsertWorkoutExercises(ctx context.Context, userID s
 }
 
 func (r *workoutRepository) GetLastWorkoutRecord(ctx context.Context, userID string, exerciseID int64) (dom.WorkoutRecord, error) {
-	var rec record.WorkoutRecord
+	var rec WorkoutRecord
 
 	// サブクエリ: 指定したエクササイズを含む最新のレコードIDを取得
 	// performed_date（実施日）とid（より新しいレコード）で最新を判定
@@ -386,7 +383,7 @@ func (r *workoutRepository) GetLastWorkoutRecord(ctx context.Context, userID str
 		return dom.WorkoutRecord{}, fmt.Errorf("error fetching last workout record: %w", err)
 	}
 
-	domainRecord := mapper.WorkoutRecordToDomain(&rec)
+	domainRecord := ToEntity(&rec)
 	if domainRecord == nil {
 		return dom.WorkoutRecord{}, fmt.Errorf("failed to convert record to domain")
 	}

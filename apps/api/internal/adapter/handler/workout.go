@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"gogym-api/internal/adapter/dto"
-	dom "gogym-api/internal/domain/workout"
+	dom "gogym-api/internal/domain/entities"
 	wu "gogym-api/internal/usecase/workout"
 
 	"github.com/labstack/echo/v4"

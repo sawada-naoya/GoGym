@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"gogym-api/internal/adapter/dto"
-	dom "gogym-api/internal/domain/user"
+	dom "gogym-api/internal/domain/entities"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/oklog/ulid/v2"

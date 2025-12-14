@@ -1,16 +1,15 @@
-package repository
+package user
 
 import (
 	"context"
-	"gogym-api/internal/adapter/repository/mapper"
-	"gogym-api/internal/adapter/repository/record"
-	dom "gogym-api/internal/domain/user"
+
+	dom "gogym-api/internal/domain/entities"
 
 	"github.com/oklog/ulid/v2"
 	"gorm.io/gorm"
 )
 
-type UserRepository struct { // ← 公開にする
+type UserRepository struct {
 	db *gorm.DB
 }
 
@@ -19,7 +18,7 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 }
 
 func (r *UserRepository) Create(ctx context.Context, user *dom.User) error {
-	recordUser := mapper.FromUserEntity(user)
+	recordUser := FromEntity(user)
 
 	result := r.db.WithContext(ctx).Create(recordUser)
 	if result.Error != nil {
@@ -30,44 +29,44 @@ func (r *UserRepository) Create(ctx context.Context, user *dom.User) error {
 }
 
 func (r *UserRepository) FindByID(ctx context.Context, id ulid.ULID) (*dom.User, error) {
-	var recordUser record.User
+	var recordUser User
 
 	err := r.db.WithContext(ctx).
-		Model(&record.User{}).
+		Model(&User{}).
 		Where("id = ?", id.String()).
 		First(&recordUser).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, dom.NewDomainError("user_not_found")
+			return nil, nil // user not found
 		}
 		return nil, err
 	}
 
-	return mapper.ToUserEntity(&recordUser), nil
+	return ToEntity(&recordUser)
 }
 
-func (r *UserRepository) FindByEmail(ctx context.Context, email dom.Email) (*dom.User, error) {
-	var recordUser record.User
+func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*dom.User, error) {
+	var recordUser User
 
 	err := r.db.WithContext(ctx).
-		Model(&record.User{}).
-		Where("email = ?", email.String()).
+		Model(&User{}).
+		Where("email = ?", email).
 		First(&recordUser).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, dom.NewDomainError("user_not_found")
+			return nil, nil // user not found
 		}
 		return nil, err
 	}
 
-	return mapper.ToUserEntity(&recordUser), nil
+	return ToEntity(&recordUser)
 }
 
-func (r *UserRepository) ExistsByEmail(ctx context.Context, email dom.Email) (bool, error) {
+func (r *UserRepository) ExistsByEmail(ctx context.Context, email string) (bool, error) {
 	var count int64
 	result := r.db.WithContext(ctx).
-		Model(&record.User{}).
-		Where("email = ?", email.String()).
+		Model(&User{}).
+		Where("email = ?", email).
 		Count(&count).Error
 
 	if result != nil {

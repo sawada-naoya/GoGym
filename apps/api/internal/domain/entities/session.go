@@ -2,9 +2,12 @@
 // 受け取り: JTI, UserID, 有効期限, 現在時刻
 // 処理: RefreshTokenの作成、バリデーション、有効性チェック
 // 返却: 検証済みRefreshTokenエンティティ、エラー
-package session
+package domain
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 // RefreshToken リフレッシュトークンエンティティ
 type RefreshToken struct {
@@ -18,13 +21,13 @@ type RefreshToken struct {
 // NewRefreshToken バリデーション付きで新しいリフレッシュトークンを作成
 func NewRefreshToken(jti, userID string, expiresAt, now time.Time) (*RefreshToken, error) {
 	if jti == "" {
-		return nil, NewDomainError("invalid_jti")
+		return nil, errors.New("invalid jti")
 	}
 	if userID == "" {
-		return nil, NewDomainError("invalid_user_id")
+		return nil, errors.New("invalid user id")
 	}
 	if !expiresAt.After(now) {
-		return nil, NewDomainError("invalid_expires_at")
+		return nil, errors.New("invalid expires at")
 	}
 
 	return &RefreshToken{

@@ -1,4 +1,4 @@
-package record
+package workout
 
 import (
 	"time"
@@ -9,10 +9,10 @@ import (
 type WorkoutRecord struct {
 	ID              int    `gorm:"primaryKey;autoIncrement"`
 	UserID          string `gorm:"index"`
+	GymID           *int64 `gorm:"index"` // gym_id追加
 	PerformedDate   time.Time
 	StartedAt       *time.Time
 	EndedAt         *time.Time
-	Place           *string
 	Note            *string
 	ConditionLevel  *int
 	DurationMinutes *int
@@ -22,6 +22,10 @@ type WorkoutRecord struct {
 
 	// Record → Set（1:N）
 	Sets []WorkoutSet `gorm:"foreignKey:WorkoutRecordID"`
+}
+
+func (WorkoutRecord) TableName() string {
+	return "workout_records"
 }
 
 type WorkoutSet struct {
@@ -41,6 +45,10 @@ type WorkoutSet struct {
 	Exercise WorkoutExercise `gorm:"foreignKey:WorkoutExerciseID"`
 }
 
+func (WorkoutSet) TableName() string {
+	return "workout_sets"
+}
+
 type WorkoutExercise struct {
 	ID            int `gorm:"primaryKey;autoIncrement"`
 	Name          string
@@ -54,6 +62,10 @@ type WorkoutExercise struct {
 	Part *WorkoutPart `gorm:"foreignKey:WorkoutPartID"`
 }
 
+func (WorkoutExercise) TableName() string {
+	return "workout_exercises"
+}
+
 type WorkoutPart struct {
 	ID        int `gorm:"primaryKey;autoIncrement"`
 	Name      string
@@ -63,4 +75,8 @@ type WorkoutPart struct {
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 
 	Exercises []WorkoutExercise `gorm:"foreignKey:WorkoutPartID"`
+}
+
+func (WorkoutPart) TableName() string {
+	return "workout_parts"
 }

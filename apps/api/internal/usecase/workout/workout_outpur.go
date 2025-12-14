@@ -1,8 +1,8 @@
-package workout
+package usecase
 
 import (
 	"context"
-	dom "gogym-api/internal/domain/workout"
+	dom "gogym-api/internal/domain/entities"
 )
 
 type Repository interface {

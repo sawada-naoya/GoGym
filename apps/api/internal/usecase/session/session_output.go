@@ -7,13 +7,13 @@ package session
 import (
 	"context"
 
-	userDom "gogym-api/internal/domain/user"
+	dom "gogym-api/internal/domain/entities"
 	"github.com/oklog/ulid/v2"
 )
 
 type UserRepository interface {
-	FindByEmail(ctx context.Context, email userDom.Email) (*userDom.User, error)
-	FindByID(ctx context.Context, id ulid.ULID) (*userDom.User, error)
+	FindByEmail(ctx context.Context, email dom.Email) (*dom.User, error)
+	FindByID(ctx context.Context, id ulid.ULID) (*dom.User, error)
 }
 
 type PasswordHasher interface {

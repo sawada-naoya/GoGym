@@ -1,9 +1,9 @@
-package workout
+package usecase
 
 import (
 	"context"
 	dto "gogym-api/internal/adapter/dto"
-	dom "gogym-api/internal/domain/workout"
+	dom "gogym-api/internal/domain/entities"
 )
 
 type WorkoutUseCase interface {

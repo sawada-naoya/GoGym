@@ -1,4 +1,4 @@
-package workout
+package domain
 
 import (
 	"errors"
@@ -53,10 +53,10 @@ type WorkoutSet struct {
 type WorkoutRecord struct {
 	ID            *ID
 	UserID        ULID
+	GymID         *ID
 	PerformedDate time.Time  // DATE を day-start に固定、時刻は別扱い
 	StartedAt     *time.Time // 実日時（PerformedDateに紐づけて作る）
 	EndedAt       *time.Time
-	Place         *string
 	Note          *string
 	Condition     ConditionLevel
 	DurationMin   *int // 派生値：Started/Endedから再計算

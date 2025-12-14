@@ -1,9 +1,9 @@
-package workout
+package usecase
 
 import (
 	"context"
 	dto "gogym-api/internal/adapter/dto"
-	dom "gogym-api/internal/domain/workout"
+	dom "gogym-api/internal/domain/entities"
 	"time"
 )
 
@@ -11,7 +11,7 @@ type interactor struct {
 	repo Repository
 }
 
-func NewInteractor(repo Repository) WorkoutUseCase {
+func NewUsecase(repo Repository) WorkoutUseCase {
 	return &interactor{
 		repo: repo,
 	}
