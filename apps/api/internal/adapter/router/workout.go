@@ -2,8 +2,8 @@ package router
 
 import (
 	"gogym-api/internal/adapter/handler"
-	"gogym-api/internal/adapter/middleware"
 	"gogym-api/internal/configs"
+	"gogym-api/internal/infra/middleware"
 
 	"github.com/labstack/echo/v4"
 )

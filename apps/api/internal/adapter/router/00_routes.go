@@ -2,8 +2,8 @@ package router
 
 import (
 	"gogym-api/internal/adapter/handler"
-	"gogym-api/internal/adapter/server"
 	"gogym-api/internal/configs"
+	"gogym-api/internal/infra/server"
 
 	"github.com/labstack/echo/v4"
 )
@@ -26,9 +26,9 @@ func RegisterRoutes(
 	v1 := e.Group("/api/v1")
 
 	// MVPに必要な機能のみ有効化
-	GymRoutes(v1, gymHandler)           // ジム登録・検索
-	UserRoutes(v1, userHandler)         // ユーザー登録
-	SessionRoutes(v1, sessionHandler)   // 認証
+	GymRoutes(v1, gymHandler)                  // ジム登録・検索
+	UserRoutes(v1, userHandler)                // ユーザー登録
+	SessionRoutes(v1, sessionHandler)          // 認証
 	WorkoutRoutes(v1, workoutHandler, authCfg) // トレーニング記録
 
 	// 将来実装予定の機能（一旦無効化）
