@@ -1,0 +1,31 @@
+name: Deploy API to Render/Fly.io
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/api/**'
+      - 'packages/openapi/**'
+      - '.github/workflows/deploy-api.yml'
+
+jobs:
+  deploy:
+    name: Deploy API
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Render.com を使う場合はここにRender CLI設定
+      # Fly.io を使う場合は以下のようにflyctl設定
+
+      # - uses: superfly/flyctl-actions/setup-flyctl@master
+      # - run: flyctl deploy --remote-only
+      #   working-directory: apps/api
+      #   env:
+      #     FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      # Renderの場合は単にgit pushでトリガーされるので
+      # 明示的なデプロイコマンドは不要
+      - name: Trigger Render Deploy
+        run: echo "Render deploys automatically on git push"
