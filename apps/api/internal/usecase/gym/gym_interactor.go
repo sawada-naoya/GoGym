@@ -1,11 +1,11 @@
 package gym
 
-type interactor struct {
+type gymInteractor struct {
 	repo Repository
 }
 
-func NewInteractor(repo Repository) GymUseCase {
-	return &interactor{
+func NewGymInteractor(repo Repository) GymUseCase {
+	return &gymInteractor{
 		repo: repo,
 	}
 }

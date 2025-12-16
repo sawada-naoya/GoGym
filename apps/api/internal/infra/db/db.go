@@ -1,33 +1,18 @@
-// internal/infra/db/gorm.go
-// 役割: データベース接続インフラストラクチャ（Infrastructure Layer）
-// GORM（Go ORM）を使用してMySQL 8.0への接続とコネクションプールの設定を担当
 package db
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"gogym-api/internal/configs"
 
-	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
-// NewDB は設定情報を元にGORMのDBインスタンスを生成する
-// 接続プールやログ設定も同時に行い、本番環境での運用に適した設定を適用する
-//
-// Parameters:
-//   - cfg: データベース接続設定（ホスト、ポート、ユーザー、パスワード等）
-//
-// Returns:
-//   - *gorm.DB: 設定済みのGORMデータベースインスタンス
-//   - error: 接続エラーまたは設定エラー
 func NewDB(cfg configs.DatabaseConfig) (*gorm.DB, error) {
-	// MySQL接続用のDSN（Data Source Name）を構築
-	// parseTime=true: time.Time型への自動変換を有効化
-	// loc=UTC: タイムゾーンをUTCに固定（DBは常にUTCで保存）
-	// charset/collation: UTF-8（日本語対応）+ 大文字小文字区別なし
 	dsn := fmt.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s?parseTime=true&loc=UTC&charset=utf8mb4&collation=utf8mb4_unicode_ci&interpolateParams=true",
 		cfg.User,
@@ -37,14 +22,18 @@ func NewDB(cfg configs.DatabaseConfig) (*gorm.DB, error) {
 		cfg.Database,
 	)
 
-	// GORM用ロガー設定
-	// 開発環境では実行されるSQLクエリを全てログ出力する（デバッグ用）
-	// 本番環境ではエラーのみ出力するよう後で調整可能
-	newLogger := logger.Default.LogMode(logger.Info)
+	// 環境に応じたログレベルの設定
+	var newLogger logger.Interface
+	env := os.Getenv("APP_ENV")
+	if env == "local" || env == "development" || env == "" {
+		// ローカル環境ではInfoレベルで詳細なログを表示
+		newLogger = logger.Default.LogMode(logger.Info)
+	} else {
+		// 本番環境ではWarnレベル以上のみ表示
+		newLogger = logger.Default.LogMode(logger.Warn)
+	}
 
-	// GORM DBインスタンスを作成
-	// MySQL 8.0ドライバーを使用してデータベースに接続
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: newLogger,
 	})
 	if err != nil {

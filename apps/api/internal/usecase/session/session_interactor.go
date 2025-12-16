@@ -16,23 +16,23 @@ import (
 	"github.com/oklog/ulid/v2"
 )
 
-type interactor struct {
+type sessionInteractor struct {
 	// 外部依存関係
 	ur UserRepository
 	ph PasswordHasher
 }
 
-func NewInteractor(
+func NewSessionInteractor(
 	ur UserRepository,
 	ph PasswordHasher,
 ) SessionUseCase {
-	return &interactor{
+	return &sessionInteractor{
 		ur: ur,
 		ph: ph,
 	}
 }
 
-func (i *interactor) Login(ctx context.Context, req dto.LoginRequest) error {
+func (i *sessionInteractor) Login(ctx context.Context, req dto.LoginRequest) error {
 
 	// ユーザー検索
 	user, err := i.ur.FindByEmail(ctx, req.Email)
@@ -50,7 +50,7 @@ func (i *interactor) Login(ctx context.Context, req dto.LoginRequest) error {
 	return nil
 }
 
-func (i *interactor) CreateSession(ctx context.Context, email string) (dto.TokenResponse, error) {
+func (i *sessionInteractor) CreateSession(ctx context.Context, email string) (dto.TokenResponse, error) {
 
 	user, err := i.ur.FindByEmail(ctx, email)
 	if err != nil {
@@ -104,7 +104,7 @@ func (i *interactor) CreateSession(ctx context.Context, email string) (dto.Token
 	}, nil
 }
 
-func (i *interactor) RefreshToken(ctx context.Context, refreshToken string) (dto.TokenResponse, error) {
+func (i *sessionInteractor) RefreshToken(ctx context.Context, refreshToken string) (dto.TokenResponse, error) {
 	secret := []byte(os.Getenv("JWT_SECRET"))
 
 	// リフレッシュトークンを検証

@@ -1,5 +1,3 @@
-// 役割: ユーザードメインのEntity/VO（Domain Layer）
-// ビジネスルールと不変条件を持つ純粋なドメインオブジェクト。GORM/JSONタグは一切なし
 package domain
 
 import (
@@ -19,7 +17,6 @@ type User struct {
 	UpdatedAt    time.Time // 更新日時
 }
 
-// NewUser: 不変条件を満たすユーザーを生成（IDは自動生成）
 func NewUser(id ulid.ULID, name, email, passwordHash string, now time.Time) *User {
 	n := strings.TrimSpace(name)
 	if n == "" || len(n) > 100 {

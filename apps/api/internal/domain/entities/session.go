@@ -1,7 +1,3 @@
-// 役割: セッションドメインのエンティティ（認証・セッション管理）
-// 受け取り: JTI, UserID, 有効期限, 現在時刻
-// 処理: RefreshTokenの作成、バリデーション、有効性チェック
-// 返却: 検証済みRefreshTokenエンティティ、エラー
 package domain
 
 import (
@@ -9,7 +5,6 @@ import (
 	"time"
 )
 
-// RefreshToken リフレッシュトークンエンティティ
 type RefreshToken struct {
 	JTI       string     // JWT ID (ULID)
 	UserID    string     // ユーザーID (ULID)
@@ -18,7 +13,6 @@ type RefreshToken struct {
 	CreatedAt time.Time  // 作成タイムスタンプ
 }
 
-// NewRefreshToken バリデーション付きで新しいリフレッシュトークンを作成
 func NewRefreshToken(jti, userID string, expiresAt, now time.Time) (*RefreshToken, error) {
 	if jti == "" {
 		return nil, errors.New("invalid jti")

@@ -12,20 +12,20 @@ import (
 	"github.com/oklog/ulid/v2"
 )
 
-type interactor struct {
+type userInteractor struct {
 	repo   Repository
 	hasher PasswordHasher
 }
 
-func NewInteractor(repo Repository, hasher PasswordHasher) UserUseCase {
-	return &interactor{
+func NewUserInteractor(repo Repository, hasher PasswordHasher) UserUseCase {
+	return &userInteractor{
 		repo:   repo,
 		hasher: hasher,
 	}
 }
 
 // SignUp handles user registration
-func (i *interactor) SignUp(ctx context.Context, req dto.SignUpRequest) error {
+func (i *userInteractor) SignUp(ctx context.Context, req dto.SignUpRequest) error {
 	// メールアドレスの重複チェック
 	exists, err := i.repo.ExistsByEmail(ctx, req.Email)
 	if err != nil {

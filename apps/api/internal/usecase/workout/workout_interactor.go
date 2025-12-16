@@ -7,17 +7,17 @@ import (
 	"time"
 )
 
-type interactor struct {
+type workoutInteractor struct {
 	repo Repository
 }
 
-func NewUsecase(repo Repository) WorkoutUseCase {
-	return &interactor{
+func NewWorkoutInteractor(repo Repository) WorkoutUseCase {
+	return &workoutInteractor{
 		repo: repo,
 	}
 }
 
-func (i *interactor) GetWorkoutRecords(ctx context.Context, userID string, dateParam string) (dto.WorkoutRecordDTO, error) {
+func (i *workoutInteractor) GetWorkoutRecords(ctx context.Context, userID string, dateParam string) (dto.WorkoutRecordDTO, error) {
 	// dateが空文字列の場合は今日のJST日付を使用
 	date := dateParam
 	if date == "" {
@@ -43,7 +43,7 @@ func (i *interactor) GetWorkoutRecords(ctx context.Context, userID string, dateP
 	return *response, nil
 }
 
-func (i *interactor) CreateWorkoutRecord(ctx context.Context, workout dom.WorkoutRecord) error {
+func (i *workoutInteractor) CreateWorkoutRecord(ctx context.Context, workout dom.WorkoutRecord) error {
 	// Domain logic can be added here (validation, business rules, etc.)
 
 	// 同日同部位ならupsert、それ以外は新規作成
@@ -54,7 +54,7 @@ func (i *interactor) CreateWorkoutRecord(ctx context.Context, workout dom.Workou
 	return nil
 }
 
-func (i *interactor) UpsertWorkoutRecord(ctx context.Context, workout dom.WorkoutRecord) error {
+func (i *workoutInteractor) UpsertWorkoutRecord(ctx context.Context, workout dom.WorkoutRecord) error {
 	// Domain logic can be added here (validation, business rules, etc.)
 
 	// 同日同部位ならupsert、それ以外は新規作成
@@ -65,7 +65,7 @@ func (i *interactor) UpsertWorkoutRecord(ctx context.Context, workout dom.Workou
 	return nil
 }
 
-func (i *interactor) GetWorkoutParts(ctx context.Context, userID string) ([]dto.WorkoutPartListItemDTO, error) {
+func (i *workoutInteractor) GetWorkoutParts(ctx context.Context, userID string) ([]dto.WorkoutPartListItemDTO, error) {
 	parts, err := i.repo.GetWorkoutParts(ctx, userID)
 	if err != nil {
 		return nil, err
@@ -73,7 +73,7 @@ func (i *interactor) GetWorkoutParts(ctx context.Context, userID string) ([]dto.
 	return dto.WorkoutPartsToDTO(parts), nil
 }
 
-func (i *interactor) SeedWorkoutParts(ctx context.Context, userID string) error {
+func (i *workoutInteractor) SeedWorkoutParts(ctx context.Context, userID string) error {
 	// すでにユーザーの部位が存在するかチェック
 	count, err := i.repo.CountUserWorkoutParts(ctx, userID)
 	if err != nil {
@@ -101,7 +101,7 @@ func (i *interactor) SeedWorkoutParts(ctx context.Context, userID string) error 
 	return i.repo.CreateWorkoutParts(ctx, userID, defaultParts)
 }
 
-func (i *interactor) CreateWorkoutExercise(ctx context.Context, userID string, exercises []dto.CreateWorkoutExerciseItem) error {
+func (i *workoutInteractor) CreateWorkoutExercise(ctx context.Context, userID string, exercises []dto.CreateWorkoutExerciseItem) error {
 	// ユーザーIDをULIDに変換
 	ownerULID := dom.ULID(userID)
 
@@ -127,11 +127,11 @@ func (i *interactor) CreateWorkoutExercise(ctx context.Context, userID string, e
 	return i.repo.UpsertWorkoutExercises(ctx, userID, domainExercises)
 }
 
-func (i *interactor) DeleteWorkoutExercise(ctx context.Context, userID string, exerciseID int64) error {
+func (i *workoutInteractor) DeleteWorkoutExercise(ctx context.Context, userID string, exerciseID int64) error {
 	return i.repo.DeleteWorkoutExercise(ctx, userID, exerciseID)
 }
 
-func (i *interactor) GetLastWorkoutRecord(ctx context.Context, userID string, exerciseID int64) (*dto.ExerciseDTO, error) {
+func (i *workoutInteractor) GetLastWorkoutRecord(ctx context.Context, userID string, exerciseID int64) (*dto.ExerciseDTO, error) {
 	// 最後のワークアウトレコードを取得
 	record, err := i.repo.GetLastWorkoutRecord(ctx, userID, exerciseID)
 	if err != nil {

@@ -6,7 +6,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// User はユーザーエンティティ用のGORMレコードを表す
 type User struct {
 	ID           string         `gorm:"primaryKey;type:char(26)"` // ULID用
 	Email        string         `gorm:"unique;not null;index"`

@@ -1,6 +1,3 @@
-// internal/domain/gym/entity.go
-// 役割: ジムドメインのEntity/VO（Domain Layer）
-// ビジネスルールと不変条件を持つ純粋なドメインオブジェクト。GORM/JSONタグは一切なし
 package domain
 
 import (
@@ -8,7 +5,6 @@ import (
 	"strings"
 )
 
-// Gym はジムの集約ルートを表す
 type Gym struct {
 	ID              int
 	Name            string `validate:"required,max=255"`
@@ -19,7 +15,6 @@ type Gym struct {
 	PlaceID         int
 }
 
-// NewGym は検証付きで新しいジムを作成する
 func NewGym(name, address string, latitude, longitude float64) (*Gym, error) {
 	gym := &Gym{
 		Name:      strings.TrimSpace(name),

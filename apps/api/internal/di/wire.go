@@ -3,81 +3,58 @@
 package di
 
 import (
-	"gogym-api/internal/configs"
-
 	"github.com/google/wire"
+	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 
-	"gogym-api/internal/adapter/auth"
 	"gogym-api/internal/adapter/handler"
-	"gogym-api/internal/adapter/repository"
-	"gogym-api/internal/adapter/router"
+	gymrepo "gogym-api/internal/adapter/repository/gym"
+	userrepo "gogym-api/internal/adapter/repository/user"
+	workoutrepo "gogym-api/internal/adapter/repository/workout"
 	gymuc "gogym-api/internal/usecase/gym"
-	reviewuc "gogym-api/internal/usecase/review"
 	sessionuc "gogym-api/internal/usecase/session"
 	useruc "gogym-api/internal/usecase/user"
 	workoutuc "gogym-api/internal/usecase/workout"
-
-	"gogym-api/internal/infra/db"
-
-	"github.com/labstack/echo/v4"
 )
 
-var RepositorySet = wire.NewSet(
-	repository.NewUserRepository, // 具象
-	wire.Bind(new(useruc.Repository), new(*repository.UserRepository)),
-	wire.Bind(new(sessionuc.UserRepository), new(*repository.UserRepository)),
+type Handlers struct {
+	User    *handler.UserHandler
+	Session *handler.SessionHandler
+	Gym     *handler.GymHandler
+	Workout *handler.WorkoutHandler
+}
 
-	repository.NewGymRepository,
-	repository.NewReviewRepository,
-	repository.NewTagRepository,
-	repository.NewWorkoutRepository,
-)
+func NewHandlers(
+	user *handler.UserHandler,
+	session *handler.SessionHandler,
+	gym *handler.GymHandler,
+	workout *handler.WorkoutHandler,
+) *Handlers {
+	return &Handlers{
+		User:    user,
+		Session: session,
+		Gym:     gym,
+		Workout: workout,
+	}
+}
 
-var internalPlatformSet = wire.NewSet(
-	auth.NewBcryptPasswordHasher,
-	wire.Bind(new(useruc.PasswordHasher), new(*auth.BcryptPasswordHasher)),
-	wire.Bind(new(sessionuc.PasswordHasher), new(*auth.BcryptPasswordHasher)),
-)
-
-var UsecaseSet = wire.NewSet(
-	internalPlatformSet,
-	gymuc.NewInteractor,
-	reviewuc.NewInteractor,
-	sessionuc.NewInteractor,
-	useruc.NewInteractor,
-	workoutuc.NewInteractor,
-)
-
-var HandlerSet = wire.NewSet(
-	handler.NewGymHandler,
-	handler.NewReviewHandler,
-	handler.NewUserHandler,
-	handler.NewSessionHandler,
-	handler.NewWorkoutHandler,
-)
-
-var ServerSet = wire.NewSet(
-	router.RegisterRoutes,
-)
-
-var InfraSet = wire.NewSet(
-	db.NewDB,
-)
-
-func provideHTTP(c *configs.Config) configs.HTTPConfig { return c.HTTP }
-
-func provideDB(c *configs.Config) configs.DatabaseConfig { return c.Database }
-
-func provideAuth(c *configs.Config) configs.AuthConfig { return c.Auth }
-
-func BuildServer(cfg *configs.Config) (*echo.Echo, func(), error) {
+func Initialize(e *echo.Echo, db *gorm.DB) *Handlers {
 	wire.Build(
-		provideHTTP, provideDB, provideAuth, // cfg → サブ設定
-		InfraSet,      // db
-		RepositorySet, // repo
-		UsecaseSet,    // usecase（内側でauth/serviceを吸収）
-		HandlerSet,    // handler
-		ServerSet,     // router(server)
+		userrepo.NewUserRepository,
+		gymrepo.NewGymRepository,
+		workoutrepo.NewWorkoutRepository,
+
+		useruc.NewUserInteractor,
+		sessionuc.NewSessionInteractor,
+		gymuc.NewGymInteractor,
+		workoutuc.NewWorkoutInteractor,
+
+		handler.NewUserHandler,
+		handler.NewSessionHandler,
+		handler.NewGymHandler,
+		handler.NewWorkoutHandler,
+
+		NewHandlers,
 	)
-	return nil, nil, nil
+	return nil
 }

@@ -1,6 +1,3 @@
-// internal/adapter/repository/gym/gym_record.go
-// 役割: ジム関連のGORMレコード構造体（Infrastructure Layer）
-// DB行の形でGORMタグ付きstruct。ドメインエンティティとの変換はmapperで実行
 package gym
 
 import (
@@ -9,7 +6,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// GymRecord はジムエンティティ用のGORMレコードを表す
 type GymRecord struct {
 	ID              int64          `gorm:"primaryKey;autoIncrement"`
 	Name            string         `gorm:"size:255;not null;index:idx_gyms_name"`

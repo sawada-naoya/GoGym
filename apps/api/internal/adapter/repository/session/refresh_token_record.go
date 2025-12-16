@@ -6,7 +6,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// RefreshToken represents refresh_tokens table structure（ULID対応）
 type RefreshToken struct {
 	JTI       string         `gorm:"primaryKey;type:char(26);column:jti"` // JWT ID (ULID)
 	UserID    string         `gorm:"not null;index;type:char(26)"`        // User ID (ULID)
