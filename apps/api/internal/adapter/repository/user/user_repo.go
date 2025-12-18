@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"strings"
 
 	dom "gogym-api/internal/domain/entities"
 
@@ -50,7 +51,7 @@ func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*dom.Us
 
 	err := r.db.WithContext(ctx).
 		Model(&User{}).
-		Where("email = ?", email).
+		Where("LOWER(email) = ?", strings.ToLower(email)).
 		First(&recordUser).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -66,7 +67,7 @@ func (r *UserRepository) ExistsByEmail(ctx context.Context, email string) (bool,
 	var count int64
 	result := r.db.WithContext(ctx).
 		Model(&User{}).
-		Where("email = ?", email).
+		Where("LOWER(email) = ?", strings.ToLower(email)).
 		Count(&count).Error
 
 	if result != nil {

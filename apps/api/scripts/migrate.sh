@@ -20,11 +20,11 @@ if [ -z "$DB_HOST" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASSWORD" ] || [ -z "$DB_
     exit 1
 fi
 
-# DB_PORTが設定されていない場合は3306（MySQL）を使用
-DB_PORT=${DB_PORT:-3306}
+# DB_PORTが設定されていない場合は5432（PostgreSQL）を使用
+DB_PORT=${DB_PORT:-5432}
 
 # DSNを構築
-DSN="mysql://${DB_USER}:${DB_PASSWORD}@tcp(${DB_HOST}:${DB_PORT})/${DB_NAME}?multiStatements=true"
+DSN="postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=disable"
 
 echo "Running database migrations..."
 $MIGRATE_CMD -path ./internal/infra/db/migrations -database "$DSN" up

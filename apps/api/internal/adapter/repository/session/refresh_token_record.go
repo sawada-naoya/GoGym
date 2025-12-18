@@ -11,7 +11,7 @@ type RefreshToken struct {
 	UserID    string         `gorm:"not null;index;type:char(26)"`        // User ID (ULID)
 	RevokedAt *time.Time     `gorm:"index"`                               // 取り消し日時
 	ExpiresAt time.Time      `gorm:"not null"`                            // 有効期限
-	CreatedAt time.Time      `gorm:"not null;default:CURRENT_TIMESTAMP"`
+	CreatedAt time.Time      `gorm:"autoCreateTime"`
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 

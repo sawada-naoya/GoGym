@@ -14,12 +14,12 @@ import (
 
 func NewDB(cfg configs.DatabaseConfig) (*gorm.DB, error) {
 	dsn := fmt.Sprintf(
-		"%s:%s@tcp(%s:%s)/%s?parseTime=true&loc=UTC&charset=utf8mb4&collation=utf8mb4_unicode_ci&interpolateParams=true",
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Tokyo",
+		cfg.Host,
 		cfg.User,
 		cfg.Password,
-		cfg.Host,
-		cfg.Port,
 		cfg.Database,
+		cfg.Port,
 	)
 
 	// 環境に応じたログレベルの設定

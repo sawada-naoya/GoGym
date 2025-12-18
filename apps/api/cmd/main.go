@@ -45,7 +45,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	handlers := di.Initialize(e, database)
+	handlers := di.Initialize(database)
 	router.RegisterRoutes(e, handlers.Gym, handlers.User, handlers.Session, handlers.Workout)
 
 	addr := fmt.Sprintf("%s:%d", config.HTTP.Host, config.HTTP.Port)
