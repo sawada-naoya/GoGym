@@ -16,11 +16,10 @@ type Props = {
   onSubmit: () => void;
   onRefetchParts: () => void;
   dataKey?: string; // データを識別するキー（日付など）
-  onFetchLastRecord: (token: string, exerciseID: number) => Promise<ExerciseDTO | null>;
-  token: string;
+  onFetchLastRecord: (exerciseID: number) => Promise<ExerciseDTO | null>;
 };
 
-const WorkoutExercisesEditor: React.FC<Props> = ({ allExercises, onChangeExercises, workoutParts, selectedPartId, onPartChange, isUpdate, onSubmit, onRefetchParts, dataKey, onFetchLastRecord, token }) => {
+const WorkoutExercisesEditor: React.FC<Props> = ({ allExercises, onChangeExercises, workoutParts, selectedPartId, onPartChange, isUpdate, onSubmit, onRefetchParts, dataKey, onFetchLastRecord }) => {
   // 選択中の部位でフィルタリング
   const displayedExercises = selectedPartId ? allExercises.filter((ex) => ex.workout_part_id === selectedPartId) : [];
 
@@ -55,7 +54,7 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ allExercises, onChangeExercis
         // 種目にIDがある場合のみ前回記録を取得
         if (exercise.id) {
           try {
-            const lastRecord = await onFetchLastRecord(token, exercise.id);
+            const lastRecord = await onFetchLastRecord(exercise.id);
             if (lastRecord) {
               newLastRecords.set(exercise.id, lastRecord);
             }
@@ -69,7 +68,7 @@ const WorkoutExercisesEditor: React.FC<Props> = ({ allExercises, onChangeExercis
     };
 
     fetchPreviousRecords();
-  }, [exercises.map((e) => e.id).join(","), token, onFetchLastRecord]);
+  }, [exercises.map((e) => e.id).join(","), onFetchLastRecord]);
 
   // 表示されているexercise（フィルタ済み）を更新して、全体を再構築
   const updateDisplayedExercise = (updatedDisplayed: ExerciseRow[]) => {
