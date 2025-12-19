@@ -14,15 +14,11 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "**.railway.app",
-      },
-      {
-        protocol: "https",
         hostname: "**.supabase.co",
       },
       {
         protocol: "https",
-        hostname: "**.fly.dev",
+        hostname: "**.vercel.app",
       },
     ],
   },
