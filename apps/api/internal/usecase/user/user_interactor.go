@@ -1,0 +1,64 @@
+package user
+
+import (
+	"context"
+	"crypto/rand"
+	"errors"
+	"time"
+
+	"gogym-api/internal/adapter/dto"
+	dom "gogym-api/internal/domain/entities"
+
+	"github.com/oklog/ulid/v2"
+)
+
+type userInteractor struct {
+	repo   Repository
+	hasher PasswordHasher
+}
+
+func NewUserInteractor(repo Repository, hasher PasswordHasher) UserUseCase {
+	return &userInteractor{
+		repo:   repo,
+		hasher: hasher,
+	}
+}
+
+// SignUp handles user registration
+func (i *userInteractor) SignUp(ctx context.Context, req dto.SignUpRequest) error {
+	// メールアドレスの重複チェック
+	exists, err := i.repo.ExistsByEmail(ctx, req.Email)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return errors.New("email_already_exists")
+	}
+
+	// パスワードハッシュ化
+	hashedPassword, err := i.hasher.HashPassword(req.Password)
+	if err != nil {
+		return err
+	}
+
+	// ユーザーID(ulid)の生成
+	t := time.Now()
+	entropy := ulid.Monotonic(rand.Reader, 0)
+	id := ulid.MustNew(ulid.Timestamp(t), entropy)
+
+	now := time.Now()
+
+	// ユーザーエンティティの生成
+	user := dom.NewUser(id, req.Name, req.Email, hashedPassword, now)
+	if user == nil {
+		return errors.New("failed to create user entity")
+	}
+
+	// データベースに保存
+	err = i.repo.Create(ctx, user)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

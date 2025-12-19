@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"gogym-api/internal/adapter/dto"
-	dom "gogym-api/internal/domain/workout"
+	dom "gogym-api/internal/domain/entities"
 	wu "gogym-api/internal/usecase/workout"
 
 	"github.com/labstack/echo/v4"
@@ -26,7 +26,6 @@ func (h *WorkoutHandler) GetWorkoutRecords(c echo.Context) error {
 	ctx := c.Request().Context()
 	slog.InfoContext(ctx, "GetWorkoutRecords Handler")
 
-	// ユーザーIDを取得（認証ミドルウェアでコンテキストにセットされている想定）
 	userID, ok := c.Get("user_id").(string)
 	if !ok || userID == "" {
 		slog.ErrorContext(ctx, "User ID not found in context")

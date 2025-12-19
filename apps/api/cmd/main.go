@@ -10,8 +10,11 @@ import (
 	"syscall"
 	"time"
 
+	"gogym-api/internal/adapter/router"
 	"gogym-api/internal/configs"
 	"gogym-api/internal/di"
+	"gogym-api/internal/infra/db"
+	"gogym-api/internal/infra/server"
 
 	"github.com/joho/godotenv"
 )
@@ -31,13 +34,19 @@ func main() {
 	config, err := configs.Load()
 	if err != nil {
 		slog.Error("Failed to load configuration", "error", err)
-	}
-
-	e, _, err := di.BuildServer(config)
-	if err != nil {
-		slog.Error("Failed to build server", "error", err)
 		os.Exit(1)
 	}
+
+	e := server.NewEcho(config.HTTP)
+
+	database, err := db.NewDB(config.Database)
+	if err != nil {
+		slog.Error("Failed to connect to database", "error", err)
+		os.Exit(1)
+	}
+
+	handlers := di.Initialize(database)
+	router.RegisterRoutes(e, handlers.Gym, handlers.User, handlers.Session, handlers.Workout)
 
 	addr := fmt.Sprintf("%s:%d", config.HTTP.Host, config.HTTP.Port)
 	slog.Info("Starting server", "address", addr)

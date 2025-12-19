@@ -1,79 +1,35 @@
-# GoGym アプリケーション用 Docker Compose 設定
-# 開発環境で必要な全てのサービス（MySQL, API, Web）を起動
-# 使用方法: docker-compose up -d
+# GoGym ローカル開発環境用 Docker Compose
+# PostgreSQLのみを起動（API/Webはローカルで直接実行）
+#
+# 使用方法:
+#   docker-compose up -d        # PostgreSQL起動
+#   docker-compose down         # 停止
+#   docker-compose logs -f      # ログ確認
 
 name: gogym
 
 services:
-  # MySQL 8.0 データベースサーバー
-  mysql:
-    image: mysql:8.0
-    container_name: gogym-mysql
+  postgres:
+    image: postgres:16
+    container_name: gogym-postgres
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:-gogym}
+      POSTGRES_USER: ${DB_USER:-gogym}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-gogym_password}
       TZ: ${TZ:-Asia/Tokyo}
     ports:
-      - "${MYSQL_PORT:-3307}:3306"
+      - "${DB_PORT:-5433}:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
-      - ./init:/docker-entrypoint-initdb.d
-      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
-    networks:
-      - gogym-network
-
-  # Go API サーバー
-  api:
-    build:
-      context: ../apps/api
-      dockerfile: Dockerfile
-    container_name: gogym-api
-    ports:
-      - "${API_PORT:-8081}:8081"
-    environment:
-      - APP_ENV=${APP_ENV}
-      - APP_PORT=${APP_PORT}
-      - TZ=${TZ}
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_ACCESS_EXPIRES_IN=${JWT_ACCESS_EXPIRES_IN}
-      - JWT_REFRESH_EXPIRES_IN=${JWT_REFRESH_EXPIRES_IN}
-      - CORS_ALLOW_ORIGINS=${CORS_ALLOW_ORIGINS}
-    depends_on:
-      - mysql
-    networks:
-      - gogym-network
+      - postgres_data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test:
+        ["CMD-SHELL", "pg_isready -U ${DB_USER:-gogym} -d ${DB_NAME:-gogym}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
     restart: unless-stopped
 
-  # Next.js Web フロントエンド
-  web:
-    build:
-      context: ../apps/web
-      dockerfile: Dockerfile
-    container_name: gogym-web
-    ports:
-      - "${WEB_PORT:-3003}:3003"
-    environment:
-      - NODE_ENV=${NODE_ENV}
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
-    depends_on:
-      - api
-    networks:
-      - gogym-network
-    restart: unless-stopped
-
-# 永続化ボリューム設定
 volumes:
-  mysql_data:
+  postgres_data:
     driver: local
-
-# ネットワーク設定
-networks:
-  gogym-network:
-    driver: bridge

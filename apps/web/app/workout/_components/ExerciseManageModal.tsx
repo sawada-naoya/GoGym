@@ -1,33 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import type { WorkoutPartDTO } from "../_lib/types";
 import { useBanner } from "@/components/Banner";
-import { POST, DELETE_ } from "@/lib/api";
-
-/**
- * 種目を一括作成/更新（Upsert）
- */
-async function upsertWorkoutExercises(token: string, exercises: Array<{ id?: number; name: string; workout_part_id: number | null }>) {
-  if (!token) {
-    return { ok: false, error: "認証エラー" };
-  }
-
-  const res = await POST("/api/v1/workouts/exercises/bulk", { body: { exercises }, token });
-  return { ok: res.ok, error: res.ok ? null : "種目の登録に失敗しました", data: res.ok ? res.data : null };
-}
-
-/**
- * 種目を削除
- */
-async function deleteWorkoutExercise(token: string, exerciseID: number) {
-  if (!token) {
-    return { ok: false, error: "認証エラー" };
-  }
-
-  const res = await DELETE_(`/api/v1/workouts/exercises/${exerciseID}`, { token });
-  return { ok: res.ok, error: res.ok ? null : "種目の削除に失敗しました" };
-}
+import {
+  upsertWorkoutExercises,
+  deleteWorkoutExercise,
+} from "@/lib/bff/workout";
 
 type Props = {
   isOpen: boolean;
@@ -41,14 +19,22 @@ type ExerciseFormItem = {
   name: string;
 };
 
-const ExerciseManageModal: React.FC<Props> = ({ isOpen, onClose, workoutParts, onSuccess }) => {
-  const { data: session } = useSession();
-  const token = session?.user?.accessToken || "";
+const ExerciseManageModal: React.FC<Props> = ({
+  isOpen,
+  onClose,
+  workoutParts,
+  onSuccess,
+}) => {
   const { success, error } = useBanner();
   const [selectedPart, setSelectedPart] = useState<number | null>(null);
-  const [exercises, setExercises] = useState<ExerciseFormItem[]>([{ name: "" }]);
+  const [exercises, setExercises] = useState<ExerciseFormItem[]>([
+    { name: "" },
+  ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<{ index: number; exercise: ExerciseFormItem } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{
+    index: number;
+    exercise: ExerciseFormItem;
+  } | null>(null);
 
   // 部位選択時に既存種目をフォームにセット
   useEffect(() => {
@@ -107,7 +93,7 @@ const ExerciseManageModal: React.FC<Props> = ({ isOpen, onClose, workoutParts, o
 
     setIsSubmitting(true);
     try {
-      const result = await deleteWorkoutExercise(token, deleteTarget.exercise.id);
+      const result = await deleteWorkoutExercise(deleteTarget.exercise.id);
 
       if (result.ok) {
         // 削除成功：フロント側も削除
@@ -152,7 +138,7 @@ const ExerciseManageModal: React.FC<Props> = ({ isOpen, onClose, workoutParts, o
         workout_part_id: selectedPart,
       }));
 
-      const result = await upsertWorkoutExercises(token, exercisesWithPart);
+      const result = await upsertWorkoutExercises(exercisesWithPart);
 
       if (result.ok) {
         success("種目を登録しました");
@@ -175,13 +161,24 @@ const ExerciseManageModal: React.FC<Props> = ({ isOpen, onClose, workoutParts, o
       {deleteTarget && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[60] p-3 md:p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-[340px] md:max-w-[400px] p-4 md:p-6">
-            <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-1.5 md:mb-2">種目を削除しますか？</h3>
-            <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6">「{deleteTarget.exercise.name}」を削除します。この操作は取り消せません。</p>
+            <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-1.5 md:mb-2">
+              種目を削除しますか？
+            </h3>
+            <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6">
+              「{deleteTarget.exercise.name}
+              」を削除します。この操作は取り消せません。
+            </p>
             <div className="flex gap-2 md:gap-3 justify-center">
-              <button onClick={handleCancelDelete} className="px-3 md:px-4 py-1.5 md:py-2 text-sm md:text-base rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+              <button
+                onClick={handleCancelDelete}
+                className="px-3 md:px-4 py-1.5 md:py-2 text-sm md:text-base rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+              >
                 キャンセル
               </button>
-              <button onClick={handleConfirmDelete} className="px-3 md:px-4 py-1.5 md:py-2 text-sm md:text-base rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors">
+              <button
+                onClick={handleConfirmDelete}
+                className="px-3 md:px-4 py-1.5 md:py-2 text-sm md:text-base rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors"
+              >
                 削除する
               </button>
             </div>
@@ -196,7 +193,15 @@ const ExerciseManageModal: React.FC<Props> = ({ isOpen, onClose, workoutParts, o
           <div className="px-3 md:px-6 py-3 md:py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 md:gap-2 flex-1 min-w-0">
-                <select value={selectedPart?.toString() ?? ""} onChange={(e) => setSelectedPart(e.target.value ? Number(e.target.value) : null)} className="w-24 md:w-32 px-2 md:px-3 py-1.5 md:py-2 text-sm md:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500 bg-white">
+                <select
+                  value={selectedPart?.toString() ?? ""}
+                  onChange={(e) =>
+                    setSelectedPart(
+                      e.target.value ? Number(e.target.value) : null,
+                    )
+                  }
+                  className="w-24 md:w-32 px-2 md:px-3 py-1.5 md:py-2 text-sm md:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500 bg-white"
+                >
                   <option value="">部位</option>
                   {workoutParts.map((part) => (
                     <option key={part.id} value={part.id.toString()}>
@@ -204,11 +209,26 @@ const ExerciseManageModal: React.FC<Props> = ({ isOpen, onClose, workoutParts, o
                     </option>
                   ))}
                 </select>
-                <h2 className="text-sm md:text-xl font-semibold text-gray-900 truncate">の種目を追加</h2>
+                <h2 className="text-sm md:text-xl font-semibold text-gray-900 truncate">
+                  の種目を追加
+                </h2>
               </div>
-              <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0 ml-2">
-                <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0 ml-2"
+              >
+                <svg
+                  className="w-5 h-5 md:w-6 md:h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
@@ -219,18 +239,55 @@ const ExerciseManageModal: React.FC<Props> = ({ isOpen, onClose, workoutParts, o
             <div className="space-y-2 md:space-y-3">
               {exercises.map((exercise, index) => (
                 <div key={index} className="flex gap-1.5 md:gap-2">
-                  <input type="text" value={exercise.name} onChange={(e) => handleUpdateExerciseName(index, e.target.value)} placeholder="種目名" className="flex-1 px-2 md:px-3 py-1.5 md:py-2 text-sm md:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500" />
-                  <button type="button" onClick={() => handleRemoveExercise(index)} className="p-1.5 md:p-2 text-gray-400 hover:text-red-600 transition-colors" disabled={exercises.length === 1}>
-                    <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  <input
+                    type="text"
+                    value={exercise.name}
+                    onChange={(e) =>
+                      handleUpdateExerciseName(index, e.target.value)
+                    }
+                    placeholder="種目名"
+                    className="flex-1 px-2 md:px-3 py-1.5 md:py-2 text-sm md:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveExercise(index)}
+                    className="p-1.5 md:p-2 text-gray-400 hover:text-red-600 transition-colors"
+                    disabled={exercises.length === 1}
+                  >
+                    <svg
+                      className="w-4 h-4 md:w-5 md:h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
                     </svg>
                   </button>
                 </div>
               ))}
               <div className="flex justify-center pt-1">
-                <button type="button" onClick={handleAddExerciseInput} className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 text-booking-600 hover:text-booking-700 hover:bg-booking-50 rounded-full transition-colors">
-                  <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                <button
+                  type="button"
+                  onClick={handleAddExerciseInput}
+                  className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 text-booking-600 hover:text-booking-700 hover:bg-booking-50 rounded-full transition-colors"
+                >
+                  <svg
+                    className="w-4 h-4 md:w-5 md:h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
                   </svg>
                 </button>
               </div>
@@ -239,7 +296,11 @@ const ExerciseManageModal: React.FC<Props> = ({ isOpen, onClose, workoutParts, o
 
           {/* フッター */}
           <div className="px-3 md:px-6 py-3 md:py-4 flex justify-center border-t border-gray-100">
-            <button onClick={handleRegister} disabled={isSubmitting} className="px-6 md:px-8 py-1.5 md:py-2 text-sm md:text-base rounded-md bg-booking-600 text-white hover:bg-booking-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium">
+            <button
+              onClick={handleRegister}
+              disabled={isSubmitting}
+              className="px-6 md:px-8 py-1.5 md:py-2 text-sm md:text-base rounded-md bg-booking-600 text-white hover:bg-booking-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            >
               {isSubmitting ? "登録中..." : "登録"}
             </button>
           </div>

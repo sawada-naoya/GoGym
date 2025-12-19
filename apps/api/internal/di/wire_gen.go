@@ -8,69 +8,60 @@ package di
 
 import (
 	"github.com/google/wire"
-	"github.com/labstack/echo/v4"
-	"gogym-api/internal/adapter/auth"
 	"gogym-api/internal/adapter/handler"
-	"gogym-api/internal/adapter/repository"
-	"gogym-api/internal/adapter/router"
-	"gogym-api/internal/configs"
-	"gogym-api/internal/infra/db"
-	"gogym-api/internal/usecase/gym"
-	"gogym-api/internal/usecase/review"
+	"gogym-api/internal/adapter/repository/gym"
+	"gogym-api/internal/adapter/repository/user"
+	"gogym-api/internal/adapter/repository/workout"
+	"gogym-api/internal/infra/security"
+	gym2 "gogym-api/internal/usecase/gym"
 	"gogym-api/internal/usecase/session"
-	"gogym-api/internal/usecase/user"
-	"gogym-api/internal/usecase/workout"
+	user2 "gogym-api/internal/usecase/user"
+	workout2 "gogym-api/internal/usecase/workout"
+	"gorm.io/gorm"
 )
 
 // Injectors from wire.go:
 
-func BuildServer(cfg *configs.Config) (*echo.Echo, func(), error) {
-	httpConfig := provideHTTP(cfg)
-	authConfig := provideAuth(cfg)
-	databaseConfig := provideDB(cfg)
-	gormDB, err := db.NewDB(databaseConfig)
-	if err != nil {
-		return nil, nil, err
-	}
-	gymRepository := repository.NewGymRepository(gormDB)
-	tagRepository := repository.NewTagRepository(gormDB)
-	gymUseCase := gym.NewInteractor(gymRepository, tagRepository)
-	gymHandler := handler.NewGymHandler(gymUseCase)
-	userRepository := repository.NewUserRepository(gormDB)
-	bcryptPasswordHasher := auth.NewBcryptPasswordHasher()
-	userUseCase := user.NewInteractor(userRepository, bcryptPasswordHasher)
+func Initialize(db *gorm.DB) *Handlers {
+	userRepository := user.NewUserRepository(db)
+	bcryptPasswordHasher := security.NewBcryptPasswordHasher()
+	userUseCase := user2.NewUserInteractor(userRepository, bcryptPasswordHasher)
 	userHandler := handler.NewUserHandler(userUseCase)
-	reviewRepository := repository.NewReviewRepository(gormDB)
-	reviewUseCase := review.NewInteractor(reviewRepository)
-	reviewHandler := handler.NewReviewHandler(reviewUseCase)
-	sessionUseCase := session.NewInteractor(userRepository, bcryptPasswordHasher, userUseCase)
+	sessionUseCase := session.NewSessionInteractor(userRepository, bcryptPasswordHasher)
 	sessionHandler := handler.NewSessionHandler(sessionUseCase)
-	workoutRepository := repository.NewWorkoutRepository(gormDB)
-	workoutUseCase := workout.NewInteractor(workoutRepository)
+	repository := gym.NewGymRepository(db)
+	gymUseCase := gym2.NewGymInteractor(repository)
+	gymHandler := handler.NewGymHandler(gymUseCase)
+	workoutRepository := workout.NewWorkoutRepository(db)
+	workoutUseCase := workout2.NewWorkoutInteractor(workoutRepository)
 	workoutHandler := handler.NewWorkoutHandler(workoutUseCase)
-	echoEcho := router.RegisterRoutes(httpConfig, authConfig, gymHandler, userHandler, reviewHandler, sessionHandler, workoutHandler)
-	return echoEcho, func() {
-	}, nil
+	handlers := NewHandlers(userHandler, sessionHandler, gymHandler, workoutHandler)
+	return handlers
 }
 
 // wire.go:
 
-var RepositorySet = wire.NewSet(repository.NewUserRepository, wire.Bind(new(user.Repository), new(*repository.UserRepository)), wire.Bind(new(session.UserRepository), new(*repository.UserRepository)), repository.NewGymRepository, repository.NewReviewRepository, repository.NewTagRepository, repository.NewWorkoutRepository)
+type Handlers struct {
+	User    *handler.UserHandler
+	Session *handler.SessionHandler
+	Gym     *handler.GymHandler
+	Workout *handler.WorkoutHandler
+}
 
-var internalPlatformSet = wire.NewSet(auth.NewBcryptPasswordHasher, wire.Bind(new(user.PasswordHasher), new(*auth.BcryptPasswordHasher)), wire.Bind(new(session.PasswordHasher), new(*auth.BcryptPasswordHasher)))
+func NewHandlers(user3 *handler.UserHandler, session2 *handler.SessionHandler, gym3 *handler.GymHandler, workout3 *handler.WorkoutHandler,
+) *Handlers {
+	return &Handlers{
+		User:    user3,
+		Session: session2,
+		Gym:     gym3,
+		Workout: workout3,
+	}
+}
 
-var UsecaseSet = wire.NewSet(
-	internalPlatformSet, gym.NewInteractor, review.NewInteractor, session.NewInteractor, user.NewInteractor, workout.NewInteractor,
-)
+var repositorySet = wire.NewSet(user.NewUserRepository, gym.NewGymRepository, workout.NewWorkoutRepository, wire.Bind(new(user2.Repository), new(*user.UserRepository)), wire.Bind(new(session.UserRepository), new(*user.UserRepository)))
 
-var HandlerSet = wire.NewSet(handler.NewGymHandler, handler.NewReviewHandler, handler.NewUserHandler, handler.NewSessionHandler, handler.NewWorkoutHandler)
+var securitySet = wire.NewSet(security.NewBcryptPasswordHasher, wire.Bind(new(user2.PasswordHasher), new(*security.BcryptPasswordHasher)), wire.Bind(new(session.PasswordHasher), new(*security.BcryptPasswordHasher)))
 
-var ServerSet = wire.NewSet(router.RegisterRoutes)
+var usecaseSet = wire.NewSet(user2.NewUserInteractor, session.NewSessionInteractor, gym2.NewGymInteractor, workout2.NewWorkoutInteractor)
 
-var InfraSet = wire.NewSet(db.NewDB)
-
-func provideHTTP(c *configs.Config) configs.HTTPConfig { return c.HTTP }
-
-func provideDB(c *configs.Config) configs.DatabaseConfig { return c.Database }
-
-func provideAuth(c *configs.Config) configs.AuthConfig { return c.Auth }
+var handlerSet = wire.NewSet(handler.NewUserHandler, handler.NewSessionHandler, handler.NewGymHandler, handler.NewWorkoutHandler, NewHandlers)

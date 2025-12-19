@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	dom "gogym-api/internal/domain/workout"
+	dom "gogym-api/internal/domain/entities"
 	"gogym-api/internal/util"
 )
 
@@ -65,8 +65,6 @@ type WorkoutExerciseListItemDTO struct {
 	WorkoutPartID *int64 `json:"workout_part_id,omitempty"`
 }
 
-
-
 // DomainToDTO converts domain.WorkoutRecord to WorkoutFormDTO
 func WorkoutRecordToDTO(record *dom.WorkoutRecord) *WorkoutRecordDTO {
 	if record == nil {
@@ -78,7 +76,6 @@ func WorkoutRecordToDTO(record *dom.WorkoutRecord) *WorkoutRecordDTO {
 		PerformedDate:  util.FormatJSTDate(record.PerformedDate),
 		StartedAt:      timeToJSTHHmm(record.StartedAt),
 		EndedAt:        timeToJSTHHmm(record.EndedAt),
-		Place:          stringPtrToString(record.Place),
 		Note:           record.Note,
 		ConditionLevel: conditionLevelToIntPtr(record.Condition),
 		WorkoutPart:    WorkoutPartDTO{}, // 最初のセットから部位情報を取得
@@ -225,10 +222,6 @@ func WorkoutRecordDTOToDomain(dto *WorkoutRecordDTO) (*dom.WorkoutRecord, error)
 		return nil, fmt.Errorf("invalid times: %w", err)
 	}
 
-	// Set other fields
-	if dto.Place != "" {
-		record.Place = &dto.Place
-	}
 	record.Note = dto.Note
 	if dto.ConditionLevel != nil {
 		record.Condition = dom.ConditionLevel(*dto.ConditionLevel)

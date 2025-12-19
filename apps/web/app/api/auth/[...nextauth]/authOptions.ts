@@ -16,12 +16,15 @@ type RefreshResponse = {
   expires_in: number;
 };
 
-const API_BASE = process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_URL;
+const API_BASE =
+  process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_URL;
 
 /**
  * リフレッシュトークンを使って新しいアクセストークンを取得
  */
-const refreshAccessToken = async (refreshToken: string): Promise<RefreshResponse | null> => {
+const refreshAccessToken = async (
+  refreshToken: string,
+): Promise<RefreshResponse | null> => {
   try {
     const res = await fetch(`${API_BASE}/api/v1/sessions/refresh`, {
       method: "POST",
@@ -50,6 +53,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   session: { strategy: "jwt" },
 
+  // NextAuth に「メール/パスワードでログインする」入口を提供
   providers: [
     Credentials({
       name: "Email & Password",
@@ -57,6 +61,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
+      // authorize が Go API (/api/v1/sessions/login)に問い合わせて認証を行う
       authorize: async (credentials) => {
         const email = credentials?.email?.toString().trim();
         const password = credentials?.password?.toString();
@@ -73,7 +78,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           const data = (await res.json()) as LoginResponse;
           const { user, access_token, refresh_token, expires_in } = data ?? {};
-          if (!user?.id || !user?.name || !user?.email || !access_token || !refresh_token) return null;
+          if (
+            !user?.id ||
+            !user?.name ||
+            !user?.email ||
+            !access_token ||
+            !refresh_token
+          )
+            return null;
 
           return {
             id: String(user.id),
@@ -90,11 +102,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
 
+  // NextAuth のセッションを DB ではなく JWT で管理するための設定
   callbacks: {
     jwt: async ({ token, user }) => {
       // 初回ログイン時: userオブジェクトからトークン情報を保存
       if (user) {
-        const expiresAt = Math.floor(Date.now() / 1000) + ((user as any).expiresIn || 900); // 15分 = 900秒
+        const expiresAt =
+          Math.floor(Date.now() / 1000) + ((user as any).expiresIn || 900); // 15分 = 900秒
         return {
           ...token,
           accessToken: (user as any).accessToken,
@@ -134,15 +148,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
 
     session: async ({ session, token }) => {
-      if (token.error) {
-        return null as any;
-      }
+      (session as any).authError = token.error ?? null;
 
       if (session.user) {
         session.user.id = token.sub as string;
-        (session.user as any).accessToken = token.accessToken;
-        (session as any).refreshToken = token.refreshToken;
-        (session as any).expiresAt = token.expiresAt;
       }
 
       return session;
