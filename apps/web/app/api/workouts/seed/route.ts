@@ -1,4 +1,30 @@
-import { proxyToGo } from "@/lib/server/proxy";
+import { NextResponse } from "next/server";
+import { getServerAccessToken } from "@/lib/auth-helpers";
 
-export const POST = (req: Request) =>
-  proxyToGo(req, "/api/v1/workouts/seed", { method: "POST" });
+const API_BASE =
+  process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_URL;
+
+export const SeedWorkoutParts = async () => {
+  const token = await getServerAccessToken();
+  if (!token) {
+    return NextResponse.json({ message: "unauthorized" }, { status: 401 });
+  }
+  if (!API_BASE) {
+    return NextResponse.json(
+      { message: "API base url is not configured" },
+      { status: 500 },
+    );
+  }
+
+  const res = await fetch(`${API_BASE}/api/v1/workouts/seed`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+
+  const data = await res.json().catch(() => null);
+  return NextResponse.json(data, { status: res.status });
+};
+
+// Route Handler（Client Component用）
+export const POST = SeedWorkoutParts;

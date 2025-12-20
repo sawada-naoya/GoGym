@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { signup } from "@/lib/bff/auth";
+// Removed lib/bff/auth import - now using direct fetch to Route Handler
 import { useBanner } from "@/components/Banner";
 
 const SignUpSchema = z
@@ -64,14 +64,20 @@ const SignupFormContent = ({
     setLoading(true);
 
     try {
-      const result = await signup({
-        name: data.name,
-        email: data.email,
-        password: data.password,
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          password: data.password,
+        }),
+        cache: "no-store",
       });
 
-      if (!result.ok) {
-        error(result.error || "このメールアドレスは既に使用されています");
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        error(errorData.message || "このメールアドレスは既に使用されています");
         return;
       }
 

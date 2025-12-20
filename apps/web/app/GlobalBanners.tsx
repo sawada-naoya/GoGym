@@ -13,7 +13,10 @@ const GlobalBanners = () => {
     if (!raw) return;
 
     try {
-      const data = JSON.parse(raw) as { variant?: "success" | "error" | "info" | "warning"; message?: string };
+      const data = JSON.parse(raw) as {
+        variant?: "success" | "error" | "info" | "warning";
+        message?: string;
+      };
       sessionStorage.removeItem("flash");
 
       if (data?.message) {

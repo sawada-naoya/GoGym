@@ -2,10 +2,7 @@
 import { useState, useEffect } from "react";
 import type { WorkoutPartDTO } from "../_lib/types";
 import { useBanner } from "@/components/Banner";
-import {
-  upsertWorkoutExercises,
-  deleteWorkoutExercise,
-} from "@/lib/bff/workout";
+// Removed lib/bff/workout import - now using direct fetch to Route Handler (BFF)
 
 type Props = {
   isOpen: boolean;
@@ -93,9 +90,15 @@ const ExerciseManageModal: React.FC<Props> = ({
 
     setIsSubmitting(true);
     try {
-      const result = await deleteWorkoutExercise(deleteTarget.exercise.id);
+      const res = await fetch(
+        `/api/workouts/exercises?id=${deleteTarget.exercise.id}`,
+        {
+          method: "DELETE",
+          cache: "no-store",
+        },
+      );
 
-      if (result.ok) {
+      if (res.ok) {
         // 削除成功：フロント側も削除
         if (exercises.length > 1) {
           setExercises(exercises.filter((_, i) => i !== deleteTarget.index));
@@ -103,7 +106,7 @@ const ExerciseManageModal: React.FC<Props> = ({
         success("種目を削除しました");
         onSuccess?.(); // 親側で再取得させる
       } else {
-        error(result.error || "削除に失敗しました");
+        error("削除に失敗しました");
       }
     } catch (err) {
       console.error("種目削除エラー:", err);
@@ -138,14 +141,19 @@ const ExerciseManageModal: React.FC<Props> = ({
         workout_part_id: selectedPart,
       }));
 
-      const result = await upsertWorkoutExercises(exercisesWithPart);
+      const res = await fetch("/api/workouts/exercises", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ exercises: exercisesWithPart }),
+        cache: "no-store",
+      });
 
-      if (result.ok) {
+      if (res.ok) {
         success("種目を登録しました");
         onSuccess?.();
         // モーダルは閉じない
       } else {
-        error(result.error || "登録に失敗しました");
+        error("登録に失敗しました");
       }
     } catch (err) {
       console.error("種目登録エラー:", err);

@@ -16,7 +16,15 @@ type Props = {
   onDayChange: (day: number) => void;
 };
 
-const WorkoutMetadataEditor = ({ form, selectedYear, selectedMonth, selectedDay, onYearChange, onMonthChange, onDayChange }: Props) => {
+const WorkoutMetadataEditor = ({
+  form,
+  selectedYear,
+  selectedMonth,
+  selectedDay,
+  onYearChange,
+  onMonthChange,
+  onDayChange,
+}: Props) => {
   const router = useRouter();
   const [isMetadataOpen, setIsMetadataOpen] = useState(false);
 
@@ -78,14 +86,33 @@ const WorkoutMetadataEditor = ({ form, selectedYear, selectedMonth, selectedDay,
       </div>
 
       {/* 日付選択 */}
-      <MonthlyStrip year={selectedYear} month={selectedMonth} selectedDay={selectedDay} onSelectDay={handleDayChange} />
+      <MonthlyStrip
+        year={selectedYear}
+        month={selectedMonth}
+        selectedDay={selectedDay}
+        onSelectDay={handleDayChange}
+      />
 
       {/* モバイル: 折りたたみトグル */}
       <div className="mt-2 md:hidden">
-        <button type="button" onClick={() => setIsMetadataOpen(!isMetadataOpen)} className="w-full flex items-center justify-between px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
+        <button
+          type="button"
+          onClick={() => setIsMetadataOpen(!isMetadataOpen)}
+          className="w-full flex items-center justify-between px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
+        >
           <span>詳細情報</span>
-          <svg className={`w-4 h-4 transition-transform ${isMetadataOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          <svg
+            className={`w-4 h-4 transition-transform ${isMetadataOpen ? "rotate-180" : ""}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
           </svg>
         </button>
       </div>
@@ -94,30 +121,68 @@ const WorkoutMetadataEditor = ({ form, selectedYear, selectedMonth, selectedDay,
       <div className="hidden md:block my-6 border-t border-gray-200"></div>
 
       {/* トレーニング詳細（時刻・場所・コンディション） */}
-      <div className={`flex flex-col md:flex-row md:flex-wrap items-start justify-start gap-2 md:gap-3 text-left ${isMetadataOpen ? "mt-2" : "hidden"} md:flex`}>
+      <div
+        className={`flex flex-col md:flex-row md:flex-wrap items-start justify-start gap-2 md:gap-3 text-left ${isMetadataOpen ? "mt-2" : "hidden"} md:flex`}
+      >
         {/* 時間 */}
         <div className="flex items-center gap-1 w-full md:w-auto">
-          <label className="text-xs md:text-sm font-medium text-gray-700 min-w-[44px] md:min-w-[60px]">時間</label>
-          <input type="time" className="w-24 md:w-28 px-1.5 md:px-2 py-1.5 md:py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500" value={form.watch("started_at") ?? ""} onChange={(e) => form.setValue("started_at", e.target.value || null, { shouldDirty: true })} />
+          <label className="text-xs md:text-sm font-medium text-gray-700 min-w-[44px] md:min-w-[60px]">
+            時間
+          </label>
+          <input
+            type="time"
+            className="w-24 md:w-28 px-1.5 md:px-2 py-1.5 md:py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500"
+            value={form.watch("started_at") ?? ""}
+            onChange={(e) =>
+              form.setValue("started_at", e.target.value || null, {
+                shouldDirty: true,
+              })
+            }
+          />
           <span className="text-xs text-gray-500">〜</span>
-          <input type="time" className="w-24 md:w-28 px-1.5 md:px-2 py-1.5 md:py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500" value={form.watch("ended_at") ?? ""} onChange={(e) => form.setValue("ended_at", e.target.value || null, { shouldDirty: true })} />
+          <input
+            type="time"
+            className="w-24 md:w-28 px-1.5 md:px-2 py-1.5 md:py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500"
+            value={form.watch("ended_at") ?? ""}
+            onChange={(e) =>
+              form.setValue("ended_at", e.target.value || null, {
+                shouldDirty: true,
+              })
+            }
+          />
         </div>
 
         {/* 場所 */}
         <div className="flex items-center gap-2 w-full md:w-auto">
-          <label className="text-xs md:text-sm font-medium text-gray-700 min-w-[44px] md:min-w-[60px]">場所</label>
-          <input type="text" value={form.watch("place") ?? ""} onChange={(e) => form.setValue("place", e.target.value, { shouldDirty: true })} placeholder="ジム名など" className="flex-1 md:w-80 px-2 md:px-3 py-1.5 md:py-2 text-xs md:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500" />
+          <label className="text-xs md:text-sm font-medium text-gray-700 min-w-[44px] md:min-w-[60px]">
+            場所
+          </label>
+          <input
+            type="text"
+            value={form.watch("place") ?? ""}
+            onChange={(e) =>
+              form.setValue("place", e.target.value, { shouldDirty: true })
+            }
+            placeholder="ジム名など"
+            className="flex-1 md:w-80 px-2 md:px-3 py-1.5 md:py-2 text-xs md:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500"
+          />
         </div>
 
         {/* コンディション（1〜5） */}
         <div className="flex items-center gap-2 w-full md:w-auto">
-          <label className="text-xs md:text-sm font-medium text-gray-700 min-w-[44px] md:min-w-[60px]">体調</label>
+          <label className="text-xs md:text-sm font-medium text-gray-700 min-w-[44px] md:min-w-[60px]">
+            体調
+          </label>
           <div className="flex gap-1">
             {[1, 2, 3, 4, 5].map((n) => (
               <button
                 key={n}
                 type="button"
-                onClick={() => form.setValue("condition_level", n as 1 | 2 | 3 | 4 | 5, { shouldDirty: true })}
+                onClick={() =>
+                  form.setValue("condition_level", n as 1 | 2 | 3 | 4 | 5, {
+                    shouldDirty: true,
+                  })
+                }
                 className={`w-8 h-8 md:w-10 md:h-10 rounded border text-xs md:text-sm font-medium transition-colors ${form.watch("condition_level") === n ? "bg-booking-600 text-white border-booking-600" : "border-gray-300 text-gray-700 hover:bg-gray-100"}`}
               >
                 {n}
