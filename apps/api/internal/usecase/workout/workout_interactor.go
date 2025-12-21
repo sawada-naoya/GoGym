@@ -34,7 +34,6 @@ func (i *workoutInteractor) GetWorkoutRecords(ctx context.Context, userID string
 	if records.ID == nil {
 		return dto.WorkoutRecordDTO{
 			PerformedDate: date,
-			Place:         "",
 			Exercises:     []dto.ExerciseDTO{},
 		}, nil
 	}
