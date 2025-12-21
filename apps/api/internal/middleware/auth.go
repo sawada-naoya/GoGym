@@ -16,6 +16,7 @@ func AuthMiddleware(jwtSecret string) echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			// Authorization ヘッダーを取得
 			authHeader := c.Request().Header.Get("Authorization")
+
 			if authHeader == "" {
 				return echo.NewHTTPError(http.StatusUnauthorized, map[string]string{
 					"error": "missing authorization header",

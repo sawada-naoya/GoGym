@@ -1,9 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { UseFormReturn } from "react-hook-form";
 import MonthlyStrip from "./MonthlyStrip";
-import { WorkoutFormDTO } from "../_lib/types";
+import { WorkoutFormDTO, GymDTO } from "../_lib/types";
 import { formatDate, validateDay } from "@/lib/time";
 
 type Props = {
@@ -16,17 +16,50 @@ type Props = {
   onDayChange: (day: number) => void;
 };
 
-const WorkoutMetadataEditor = ({
-  form,
-  selectedYear,
-  selectedMonth,
-  selectedDay,
-  onYearChange,
-  onMonthChange,
-  onDayChange,
-}: Props) => {
+const WorkoutMetadataEditor = ({ form, selectedYear, selectedMonth, selectedDay, onYearChange, onMonthChange, onDayChange }: Props) => {
   const router = useRouter();
   const [isMetadataOpen, setIsMetadataOpen] = useState(false);
+  const [gyms, setGyms] = useState<GymDTO[]>([]);
+  const [gymInputValue, setGymInputValue] = useState("");
+  const [filteredGyms, setFilteredGyms] = useState<GymDTO[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // ジムリストを取得
+  useEffect(() => {
+    const fetchGyms = async () => {
+      // TODO: 実際のAPIエンドポイントから取得
+      // const res = await fetch("/api/gyms/my");
+      // if (res.ok) {
+      //   const data = await res.json();
+      //   setGyms(data);
+      // }
+      setGyms([]); // 一旦空配列
+    };
+    fetchGyms();
+  }, []);
+
+  // 選択されているgym_idからジム名を取得
+  useEffect(() => {
+    const selectedGymId = form.watch("gym_id");
+    if (selectedGymId) {
+      const gym = gyms.find((g) => g.id === selectedGymId);
+      if (gym) {
+        setGymInputValue(gym.name);
+      }
+    } else {
+      setGymInputValue("");
+    }
+  }, [form.watch("gym_id"), gyms]);
+
+  // 入力値に応じてフィルタリング
+  useEffect(() => {
+    if (gymInputValue) {
+      const filtered = gyms.filter((gym) => gym.name.toLowerCase().includes(gymInputValue.toLowerCase()));
+      setFilteredGyms(filtered);
+    } else {
+      setFilteredGyms([]);
+    }
+  }, [gymInputValue, gyms]);
 
   const handleYearMonthChange = (year: number, month: number) => {
     const validDay = validateDay(year, month, selectedDay);
@@ -86,33 +119,14 @@ const WorkoutMetadataEditor = ({
       </div>
 
       {/* 日付選択 */}
-      <MonthlyStrip
-        year={selectedYear}
-        month={selectedMonth}
-        selectedDay={selectedDay}
-        onSelectDay={handleDayChange}
-      />
+      <MonthlyStrip year={selectedYear} month={selectedMonth} selectedDay={selectedDay} onSelectDay={handleDayChange} />
 
       {/* モバイル: 折りたたみトグル */}
       <div className="mt-2 md:hidden">
-        <button
-          type="button"
-          onClick={() => setIsMetadataOpen(!isMetadataOpen)}
-          className="w-full flex items-center justify-between px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
-        >
+        <button type="button" onClick={() => setIsMetadataOpen(!isMetadataOpen)} className="w-full flex items-center justify-between px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
           <span>詳細情報</span>
-          <svg
-            className={`w-4 h-4 transition-transform ${isMetadataOpen ? "rotate-180" : ""}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 9l-7 7-7-7"
-            />
+          <svg className={`w-4 h-4 transition-transform ${isMetadataOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </button>
       </div>
@@ -121,14 +135,10 @@ const WorkoutMetadataEditor = ({
       <div className="hidden md:block my-6 border-t border-gray-200"></div>
 
       {/* トレーニング詳細（時刻・場所・コンディション） */}
-      <div
-        className={`flex flex-col md:flex-row md:flex-wrap items-start justify-start gap-2 md:gap-3 text-left ${isMetadataOpen ? "mt-2" : "hidden"} md:flex`}
-      >
+      <div className={`flex flex-col md:flex-row md:flex-wrap items-start justify-start gap-2 md:gap-3 text-left ${isMetadataOpen ? "mt-2" : "hidden"} md:flex`}>
         {/* 時間 */}
         <div className="flex items-center gap-1 w-full md:w-auto">
-          <label className="text-xs md:text-sm font-medium text-gray-700 min-w-[44px] md:min-w-[60px]">
-            時間
-          </label>
+          <label className="text-xs md:text-sm font-medium text-gray-700 min-w-[44px] md:min-w-[60px]">時間</label>
           <input
             type="time"
             className="w-24 md:w-28 px-1.5 md:px-2 py-1.5 md:py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500"
@@ -152,27 +162,51 @@ const WorkoutMetadataEditor = ({
           />
         </div>
 
-        {/* 場所 */}
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          <label className="text-xs md:text-sm font-medium text-gray-700 min-w-[44px] md:min-w-[60px]">
-            場所
-          </label>
-          <input
-            type="text"
-            value={form.watch("place") ?? ""}
-            onChange={(e) =>
-              form.setValue("place", e.target.value, { shouldDirty: true })
-            }
-            placeholder="ジム名など"
-            className="flex-1 md:w-80 px-2 md:px-3 py-1.5 md:py-2 text-xs md:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500"
-          />
+        {/* 場所（ジム予測入力） */}
+        <div className="flex items-center gap-2 w-full md:w-auto relative">
+          <label className="text-xs md:text-sm font-medium text-gray-700 min-w-[44px] md:min-w-[60px]">場所</label>
+          <div className="flex-1 md:w-80 relative">
+            <input
+              type="text"
+              value={gymInputValue}
+              onChange={(e) => {
+                setGymInputValue(e.target.value);
+                setShowSuggestions(true);
+                if (!e.target.value) {
+                  form.setValue("gym_id", null, { shouldDirty: true });
+                }
+              }}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => {
+                // 少し遅延させてクリックイベントを処理できるようにする
+                setTimeout(() => setShowSuggestions(false), 200);
+              }}
+              placeholder="ジム名を入力"
+              className="w-full px-2 md:px-3 py-1.5 md:py-2 text-xs md:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500"
+            />
+            {showSuggestions && filteredGyms.length > 0 && (
+              <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                {filteredGyms.map((gym) => (
+                  <li
+                    key={gym.id}
+                    onClick={() => {
+                      setGymInputValue(gym.name);
+                      form.setValue("gym_id", gym.id, { shouldDirty: true });
+                      setShowSuggestions(false);
+                    }}
+                    className="px-3 py-2 text-xs md:text-sm hover:bg-gray-100 cursor-pointer"
+                  >
+                    {gym.name}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
 
         {/* コンディション（1〜5） */}
         <div className="flex items-center gap-2 w-full md:w-auto">
-          <label className="text-xs md:text-sm font-medium text-gray-700 min-w-[44px] md:min-w-[60px]">
-            体調
-          </label>
+          <label className="text-xs md:text-sm font-medium text-gray-700 min-w-[44px] md:min-w-[60px]">体調</label>
           <div className="flex gap-1">
             {[1, 2, 3, 4, 5].map((n) => (
               <button

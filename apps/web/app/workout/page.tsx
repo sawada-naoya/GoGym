@@ -13,33 +13,22 @@ type Props = {
 };
 
 const Page = async ({ searchParams }: Props) => {
+  const sp = await searchParams;
+
   // 部位データをシード（初回のみ作成、idempotent）
   await SeedWorkoutParts();
 
   // SSRで並列取得
-  const [dtoResponse, partsResponse] = await Promise.all([
-    GetWorkoutRecords({ date: searchParams?.date }),
-    GetWorkoutParts(),
-  ]);
+  const [dtoResponse, partsResponse] = await Promise.all([GetWorkoutRecords({ date: sp?.date }), GetWorkoutParts()]);
 
   // NextResponseからJSONデータを取得
-  const dto =
-    dtoResponse.status === 200 ? await dtoResponse.json() : buildEmptyDTO();
+  const dto = dtoResponse.status === 200 ? await dtoResponse.json() : buildEmptyDTO();
   const parts = partsResponse.status === 200 ? await partsResponse.json() : [];
 
   // バックエンドから返された日付を使用（通常は必ず返される）
   const { year, month, day } = extractDateParts(dto.performed_date);
 
-  return (
-    <WorkoutContent
-      Year={year}
-      Month={month}
-      Day={day}
-      defaultValues={dto}
-      availableParts={parts}
-      isUpdate={!!dto.id}
-    />
-  );
+  return <WorkoutContent Year={year} Month={month} Day={day} defaultValues={dto} availableParts={parts} isUpdate={!!dto.id} />;
 };
 
 export default Page;

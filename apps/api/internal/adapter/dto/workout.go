@@ -20,7 +20,7 @@ type WorkoutRecordDTO struct {
 	PerformedDate  string  `json:"performed_date"`       // "YYYY-MM-DD"
 	StartedAt      *string `json:"started_at,omitempty"` // "HH:mm"
 	EndedAt        *string `json:"ended_at,omitempty"`   // "HH:mm"
-	Place          string  `json:"place"`
+	GymID          *int64  `json:"gym_id,omitempty"`
 	Note           *string `json:"note,omitempty"`
 	ConditionLevel *int    `json:"condition_level,omitempty"` // 1..5
 
@@ -76,6 +76,7 @@ func WorkoutRecordToDTO(record *dom.WorkoutRecord) *WorkoutRecordDTO {
 		PerformedDate:  util.FormatJSTDate(record.PerformedDate),
 		StartedAt:      timeToJSTHHmm(record.StartedAt),
 		EndedAt:        timeToJSTHHmm(record.EndedAt),
+		GymID:          domainIDToInt64Ptr(record.GymID),
 		Note:           record.Note,
 		ConditionLevel: conditionLevelToIntPtr(record.Condition),
 		WorkoutPart:    WorkoutPartDTO{}, // 最初のセットから部位情報を取得
@@ -225,6 +226,10 @@ func WorkoutRecordDTOToDomain(dto *WorkoutRecordDTO) (*dom.WorkoutRecord, error)
 	record.Note = dto.Note
 	if dto.ConditionLevel != nil {
 		record.Condition = dom.ConditionLevel(*dto.ConditionLevel)
+	}
+	if dto.GymID != nil {
+		gymID := dom.ID(*dto.GymID)
+		record.GymID = &gymID
 	}
 
 	// Convert exercises to sets

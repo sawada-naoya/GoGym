@@ -46,7 +46,7 @@ func main() {
 	}
 
 	handlers := di.Initialize(database)
-	router.RegisterRoutes(e, handlers.Gym, handlers.User, handlers.Session, handlers.Workout)
+	router.RegisterRoutes(e, handlers.Gym, handlers.User, handlers.Session, handlers.Workout, config.Auth.JWTSecret)
 
 	addr := fmt.Sprintf("%s:%d", config.HTTP.Host, config.HTTP.Port)
 	slog.Info("Starting server", "address", addr)

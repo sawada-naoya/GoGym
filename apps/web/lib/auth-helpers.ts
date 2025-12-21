@@ -13,10 +13,13 @@ import { headers } from "next/headers";
  */
 export const getServerToken = async () => {
   const secret = process.env.NEXTAUTH_SECRET;
-  if (!secret) return null;
+  if (!secret) {
+    return null;
+  }
 
   const headersList = await headers();
   const cookie = headersList.get("cookie") ?? "";
+
   const token = await getToken({
     req: { headers: { cookie } } as any,
     secret,
