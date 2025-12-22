@@ -15,4 +15,6 @@ type WorkoutUseCase interface {
 	CreateWorkoutExercise(ctx context.Context, userID string, exercises []dto.CreateWorkoutExerciseItem) error
 	DeleteWorkoutExercise(ctx context.Context, userID string, exerciseID int64) error
 	GetLastWorkoutRecord(ctx context.Context, userID string, exerciseID int64) (*dto.ExerciseDTO, error)
+	// ResolveGymIDFromName resolves gym_name to gym_id (finds or creates)
+	ResolveGymIDFromName(ctx context.Context, userID string, gymName string) (dom.ID, error)
 }

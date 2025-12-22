@@ -20,7 +20,8 @@ type WorkoutRecordDTO struct {
 	PerformedDate  string  `json:"performed_date"`       // "YYYY-MM-DD"
 	StartedAt      *string `json:"started_at,omitempty"` // "HH:mm"
 	EndedAt        *string `json:"ended_at,omitempty"`   // "HH:mm"
-	GymID          *int64  `json:"gym_id,omitempty"`
+	GymID          *int64  `json:"gym_id,omitempty"`     // deprecated: use gym_name instead
+	GymName        *string `json:"gym_name,omitempty"`   // フロントから送信、正規化してgym_idに変換
 	Note           *string `json:"note,omitempty"`
 	ConditionLevel *int    `json:"condition_level,omitempty"` // 1..5
 

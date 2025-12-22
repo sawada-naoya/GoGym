@@ -170,16 +170,23 @@ const WorkoutMetadataEditor = ({ form, selectedYear, selectedMonth, selectedDay,
               type="text"
               value={gymInputValue}
               onChange={(e) => {
-                setGymInputValue(e.target.value);
+                const value = e.target.value;
+                setGymInputValue(value);
                 setShowSuggestions(true);
-                if (!e.target.value) {
+                // gym_name を form に反映（バックエンドで使用）
+                form.setValue("gym_name", value.trim() || null, { shouldDirty: true });
+                if (!value) {
                   form.setValue("gym_id", null, { shouldDirty: true });
                 }
               }}
               onFocus={() => setShowSuggestions(true)}
               onBlur={() => {
                 // 少し遅延させてクリックイベントを処理できるようにする
-                setTimeout(() => setShowSuggestions(false), 200);
+                setTimeout(() => {
+                  setShowSuggestions(false);
+                  // blur時にも最終的な値を反映
+                  form.setValue("gym_name", gymInputValue.trim() || null, { shouldDirty: true });
+                }, 200);
               }}
               placeholder="ジム名を入力"
               className="w-full px-2 md:px-3 py-1.5 md:py-2 text-xs md:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500"
@@ -192,6 +199,7 @@ const WorkoutMetadataEditor = ({ form, selectedYear, selectedMonth, selectedDay,
                     onClick={() => {
                       setGymInputValue(gym.name);
                       form.setValue("gym_id", gym.id, { shouldDirty: true });
+                      form.setValue("gym_name", gym.name.trim(), { shouldDirty: true });
                       setShowSuggestions(false);
                     }}
                     className="px-3 py-2 text-xs md:text-sm hover:bg-gray-100 cursor-pointer"

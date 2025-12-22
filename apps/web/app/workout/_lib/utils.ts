@@ -163,6 +163,7 @@ export const transformFormDataForSubmit = (
   performed_date: formatDate(year, month, day),
   started_at: data.started_at || null, // HH:mm形式のまま送る
   ended_at: data.ended_at || null, // HH:mm形式のまま送る
+  gym_name: data.gym_name?.trim() || null, // ジム名をバックエンドに送信
   exercises: data.exercises.map((ex) => ({
     ...ex,
     sets: ex.sets

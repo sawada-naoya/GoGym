@@ -11,11 +11,12 @@ func ToEntity(r *GymRecord) *domain.Gym {
 	}
 
 	gym := &domain.Gym{
-		ID:        int(r.ID),
-		Name:      r.Name,
-		Latitude:  r.Latitude,
-		Longitude: r.Longitude,
-		SourceURL: r.SourceURL,
+		ID:             int(r.ID),
+		Name:           r.Name,
+		NormalizedName: r.NormalizedName,
+		Latitude:       r.Latitude,
+		Longitude:      r.Longitude,
+		SourceURL:      r.SourceURL,
 	}
 
 	if r.PrimaryPhotoURL != nil {
@@ -39,12 +40,13 @@ func FromEntity(g *domain.Gym, createdBy string) *GymRecord {
 	}
 
 	record := &GymRecord{
-		ID:        int64(g.ID),
-		Name:      g.Name,
-		Latitude:  g.Latitude,
-		Longitude: g.Longitude,
-		SourceURL: g.SourceURL,
-		CreatedBy: createdBy,
+		ID:             int64(g.ID),
+		Name:           g.Name,
+		NormalizedName: g.NormalizedName,
+		Latitude:       g.Latitude,
+		Longitude:      g.Longitude,
+		SourceURL:      g.SourceURL,
+		CreatedBy:      createdBy,
 	}
 
 	if g.PrimaryPhotoURL != "" {
