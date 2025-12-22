@@ -22,6 +22,7 @@ export const GetGymById = async (id: string) => {
 };
 
 // Route Handler（Client Component用）
-export const GET = async (req: Request, { params }: { params: { id: string } }) => {
-  return await GetGymById(params.id);
+export const GET = async (req: Request, { params }: { params: Promise<{ id: string }> }) => {
+  const { id } = await params;
+  return await GetGymById(id);
 };
