@@ -33,8 +33,9 @@ export const UpdateWorkoutRecord = async (id: string, body: any) => {
 // Route Handler（Client Component用）
 export const PUT = async (
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) => {
+  const { id } = await params;
   const body = await req.json().catch(() => null);
-  return UpdateWorkoutRecord(params.id, body);
+  return UpdateWorkoutRecord(id, body);
 };
