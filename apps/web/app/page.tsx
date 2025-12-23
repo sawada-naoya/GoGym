@@ -1,17 +1,13 @@
-"use client";
-
-import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { LoginForm } from "./_components/auth/LoginForm";
+import { redirect } from "next/navigation";
+import { auth } from "@/app/api/auth/[...nextauth]/authOptions";
 
-export default function Home() {
-  const router = useRouter();
-  const { data: session } = useSession();
+const Home = async () => {
+  const session = await auth();
 
   // ログイン済みの場合はworkoutページにリダイレクト
   if (session?.user) {
-    router.push(`/workout`);
-    return null;
+    redirect("/workout");
   }
 
   return (
@@ -64,10 +60,12 @@ export default function Home() {
           <div className="bg-white rounded-2xl shadow-xl p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">今すぐトレーニングを開始する</h2>
 
-            <LoginForm onSuccessCallback={() => window.location.reload()} showHeader={false} showSignupLink={true} />
+            <LoginForm showHeader={false} showSignupLink={true} />
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default Home;

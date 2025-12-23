@@ -2,10 +2,10 @@ package handler
 
 import (
 	"fmt"
+	"gogym-api/internal/adapter/dto"
 	"log/slog"
 	"net/http"
 
-	"gogym-api/internal/adapter/dto"
 	dom "gogym-api/internal/domain/entities"
 	wu "gogym-api/internal/usecase/workout"
 
@@ -72,6 +72,16 @@ func (h *WorkoutHandler) CreateWorkoutRecord(c echo.Context) error {
 	// Set userID
 	domainRecord.UserID = dom.ULID(userID)
 
+	// gym_name から gym_id を解決（gym_name優先、なければgym_idをそのまま使用）
+	if req.GymName != nil && *req.GymName != "" {
+		gymID, err := h.wu.ResolveGymIDFromName(ctx, userID, *req.GymName)
+		if err != nil {
+			slog.ErrorContext(ctx, "Failed to resolve gym_id from gym_name", "userID", userID, "gymName", *req.GymName, "error", err)
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to resolve gym"})
+		}
+		domainRecord.GymID = &gymID
+	}
+
 	err = h.wu.CreateWorkoutRecord(ctx, *domainRecord)
 	if err != nil {
 		slog.ErrorContext(ctx, "Failed to create workout record", "userID", userID, "error", err)
@@ -111,6 +121,16 @@ func (h *WorkoutHandler) UpdateWorkoutRecord(c echo.Context) error {
 
 	// Set userID
 	domainRecord.UserID = dom.ULID(userID)
+
+	// gym_name から gym_id を解決（gym_name優先、なければgym_idをそのまま使用）
+	if req.GymName != nil && *req.GymName != "" {
+		gymID, err := h.wu.ResolveGymIDFromName(ctx, userID, *req.GymName)
+		if err != nil {
+			slog.ErrorContext(ctx, "Failed to resolve gym_id from gym_name", "userID", userID, "gymName", *req.GymName, "error", err)
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to resolve gym"})
+		}
+		domainRecord.GymID = &gymID
+	}
 
 	// Upsert を使用（同日同部位の場合は更新、異なる場合は新規作成）
 	err = h.wu.UpsertWorkoutRecord(ctx, *domainRecord)

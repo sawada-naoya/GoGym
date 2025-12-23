@@ -6,12 +6,7 @@ import WorkoutExercisesEditor from "./_components/WorkoutExercisesEditor";
 import { WorkoutFormDTO, WorkoutPartDTO, ExerciseDTO } from "./_lib/types";
 import { transformFormDataForSubmit } from "./_lib/utils";
 import { useBanner } from "@/components/Banner";
-import {
-  getWorkoutParts,
-  createWorkoutRecord,
-  updateWorkoutRecord,
-  getLastExerciseRecord,
-} from "@/lib/bff/workout";
+// Removed lib/bff/workout import - now using direct fetch to Route Handler (BFF)
 
 type Props = {
   Year: number;
@@ -74,12 +69,22 @@ const WorkoutContent = ({
 
     try {
       if (isUpdate && data.id) {
-        const result = await updateWorkoutRecord(data.id, body);
-        if (!result.ok) return error(result.error || "更新に失敗しました");
+        const res = await fetch(`/api/workouts/records/${data.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+          cache: "no-store",
+        });
+        if (!res.ok) return error("更新に失敗しました");
         success("更新しました");
       } else {
-        const result = await createWorkoutRecord(body);
-        if (!result.ok) return error(result.error || "保存に失敗しました");
+        const res = await fetch("/api/workouts/records", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+          cache: "no-store",
+        });
+        if (!res.ok) return error("保存に失敗しました");
         success("保存しました");
       }
     } catch {
@@ -89,10 +94,37 @@ const WorkoutContent = ({
 
   const refetchWorkoutParts = async () => {
     try {
-      const parts = await getWorkoutParts();
-      setAvailableParts(parts);
+      const res = await fetch("/api/workouts/parts", { cache: "no-store" });
+      if (res.ok) {
+        const parts = await res.json();
+        setAvailableParts(parts);
+      }
     } catch (err) {
       console.error("Failed to refetch workout parts:", err);
+    }
+  };
+
+  const fetchLastExerciseRecord = async (
+    exerciseID: number,
+  ): Promise<ExerciseDTO | null> => {
+    if (!exerciseID) {
+      return null;
+    }
+
+    try {
+      const res = await fetch(
+        `/api/workouts/exercises?id=${exerciseID}&action=last`,
+        { cache: "no-store" },
+      );
+
+      if (!res.ok || res.status === 204) {
+        return null;
+      }
+
+      const data = await res.json();
+      return data || null;
+    } catch {
+      return null;
     }
   };
 
@@ -128,7 +160,7 @@ const WorkoutContent = ({
             onSubmit={form.handleSubmit(handleSubmit)}
             onRefetchParts={refetchWorkoutParts}
             dataKey={`${selectedYear}-${selectedMonth}-${selectedDay}`}
-            onFetchLastRecord={getLastExerciseRecord}
+            onFetchLastRecord={fetchLastExerciseRecord}
           />
         </div>
       </div>

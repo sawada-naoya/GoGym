@@ -35,7 +35,11 @@ export function validateDay(year: number, month: number, day: number): number {
 /**
  * YYYY-MM-DD 形式の文字列を { year, month, day } に分解
  */
-export function parseDateString(dateString: string): { year: number; month: number; day: number } {
+export function parseDateString(dateString: string): {
+  year: number;
+  month: number;
+  day: number;
+} {
   const [year, month, day] = dateString.split("-").map(Number);
   return { year, month, day };
 }

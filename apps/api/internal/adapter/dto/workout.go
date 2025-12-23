@@ -20,7 +20,8 @@ type WorkoutRecordDTO struct {
 	PerformedDate  string  `json:"performed_date"`       // "YYYY-MM-DD"
 	StartedAt      *string `json:"started_at,omitempty"` // "HH:mm"
 	EndedAt        *string `json:"ended_at,omitempty"`   // "HH:mm"
-	Place          string  `json:"place"`
+	GymID          *int64  `json:"gym_id,omitempty"`     // deprecated: use gym_name instead
+	GymName        *string `json:"gym_name,omitempty"`   // フロントから送信、正規化してgym_idに変換
 	Note           *string `json:"note,omitempty"`
 	ConditionLevel *int    `json:"condition_level,omitempty"` // 1..5
 
@@ -76,6 +77,8 @@ func WorkoutRecordToDTO(record *dom.WorkoutRecord) *WorkoutRecordDTO {
 		PerformedDate:  util.FormatJSTDate(record.PerformedDate),
 		StartedAt:      timeToJSTHHmm(record.StartedAt),
 		EndedAt:        timeToJSTHHmm(record.EndedAt),
+		GymID:          domainIDToInt64Ptr(record.GymID),
+		GymName:        record.GymName,
 		Note:           record.Note,
 		ConditionLevel: conditionLevelToIntPtr(record.Condition),
 		WorkoutPart:    WorkoutPartDTO{}, // 最初のセットから部位情報を取得
@@ -151,9 +154,8 @@ func timeToJSTHHmm(t *time.Time) *string {
 	if t == nil || t.IsZero() {
 		return nil
 	}
-	// UTC → JST 変換してから HH:mm 形式で返す
-	jstTime := util.ToJST(*t)
-	hhmm := fmt.Sprintf("%02d:%02d", jstTime.Hour(), jstTime.Minute())
+	// タイムゾーン変換せず、そのまま HH:mm 形式で返す
+	hhmm := fmt.Sprintf("%02d:%02d", t.Hour(), t.Minute())
 	return &hhmm
 }
 
@@ -226,6 +228,10 @@ func WorkoutRecordDTOToDomain(dto *WorkoutRecordDTO) (*dom.WorkoutRecord, error)
 	if dto.ConditionLevel != nil {
 		record.Condition = dom.ConditionLevel(*dto.ConditionLevel)
 	}
+	if dto.GymID != nil {
+		gymID := dom.ID(*dto.GymID)
+		record.GymID = &gymID
+	}
 
 	// Convert exercises to sets
 	for _, exercise := range dto.Exercises {
@@ -273,19 +279,17 @@ func WorkoutRecordDTOToDomain(dto *WorkoutRecordDTO) (*dom.WorkoutRecord, error)
 }
 
 // parseTimeWithDate combines a date and HH:mm time string
-// フロントエンドからJST形式で受け取った日付時刻をUTCに変換してDBに保存
+// フロントから受け取った HH:mm をそのまま UTC として保存（タイムゾーン変換しない）
 func parseTimeWithDate(date time.Time, hhmmStr string) (time.Time, error) {
 	t, err := time.Parse("15:04", hhmmStr)
 	if err != nil {
 		return time.Time{}, err
 	}
 
-	// JST として解釈
-	jstLoc, _ := time.LoadLocation("Asia/Tokyo")
-	jstTime := time.Date(date.Year(), date.Month(), date.Day(), t.Hour(), t.Minute(), 0, 0, jstLoc)
+	// タイムゾーン変換せず、そのままUTCとして保存
+	utcTime := time.Date(date.Year(), date.Month(), date.Day(), t.Hour(), t.Minute(), 0, 0, time.UTC)
 
-	// UTC に変換
-	return jstTime.UTC(), nil
+	return utcTime, nil
 }
 
 // WorkoutPartToDTO converts domain.WorkoutPart to WorkoutPartListItemDTO

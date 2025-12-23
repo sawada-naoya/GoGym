@@ -19,6 +19,7 @@ CREATE INDEX idx_users_email ON users(email);
 CREATE TABLE gyms (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
+    normalized_name VARCHAR(255) NOT NULL,
     latitude  DECIMAL(10,7) NOT NULL,
     longitude DECIMAL(10,7) NOT NULL,
     source_url VARCHAR(1000) NOT NULL,
@@ -36,6 +37,7 @@ CREATE TABLE gyms (
 
 CREATE INDEX idx_gyms_location ON gyms(latitude, longitude);
 CREATE INDEX idx_gyms_name ON gyms(name);
+CREATE UNIQUE INDEX uq_gyms_created_by_normalized_name ON gyms(created_by, normalized_name) WHERE deleted_at IS NULL;
 
 -- Refresh tokens table: JWT リフレッシュトークン管理
 CREATE TABLE refresh_tokens (

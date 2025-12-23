@@ -7,7 +7,9 @@ type GymCardProps = {
 };
 
 const GymCard = ({ gym }: GymCardProps) => {
-  const averageRating = gym.average_rating ? gym.average_rating.toFixed(1) : "0.0";
+  const averageRating = gym.average_rating
+    ? gym.average_rating.toFixed(1)
+    : "0.0";
   const reviewCount = gym.review_count;
 
   return (
@@ -18,7 +20,9 @@ const GymCard = ({ gym }: GymCardProps) => {
           {/* プレースホルダー画像 */}
           <div className="w-full h-full bg-gradient-to-br from-booking-100 to-booking-200 flex items-center justify-center">
             <div className="text-center">
-              <div className="text-4xl font-bold text-booking-600 mb-2">GYM</div>
+              <div className="text-4xl font-bold text-booking-600 mb-2">
+                GYM
+              </div>
               <div className="text-sm text-booking-500">No Image</div>
             </div>
           </div>
@@ -27,7 +31,9 @@ const GymCard = ({ gym }: GymCardProps) => {
           <FavoriteButton gymId={gym.id} />
 
           {/* エリアバッジ */}
-          <div className="absolute bottom-3 left-3 bg-white/90 px-2 py-1 rounded-md text-sm font-medium text-gray-800">{gym.city || gym.prefecture || "東京"}</div>
+          <div className="absolute bottom-3 left-3 bg-white/90 px-2 py-1 rounded-md text-sm font-medium text-gray-800">
+            {gym.city || gym.prefecture || "東京"}
+          </div>
         </div>
 
         {/* 情報部分 */}
@@ -38,35 +44,54 @@ const GymCard = ({ gym }: GymCardProps) => {
           </div>
 
           {/* ジム名 */}
-          <h3 className="font-semibold text-gray-900 text-lg mb-2 group-hover:text-booking-700 transition-colors">{gym.name}</h3>
+          <h3 className="font-semibold text-gray-900 text-lg mb-2 group-hover:text-booking-700 transition-colors">
+            {gym.name}
+          </h3>
 
           {/* レーティング */}
           <div className="flex items-center mb-2">
             <div className="flex items-center">
               <span className="text-yellow-400 mr-1">★</span>
-              <span className="text-sm font-medium text-gray-900">{averageRating}</span>
-              <span className="ml-1 text-sm text-gray-600">({reviewCount}件のレビュー)</span>
+              <span className="text-sm font-medium text-gray-900">
+                {averageRating}
+              </span>
+              <span className="ml-1 text-sm text-gray-600">
+                ({reviewCount}件のレビュー)
+              </span>
             </div>
           </div>
 
           {/* 説明文 */}
-          {gym.description && <div className="mb-3 text-sm text-gray-600 line-clamp-2">{gym.description}</div>}
+          {gym.description && (
+            <div className="mb-3 text-sm text-gray-600 line-clamp-2">
+              {gym.description}
+            </div>
+          )}
 
           {/* タグ */}
           <div className="mb-3">
             <div className="flex flex-wrap gap-1">
               {gym.tags.slice(0, 3).map((tag) => (
-                <span key={tag.id} className="px-2 py-1 bg-booking-50 text-booking-700 text-xs rounded-md">
+                <span
+                  key={tag.id}
+                  className="px-2 py-1 bg-booking-50 text-booking-700 text-xs rounded-md"
+                >
                   {tag.name}
                 </span>
               ))}
-              {gym.tags.length > 3 && <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md">+{gym.tags.length - 3}</span>}
+              {gym.tags.length > 3 && (
+                <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md">
+                  +{gym.tags.length - 3}
+                </span>
+              )}
             </div>
           </div>
 
           {/* アクションボタン */}
           <div className="flex justify-end">
-            <button className="text-booking-700 hover:text-booking-800 text-sm font-medium transition-colors">詳細を見る →</button>
+            <button className="text-booking-700 hover:text-booking-800 text-sm font-medium transition-colors">
+              詳細を見る →
+            </button>
           </div>
         </div>
       </div>

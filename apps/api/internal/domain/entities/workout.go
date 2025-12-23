@@ -54,6 +54,7 @@ type WorkoutRecord struct {
 	ID            *ID
 	UserID        ULID
 	GymID         *ID
+	GymName       *string    // ジム名（表示用）
 	PerformedDate time.Time  // DATE を day-start に固定、時刻は別扱い
 	StartedAt     *time.Time // 実日時（PerformedDateに紐づけて作る）
 	EndedAt       *time.Time

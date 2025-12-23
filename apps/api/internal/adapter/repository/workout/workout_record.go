@@ -22,6 +22,14 @@ type WorkoutRecord struct {
 
 	// Record → Set（1:N）
 	Sets []WorkoutSet `gorm:"foreignKey:WorkoutRecordID"`
+	// Record → Gym（N:1）
+	Gym *GymRecord `gorm:"foreignKey:GymID"`
+}
+
+type GymRecord struct {
+	ID             int64  `gorm:"primaryKey"`
+	Name           string `gorm:"size:255"`
+	NormalizedName string `gorm:"size:255"`
 }
 
 func (WorkoutRecord) TableName() string {

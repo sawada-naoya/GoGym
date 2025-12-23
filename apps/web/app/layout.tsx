@@ -25,7 +25,9 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => (
           <GlobalBanners />
           <main>{children}</main>
           <footer className="mt-16 border-t bg-white">
-            <div className="container mx-auto px-4 py-8 text-sm text-gray-500">© {new Date().getFullYear()} GoGym</div>
+            <div className="container mx-auto px-4 py-8 text-sm text-gray-500">
+              © {new Date().getFullYear()} GoGym
+            </div>
           </footer>
         </BannerProvider>
       </Providers>

@@ -8,6 +8,11 @@ export type WorkoutPartDTO = {
   }>;
 };
 
+export type GymDTO = {
+  id: number;
+  name: string;
+};
+
 /**
  * 空のWorkoutFormDTOを生成
  */
@@ -16,7 +21,8 @@ export const buildEmptyDTO = (): WorkoutFormDTO => ({
   performed_date: "",
   started_at: null,
   ended_at: null,
-  place: "",
+  gym_id: null,
+  gym_name: null,
   note: null,
   condition_level: null,
   exercises: Array.from({ length: 1 }, () => ({
@@ -51,7 +57,8 @@ export type WorkoutFormDTO = {
   performed_date: string; // "YYYY-MM-DD"
   started_at: string | null; // "HH:mm"（フォーム用）
   ended_at: string | null; // "HH:mm"
-  place: string;
+  gym_id: number | null; // deprecated: バックエンドで使用しない
+  gym_name: string | null; // ジム名（バックエンドで正規化して gym_id に変換）
   note: string | null;
   condition_level: 1 | 2 | 3 | 4 | 5 | null;
 

@@ -2,18 +2,23 @@ package workout
 
 import (
 	"context"
+	"errors"
+
 	dto "gogym-api/internal/adapter/dto"
 	dom "gogym-api/internal/domain/entities"
+	gymUsecase "gogym-api/internal/usecase/gym"
 	"time"
 )
 
 type workoutInteractor struct {
-	repo Repository
+	repo    Repository
+	gymRepo gymUsecase.Repository
 }
 
-func NewWorkoutInteractor(repo Repository) WorkoutUseCase {
+func NewWorkoutInteractor(repo Repository, gymRepo gymUsecase.Repository) WorkoutUseCase {
 	return &workoutInteractor{
-		repo: repo,
+		repo:    repo,
+		gymRepo: gymRepo,
 	}
 }
 
@@ -34,7 +39,6 @@ func (i *workoutInteractor) GetWorkoutRecords(ctx context.Context, userID string
 	if records.ID == nil {
 		return dto.WorkoutRecordDTO{
 			PerformedDate: date,
-			Place:         "",
 			Exercises:     []dto.ExerciseDTO{},
 		}, nil
 	}
@@ -195,4 +199,30 @@ func (i *workoutInteractor) GetLastWorkoutRecord(ctx context.Context, userID str
 	}
 
 	return &exerciseDTO, nil
+}
+
+// ResolveGymIDFromName resolves gym_name to gym_id (finds or creates)
+func (i *workoutInteractor) ResolveGymIDFromName(ctx context.Context, userID string, gymName string) (dom.ID, error) {
+	// Normalize gym name
+	normalizedName := dom.NormalizeName(gymName)
+	if normalizedName == "" {
+		return 0, errors.New("gym name cannot be empty")
+	}
+
+	// Try to find existing gym
+	gym, err := i.gymRepo.FindByNormalizedName(ctx, userID, normalizedName)
+	if err == nil && gym != nil {
+		return dom.ID(gym.ID), nil
+	}
+
+	// If not found, create new gym
+	if errors.Is(err, gymUsecase.ErrNotFound) {
+		gym, err = i.gymRepo.CreateGym(ctx, userID, gymName, normalizedName)
+		if err != nil {
+			return 0, err
+		}
+		return dom.ID(gym.ID), nil
+	}
+
+	return 0, err
 }

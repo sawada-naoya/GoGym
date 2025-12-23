@@ -1,5 +1,4 @@
 package gym
 
 // handler → usecase
-type GymUseCase interface {
-}
+type GymUseCase interface{}

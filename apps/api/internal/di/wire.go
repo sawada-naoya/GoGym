@@ -3,6 +3,8 @@
 package di
 
 import (
+	"gogym-api/internal/infra/security"
+
 	"github.com/google/wire"
 	"gorm.io/gorm"
 
@@ -10,7 +12,7 @@ import (
 	gymrepo "gogym-api/internal/adapter/repository/gym"
 	userrepo "gogym-api/internal/adapter/repository/user"
 	workoutrepo "gogym-api/internal/adapter/repository/workout"
-	"gogym-api/internal/infra/security"
+
 	gymuc "gogym-api/internal/usecase/gym"
 	sessionuc "gogym-api/internal/usecase/session"
 	useruc "gogym-api/internal/usecase/user"

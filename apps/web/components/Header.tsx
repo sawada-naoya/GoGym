@@ -19,12 +19,17 @@ const Header = () => {
         <div className="flex justify-between items-center py-2 md:py-4">
           {/* ロゴ */}
           <Link href="/" className="flex items-center">
-            <span className="text-xl md:text-3xl font-bold text-white">GoGym</span>
+            <span className="text-xl md:text-3xl font-bold text-white">
+              GoGym
+            </span>
           </Link>
 
           {/* デスクトップナビゲーション */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link href="/" className="text-white hover:text-booking-200 transition-colors">
+            <Link
+              href="/"
+              className="text-white hover:text-booking-200 transition-colors"
+            >
               トレーニングノート
             </Link>
           </nav>
@@ -36,7 +41,10 @@ const Header = () => {
             ) : userName ? (
               <>
                 <span className="text-white">{userName}</span>
-                <button onClick={handleSignOut} className="bg-white text-booking-700 hover:bg-booking-50 transition-colors px-4 py-2 rounded-md font-medium">
+                <button
+                  onClick={handleSignOut}
+                  className="bg-white text-booking-700 hover:bg-booking-50 transition-colors px-4 py-2 rounded-md font-medium"
+                >
                   ログアウト
                 </button>
               </>
@@ -49,11 +57,26 @@ const Header = () => {
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="メニュー"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               {isMenuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               )}
             </svg>
           </button>
@@ -63,13 +86,20 @@ const Header = () => {
         {isMenuOpen && (
           <div className="md:hidden py-3 border-t border-booking-600">
             <div className="flex flex-col space-y-3">
-              <Link href="/" className="text-white hover:text-booking-200 transition-colors py-2 text-sm" onClick={() => setIsMenuOpen(false)}>
+              <Link
+                href="/"
+                className="text-white hover:text-booking-200 transition-colors py-2 text-sm"
+                onClick={() => setIsMenuOpen(false)}
+              >
                 トレーニングノート
               </Link>
               {userName && (
                 <div className="flex flex-col space-y-2 pt-3 border-t border-booking-600">
                   <span className="text-white py-1 text-sm">{userName}</span>
-                  <button onClick={handleSignOut} className="bg-white text-booking-700 hover:bg-booking-50 transition-colors px-3 py-1.5 rounded-md font-medium text-center text-sm">
+                  <button
+                    onClick={handleSignOut}
+                    className="bg-white text-booking-700 hover:bg-booking-50 transition-colors px-3 py-1.5 rounded-md font-medium text-center text-sm"
+                  >
                     ログアウト
                   </button>
                 </div>

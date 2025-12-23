@@ -17,12 +17,11 @@ const LoginSchema = z.object({
 type LoginForm = z.infer<typeof LoginSchema>;
 
 type LoginFormContentProps = {
-  onSuccessCallback?: () => void;
   showHeader?: boolean;
   showSignupLink?: boolean;
 };
 
-const LoginFormContent = ({ onSuccessCallback, showHeader = true, showSignupLink = true }: LoginFormContentProps = {}) => {
+const LoginFormContent = ({ showHeader = true, showSignupLink = true }: LoginFormContentProps = {}) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
@@ -41,7 +40,7 @@ const LoginFormContent = ({ onSuccessCallback, showHeader = true, showSignupLink
   const onSubmit = async (data: LoginForm) => {
     setLoading(true);
 
-    const callbackUrl = searchParams.get("callbackUrl") ?? "/";
+    const callbackUrl = searchParams.get("callbackUrl") ?? "/workout";
     const res = await signIn("credentials", {
       email: data.email,
       password: data.password,
@@ -59,18 +58,9 @@ const LoginFormContent = ({ onSuccessCallback, showHeader = true, showSignupLink
       return;
     }
 
-    if (onSuccessCallback) {
-      onSuccessCallback();
-    } else {
-      sessionStorage.setItem(
-        "flash",
-        JSON.stringify({
-          variant: "success",
-          message: "ログインに成功しました",
-        })
-      );
-      router.push(res?.url ?? callbackUrl);
-    }
+    sessionStorage.setItem("flash", JSON.stringify({ variant: "success", message: "ログインに成功しました" }));
+
+    router.replace(res?.url ?? callbackUrl);
   };
 
   const formElement = (
@@ -182,20 +172,16 @@ const LoginFormContent = ({ onSuccessCallback, showHeader = true, showSignupLink
   );
 };
 
-export const LoginForm = (props: LoginFormContentProps) => {
-  return (
-    <Suspense fallback={null}>
-      <LoginFormContent {...props} />
-    </Suspense>
-  );
-};
+export const LoginForm = (props: LoginFormContentProps) => (
+  <Suspense fallback={null}>
+    <LoginFormContent {...props} />
+  </Suspense>
+);
 
-const LoginClient = () => {
+export const LoginClient = () => {
   return (
     <Suspense fallback={null}>
       <LoginFormContent />
     </Suspense>
   );
 };
-
-export default LoginClient;

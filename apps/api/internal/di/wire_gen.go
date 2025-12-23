@@ -33,7 +33,7 @@ func Initialize(db *gorm.DB) *Handlers {
 	gymUseCase := gym2.NewGymInteractor(repository)
 	gymHandler := handler.NewGymHandler(gymUseCase)
 	workoutRepository := workout.NewWorkoutRepository(db)
-	workoutUseCase := workout2.NewWorkoutInteractor(workoutRepository)
+	workoutUseCase := workout2.NewWorkoutInteractor(workoutRepository, repository)
 	workoutHandler := handler.NewWorkoutHandler(workoutUseCase)
 	handlers := NewHandlers(userHandler, sessionHandler, gymHandler, workoutHandler)
 	return handlers
