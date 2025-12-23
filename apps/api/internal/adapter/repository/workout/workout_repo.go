@@ -26,6 +26,11 @@ func NewWorkoutRepository(db *gorm.DB) workoutUsecase.Repository {
 // ID の重複を防ぐために Sets を nil にした後、手動で1件ずつ作成する
 func (r *workoutRepository) insertWorkoutSets(tx *gorm.DB, recordID int, sets []WorkoutSet) error {
 	for i := range sets {
+		// 種目IDが無効な場合はスキップ（未選択の種目を保存しない）
+		if sets[i].WorkoutExerciseID <= 0 {
+			continue
+		}
+
 		newSet := WorkoutSet{
 			WorkoutRecordID:   recordID,
 			WorkoutExerciseID: sets[i].WorkoutExerciseID,
@@ -47,12 +52,12 @@ func (r *workoutRepository) insertWorkoutSets(tx *gorm.DB, recordID int, sets []
 func (r *workoutRepository) GetRecordsByDate(ctx context.Context, userID string, date string) (dom.WorkoutRecord, error) {
 	var rec WorkoutRecord
 	err := r.db.WithContext(ctx).
+		Preload("Gym").
 		Preload("Sets").
 		Preload("Sets.Exercise").
 		Preload("Sets.Exercise.Part").
 		Where("user_id = ? AND performed_date = ?", userID, date).
 		First(&rec).Error
-
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return dom.WorkoutRecord{}, nil
@@ -78,12 +83,12 @@ func (r *workoutRepository) GetRecordsByDateAndPart(ctx context.Context, userID 
 	// 指定部位の種目のみを含むセットを Preload でフィルタリング
 	var rec WorkoutRecord
 	err := r.db.WithContext(ctx).
+		Preload("Gym").
 		Preload("Sets.Exercise.Part", "workout_parts.id = ?", *partID).
 		Preload("Sets", "workout_exercise_id IN (SELECT id FROM workout_exercises WHERE workout_part_id = ?)", *partID).
 		Preload("Sets.Exercise", "workout_part_id = ?", *partID).
 		Where("user_id = ? AND performed_date = ?", userID, date).
 		First(&rec).Error
-
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return dom.WorkoutRecord{}, nil
@@ -212,12 +217,13 @@ func (r *workoutRepository) createRecordWithSets(tx *gorm.DB, recordWorkout *Wor
 
 // updateRecordAndReplaceSets は既存レコードのメタデータを更新し、セットを置き換え
 func (r *workoutRepository) updateRecordAndReplaceSets(tx *gorm.DB, existing *WorkoutRecord, new *WorkoutRecord, partID *int) error {
-	// メタデータ（時刻・コンディション・ノート）を更新
+	// メタデータ（時刻・コンディション・ノート・ジムID）を更新
 	updates := map[string]interface{}{
 		"started_at":      new.StartedAt,
 		"ended_at":        new.EndedAt,
 		"note":            new.Note,
 		"condition_level": new.ConditionLevel,
+		"gym_id":          new.GymID,
 	}
 	if err := tx.Model(existing).Updates(updates).Error; err != nil {
 		return fmt.Errorf("failed to update workout record metadata: %w", err)
@@ -228,27 +234,54 @@ func (r *workoutRepository) updateRecordAndReplaceSets(tx *gorm.DB, existing *Wo
 		return fmt.Errorf("failed to delete existing sets: %w", err)
 	}
 
+	// 無効なセット（exerciseID=0や存在しない種目）を削除
+	if err := r.deleteInvalidSets(tx, existing.ID); err != nil {
+		return fmt.Errorf("failed to delete invalid sets: %w", err)
+	}
+
 	// 新しいセットを作成
 	return r.insertWorkoutSets(tx, existing.ID, new.Sets)
 }
 
-// deleteSetsByPart は指定部位のセットを削除
+// deleteSetsByPart は指定部位のセットを物理削除
+// 物理削除を使用してユニーク制約の問題を回避
 func (r *workoutRepository) deleteSetsByPart(tx *gorm.DB, recordID int, partID *int) error {
 	if partID == nil {
 		return nil
 	}
 
-	var existingSetIDs []int
-	tx.Model(&WorkoutSet{}).
-		Joins("JOIN workout_exercises ON workout_exercises.id = workout_sets.workout_exercise_id").
-		Where("workout_sets.workout_record_id = ? AND workout_exercises.workout_part_id = ?", recordID, *partID).
-		Pluck("workout_sets.id", &existingSetIDs)
+	// 指定部位に属する種目IDを取得
+	var exerciseIDs []int
+	if err := tx.Model(&WorkoutExercise{}).
+		Select("id").
+		Where("workout_part_id = ?", *partID).
+		Pluck("id", &exerciseIDs).Error; err != nil {
+		return fmt.Errorf("failed to get exercise IDs: %w", err)
+	}
 
-	if len(existingSetIDs) > 0 {
-		// 物理削除（Unscoped）を使用してユニーク制約の問題を回避
-		if err := tx.Unscoped().Delete(&WorkoutSet{}, existingSetIDs).Error; err != nil {
-			return err
-		}
+	if len(exerciseIDs) == 0 {
+		return nil
+	}
+
+	// 該当するセットを物理削除
+	if err := tx.Unscoped().
+		Where("workout_record_id = ?", recordID).
+		Where("workout_exercise_id IN ?", exerciseIDs).
+		Delete(&WorkoutSet{}).Error; err != nil {
+		return fmt.Errorf("failed to delete sets by part: %w", err)
+	}
+
+	return nil
+}
+
+// deleteInvalidSets は無効なセット（weight=0 かつ reps=0、またはexerciseID=0）を物理削除
+func (r *workoutRepository) deleteInvalidSets(tx *gorm.DB, recordID int) error {
+	// weight_kg=0 かつ reps=0 のセット、またはexerciseID=0のセットを削除
+	if err := tx.Unscoped().
+		Where("workout_record_id = ?", recordID).
+		Where("(weight_kg = 0 AND reps = 0) OR workout_exercise_id = 0 OR workout_exercise_id IS NULL").
+		Delete(&WorkoutSet{}).Error; err != nil {
+		return fmt.Errorf("failed to delete invalid sets: %w", err)
 	}
 
 	return nil
@@ -264,7 +297,6 @@ func (r *workoutRepository) GetWorkoutParts(ctx context.Context, userID string) 
 		Where("user_id = ?", userID).
 		Order("name ASC").
 		Find(&parts).Error
-
 	if err != nil {
 		return nil, fmt.Errorf("error fetching workout parts: %w", err)
 	}
@@ -279,7 +311,6 @@ func (r *workoutRepository) CountUserWorkoutParts(ctx context.Context, userID st
 		Model(&WorkoutPart{}).
 		Where("user_id = ?", userID).
 		Count(&count).Error
-
 	if err != nil {
 		return 0, fmt.Errorf("error counting workout parts: %w", err)
 	}
@@ -310,7 +341,6 @@ func (r *workoutRepository) DeleteWorkoutExercise(ctx context.Context, userID st
 	err := r.db.WithContext(ctx).
 		Where("id = ? AND user_id = ?", exerciseID, userID).
 		Delete(&WorkoutExercise{}).Error
-
 	if err != nil {
 		return fmt.Errorf("error deleting workout exercise: %w", err)
 	}
@@ -349,7 +379,6 @@ func (r *workoutRepository) UpsertWorkoutExercises(ctx context.Context, userID s
 			DoUpdates: clause.AssignmentColumns([]string{"name", "workout_part_id"}),
 		}).
 		Create(&recordExercises).Error
-
 	if err != nil {
 		return fmt.Errorf("error upserting workout exercises: %w", err)
 	}
@@ -370,12 +399,12 @@ func (r *workoutRepository) GetLastWorkoutRecord(ctx context.Context, userID str
 		Limit(1)
 
 	err := r.db.WithContext(ctx).
+		Preload("Gym").
 		Preload("Sets", "workout_exercise_id = ?", exerciseID). // 指定エクササイズのセットのみ取得
 		Preload("Sets.Exercise").
 		Preload("Sets.Exercise.Part").
 		Where("user_id = ? AND id = (?)", userID, subQuery).
 		First(&rec).Error
-
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return dom.WorkoutRecord{}, nil

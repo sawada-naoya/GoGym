@@ -38,18 +38,15 @@ const WorkoutMetadataEditor = ({ form, selectedYear, selectedMonth, selectedDay,
     fetchGyms();
   }, []);
 
-  // 選択されているgym_idからジム名を取得
+  // gym_name から直接ジム名を取得
   useEffect(() => {
-    const selectedGymId = form.watch("gym_id");
-    if (selectedGymId) {
-      const gym = gyms.find((g) => g.id === selectedGymId);
-      if (gym) {
-        setGymInputValue(gym.name);
-      }
+    const gymName = form.watch("gym_name");
+    if (gymName) {
+      setGymInputValue(gymName);
     } else {
       setGymInputValue("");
     }
-  }, [form.watch("gym_id"), gyms]);
+  }, [form.watch("gym_name")]);
 
   // 入力値に応じてフィルタリング
   useEffect(() => {

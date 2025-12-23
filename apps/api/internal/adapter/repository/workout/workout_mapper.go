@@ -10,10 +10,16 @@ func ToEntity(rec *WorkoutRecord) *dom.WorkoutRecord {
 		return nil
 	}
 
+	var gymName *string
+	if rec.Gym != nil {
+		gymName = &rec.Gym.Name
+	}
+
 	domainRecord := &dom.WorkoutRecord{
 		ID:            ptrInt64ToDomainID(int64(rec.ID)),
 		UserID:        dom.ULID(rec.UserID),
 		GymID:         int64PtrToDomainIDPtr(rec.GymID),
+		GymName:       gymName,
 		PerformedDate: rec.PerformedDate,
 		StartedAt:     rec.StartedAt,
 		EndedAt:       rec.EndedAt,
@@ -62,7 +68,7 @@ func FromEntity(domainRecord *dom.WorkoutRecord) *WorkoutRecord {
 
 	rec := &WorkoutRecord{
 		UserID:          string(domainRecord.UserID),
-		GymID:           nil, // TODO: domainにGymIDフィールドを追加後に設定
+		GymID:           domainIDPtrToInt64Ptr(domainRecord.GymID),
 		PerformedDate:   domainRecord.PerformedDate,
 		StartedAt:       domainRecord.StartedAt,
 		EndedAt:         domainRecord.EndedAt,
@@ -172,6 +178,14 @@ func int64PtrToDomainIDPtr(i *int64) *dom.ID {
 	}
 	id := dom.ID(*i)
 	return &id
+}
+
+func domainIDPtrToInt64Ptr(id *dom.ID) *int64 {
+	if id == nil {
+		return nil
+	}
+	i := int64(*id)
+	return &i
 }
 
 func stringPtrToULIDPtr(s *string) *dom.ULID {
