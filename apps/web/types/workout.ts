@@ -46,7 +46,11 @@ export type WorkoutSet = {
 
 export type WorkoutPartDTO = {
   id: number;
-  name: string;
+  key: string;
+  translations: Array<{
+    locale: string;
+    name: string;
+  }>;
   exercises: Array<{
     id: number;
     name: string;

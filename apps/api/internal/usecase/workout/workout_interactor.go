@@ -92,14 +92,56 @@ func (i *workoutInteractor) SeedWorkoutParts(ctx context.Context, userID string)
 	// ULID型に変換
 	ownerULID := dom.ULID(userID)
 
-	// 6部位のシードデータを作成
+	// 6部位のシードデータを作成（多言語対応）
 	defaultParts := []dom.WorkoutPart{
-		{Name: "胸", Owner: &ownerULID},
-		{Name: "肩", Owner: &ownerULID},
-		{Name: "背中", Owner: &ownerULID},
-		{Name: "腕", Owner: &ownerULID},
-		{Name: "脚", Owner: &ownerULID},
-		{Name: "その他", Owner: &ownerULID},
+		{
+			Key:   "chest",
+			Owner: &ownerULID,
+			Translations: []dom.WorkoutPartTranslation{
+				{Locale: "ja", Name: "胸"},
+				{Locale: "en", Name: "Chest"},
+			},
+		},
+		{
+			Key:   "shoulders",
+			Owner: &ownerULID,
+			Translations: []dom.WorkoutPartTranslation{
+				{Locale: "ja", Name: "肩"},
+				{Locale: "en", Name: "Shoulders"},
+			},
+		},
+		{
+			Key:   "back",
+			Owner: &ownerULID,
+			Translations: []dom.WorkoutPartTranslation{
+				{Locale: "ja", Name: "背中"},
+				{Locale: "en", Name: "Back"},
+			},
+		},
+		{
+			Key:   "arms",
+			Owner: &ownerULID,
+			Translations: []dom.WorkoutPartTranslation{
+				{Locale: "ja", Name: "腕"},
+				{Locale: "en", Name: "Arms"},
+			},
+		},
+		{
+			Key:   "legs",
+			Owner: &ownerULID,
+			Translations: []dom.WorkoutPartTranslation{
+				{Locale: "ja", Name: "脚"},
+				{Locale: "en", Name: "Legs"},
+			},
+		},
+		{
+			Key:   "others",
+			Owner: &ownerULID,
+			Translations: []dom.WorkoutPartTranslation{
+				{Locale: "ja", Name: "その他"},
+				{Locale: "en", Name: "Others"},
+			},
+		},
 	}
 
 	return i.repo.CreateWorkoutParts(ctx, userID, defaultParts)

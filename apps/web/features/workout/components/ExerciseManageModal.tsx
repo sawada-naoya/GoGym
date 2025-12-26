@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { WorkoutPartDTO } from "@/types/workout";
 import { useBanner } from "@/components/Banner";
+import { getLocalizedPartName } from "@/features/workout/lib/utils";
 // Removed lib/bff/workout import - now using direct fetch to Route Handler (BFF)
 
 type Props = {
@@ -215,7 +216,7 @@ const ExerciseManageModal: React.FC<Props> = ({
                   </option>
                   {workoutParts.map((part) => (
                     <option key={part.id} value={part.id.toString()}>
-                      {part.name}
+                      {getLocalizedPartName(part)}
                     </option>
                   ))}
                 </select>

@@ -1,7 +1,44 @@
-import type { WorkoutFormDTO } from "@/types/workout";
+import type { WorkoutFormDTO, WorkoutPartDTO } from "@/types/workout";
 import { formatDate, formatTimeFromDate, parseDateString } from "@/utils/time";
 
 export type ExerciseRow = WorkoutFormDTO["exercises"][number];
+
+// ==================== i18n Helpers ====================
+
+/**
+ * Get the localized name for a workout part based on current locale
+ * @param part - WorkoutPartDTO with translations
+ * @param locale - Target locale (defaults to browser locale or "ja")
+ * @returns Localized name string
+ */
+export const getLocalizedPartName = (
+  part: WorkoutPartDTO,
+  locale?: string,
+): string => {
+  // Use provided locale or try to detect from browser
+  const targetLocale =
+    locale || (typeof navigator !== "undefined" ? navigator.language : "ja");
+
+  // Extract language code (e.g., "en-US" -> "en", "ja-JP" -> "ja")
+  const languageCode = targetLocale.split("-")[0];
+
+  // Try to find exact match first
+  const exactMatch = part.translations.find((t) => t.locale === targetLocale);
+  if (exactMatch) return exactMatch.name;
+
+  // Try to find language code match (e.g., "en" for "en-US")
+  const languageMatch = part.translations.find(
+    (t) => t.locale.split("-")[0] === languageCode,
+  );
+  if (languageMatch) return languageMatch.name;
+
+  // Fallback to Japanese
+  const jaMatch = part.translations.find((t) => t.locale === "ja");
+  if (jaMatch) return jaMatch.name;
+
+  // Fallback to first available translation
+  return part.translations[0]?.name || part.key;
+};
 
 // ==================== Date & Time Formatters ====================
 

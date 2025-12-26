@@ -76,15 +76,29 @@ func (WorkoutExercise) TableName() string {
 
 type WorkoutPart struct {
 	ID        int `gorm:"primaryKey;autoIncrement"`
-	Name      string
+	Key       string
 	UserID    *string        `gorm:"index"` // nil ならプリセット
 	CreatedAt time.Time      `gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `gorm:"autoUpdateTime"`
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 
-	Exercises []WorkoutExercise `gorm:"foreignKey:WorkoutPartID"`
+	Exercises    []WorkoutExercise         `gorm:"foreignKey:WorkoutPartID"`
+	Translations []WorkoutPartTranslation  `gorm:"foreignKey:WorkoutPartID"`
 }
 
 func (WorkoutPart) TableName() string {
 	return "workout_parts"
+}
+
+type WorkoutPartTranslation struct {
+	ID            int `gorm:"primaryKey;autoIncrement"`
+	WorkoutPartID int `gorm:"index"`
+	Locale        string
+	Name          string
+	CreatedAt     time.Time      `gorm:"autoCreateTime"`
+	UpdatedAt     time.Time      `gorm:"autoUpdateTime"`
+}
+
+func (WorkoutPartTranslation) TableName() string {
+	return "workout_part_translations"
 }

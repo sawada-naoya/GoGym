@@ -133,30 +133,6 @@ const LoginFormContent = ({
         </button>
       </div>
 
-      {/* Googleログイン（後でちゃんと実装するまで消すのが正解。今はUIノイズ） */}
-      <div className="mt-6">
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300" />
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-gray-50 text-gray-500">
-              {t("auth.login.orDivider")}
-            </span>
-          </div>
-        </div>
-
-        <div className="mt-6">
-          <button
-            type="button"
-            className="w-full inline-flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors duration-200"
-            onClick={() => alert(t("auth.login.googleLoginAlert"))}
-          >
-            {t("auth.login.googleLogin")}
-          </button>
-        </div>
-      </div>
-
       <div className="text-center text-sm">
         <Link
           href="/forgot-password"

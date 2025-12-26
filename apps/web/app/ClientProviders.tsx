@@ -3,8 +3,9 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { SessionProvider } from "next-auth/react";
+import { I18nextProvider } from "react-i18next";
 import { BannerProvider, useBanner } from "@/components/Banner";
-import "@/lib/i18n/client";
+import i18n from "@/lib/i18n/client";
 
 const FlashMessageHandler = () => {
   const { success, error } = useBanner();
@@ -38,12 +39,14 @@ const FlashMessageHandler = () => {
 };
 
 const ClientProviders = ({ children }: { children: React.ReactNode }) => (
-  <SessionProvider>
-    <BannerProvider>
-      <FlashMessageHandler />
-      {children}
-    </BannerProvider>
-  </SessionProvider>
+  <I18nextProvider i18n={i18n}>
+    <SessionProvider>
+      <BannerProvider>
+        <FlashMessageHandler />
+        {children}
+      </BannerProvider>
+    </SessionProvider>
+  </I18nextProvider>
 );
 
 export default ClientProviders;

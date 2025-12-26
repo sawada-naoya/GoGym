@@ -288,14 +288,15 @@ func (r *workoutRepository) deleteInvalidSets(tx *gorm.DB, recordID int) error {
 }
 
 // GetWorkoutParts はユーザーのワークアウト部位一覧を取得
-// 各部位に紐づく種目もプリロード
+// 各部位に紐づく種目と翻訳データもプリロード
 func (r *workoutRepository) GetWorkoutParts(ctx context.Context, userID string) ([]dom.WorkoutPart, error) {
 	var parts []WorkoutPart
 
 	err := r.db.WithContext(ctx).
+		Preload("Translations").
 		Preload("Exercises", "user_id = ?", userID).
 		Where("user_id = ?", userID).
-		Order("name ASC").
+		Order("key ASC").
 		Find(&parts).Error
 	if err != nil {
 		return nil, fmt.Errorf("error fetching workout parts: %w", err)
@@ -318,13 +319,22 @@ func (r *workoutRepository) CountUserWorkoutParts(ctx context.Context, userID st
 	return count, nil
 }
 
-// CreateWorkoutParts は複数のワークアウト部位を一括作成
+// CreateWorkoutParts は複数のワークアウト部位を一括作成（翻訳データも含む）
 func (r *workoutRepository) CreateWorkoutParts(ctx context.Context, userID string, parts []dom.WorkoutPart) error {
 	recordParts := make([]WorkoutPart, len(parts))
 	for i, part := range parts {
+		translations := make([]WorkoutPartTranslation, len(part.Translations))
+		for j, trans := range part.Translations {
+			translations[j] = WorkoutPartTranslation{
+				Locale: trans.Locale,
+				Name:   trans.Name,
+			}
+		}
+
 		recordParts[i] = WorkoutPart{
-			Name:   part.Name,
-			UserID: &userID,
+			Key:          part.Key,
+			UserID:       &userID,
+			Translations: translations,
 		}
 	}
 

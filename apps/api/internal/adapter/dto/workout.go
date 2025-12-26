@@ -10,9 +10,16 @@ import (
 
 // WorkoutPartDTO represents a workout part (e.g., chest, back, legs)
 type WorkoutPartListItemDTO struct {
-	ID        int64                        `json:"id"`
-	Name      string                       `json:"name"`
-	Exercises []WorkoutExerciseListItemDTO `json:"exercises"`
+	ID           int64                          `json:"id"`
+	Key          string                         `json:"key"`
+	Translations []WorkoutPartTranslationDTO    `json:"translations"`
+	Exercises    []WorkoutExerciseListItemDTO   `json:"exercises"`
+}
+
+// WorkoutPartTranslationDTO represents a translation for a workout part
+type WorkoutPartTranslationDTO struct {
+	Locale string `json:"locale"`
+	Name   string `json:"name"`
 }
 
 type WorkoutRecordDTO struct {
@@ -298,6 +305,15 @@ func WorkoutPartToDTO(part *dom.WorkoutPart) *WorkoutPartListItemDTO {
 		return nil
 	}
 
+	// Translationsを変換
+	translations := make([]WorkoutPartTranslationDTO, 0, len(part.Translations))
+	for _, trans := range part.Translations {
+		translations = append(translations, WorkoutPartTranslationDTO{
+			Locale: trans.Locale,
+			Name:   trans.Name,
+		})
+	}
+
 	// Exercisesを変換
 	exercises := make([]WorkoutExerciseListItemDTO, 0, len(part.Exercises))
 	for _, ex := range part.Exercises {
@@ -315,9 +331,10 @@ func WorkoutPartToDTO(part *dom.WorkoutPart) *WorkoutPartListItemDTO {
 	}
 
 	return &WorkoutPartListItemDTO{
-		ID:        int64(part.ID),
-		Name:      part.Name,
-		Exercises: exercises,
+		ID:           int64(part.ID),
+		Key:          part.Key,
+		Translations: translations,
+		Exercises:    exercises,
 	}
 }
 
