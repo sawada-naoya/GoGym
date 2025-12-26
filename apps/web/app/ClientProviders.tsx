@@ -1,10 +1,12 @@
-// app/GlobalBanners.tsx
 "use client";
+
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { useBanner } from "@/components/Banner";
+import { SessionProvider } from "next-auth/react";
+import { BannerProvider, useBanner } from "@/components/Banner";
+import "@/lib/i18n/client";
 
-const GlobalBanners = () => {
+const FlashMessageHandler = () => {
   const { success, error } = useBanner();
   const pathname = usePathname();
 
@@ -20,7 +22,6 @@ const GlobalBanners = () => {
       sessionStorage.removeItem("flash");
 
       if (data?.message) {
-        // データが取得できたら表示
         if (data.variant === "error") {
           error(data.message);
         } else {
@@ -36,4 +37,13 @@ const GlobalBanners = () => {
   return null;
 };
 
-export default GlobalBanners;
+const ClientProviders = ({ children }: { children: React.ReactNode }) => (
+  <SessionProvider>
+    <BannerProvider>
+      <FlashMessageHandler />
+      {children}
+    </BannerProvider>
+  </SessionProvider>
+);
+
+export default ClientProviders;

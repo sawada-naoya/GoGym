@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { UseFormReturn } from "react-hook-form";
 import MonthlyStrip from "./MonthlyStrip";
 import { WorkoutFormDTO, GymDTO } from "@/types/workout";
@@ -25,6 +26,7 @@ const WorkoutMetadataEditor = ({
   onMonthChange,
   onDayChange,
 }: Props) => {
+  const { t } = useTranslation("common");
   const router = useRouter();
   const [isMetadataOpen, setIsMetadataOpen] = useState(false);
   const [gyms, setGyms] = useState<GymDTO[]>([]);
@@ -102,7 +104,9 @@ const WorkoutMetadataEditor = ({
             );
           })}
         </select>
-        <span className="text-sm md:text-lg font-medium">年</span>
+        <span className="text-sm md:text-lg font-medium">
+          {t("workout.metadata.year")}
+        </span>
 
         <select
           value={selectedMonth}
@@ -122,7 +126,9 @@ const WorkoutMetadataEditor = ({
             );
           })}
         </select>
-        <span className="text-sm md:text-lg font-medium">月</span>
+        <span className="text-sm md:text-lg font-medium">
+          {t("workout.metadata.month")}
+        </span>
       </div>
 
       {/* 日付選択 */}
@@ -140,7 +146,7 @@ const WorkoutMetadataEditor = ({
           onClick={() => setIsMetadataOpen(!isMetadataOpen)}
           className="w-full flex items-center justify-between px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
         >
-          <span>詳細情報</span>
+          <span>{t("workout.metadata.detailsButton")}</span>
           <svg
             className={`w-4 h-4 transition-transform ${isMetadataOpen ? "rotate-180" : ""}`}
             fill="none"
@@ -167,7 +173,7 @@ const WorkoutMetadataEditor = ({
         {/* 時間 */}
         <div className="flex items-center gap-1 w-full md:w-auto">
           <label className="text-xs md:text-sm font-medium text-gray-700 min-w-[44px] md:min-w-[60px]">
-            時間
+            {t("workout.metadata.timeLabel")}
           </label>
           <input
             type="time"
@@ -195,7 +201,7 @@ const WorkoutMetadataEditor = ({
         {/* 場所（ジム予測入力） */}
         <div className="flex items-center gap-2 w-full md:w-auto relative">
           <label className="text-xs md:text-sm font-medium text-gray-700 min-w-[44px] md:min-w-[60px]">
-            場所
+            {t("workout.metadata.locationLabel")}
           </label>
           <div className="flex-1 md:w-80 relative">
             <input
@@ -224,7 +230,7 @@ const WorkoutMetadataEditor = ({
                   });
                 }, 200);
               }}
-              placeholder="ジム名を入力"
+              placeholder={t("workout.metadata.locationPlaceholder")}
               className="w-full px-2 md:px-3 py-1.5 md:py-2 text-xs md:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500"
             />
             {showSuggestions && filteredGyms.length > 0 && (
@@ -253,7 +259,7 @@ const WorkoutMetadataEditor = ({
         {/* コンディション（1〜5） */}
         <div className="flex items-center gap-2 w-full md:w-auto">
           <label className="text-xs md:text-sm font-medium text-gray-700 min-w-[44px] md:min-w-[60px]">
-            体調
+            {t("workout.metadata.conditionLabel")}
           </label>
           <div className="flex gap-1">
             {[1, 2, 3, 4, 5].map((n) => (

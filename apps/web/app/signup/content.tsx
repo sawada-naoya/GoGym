@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslation } from "react-i18next";
 
 import { useBanner } from "@/components/Banner";
 import { signup } from "@/features/auth/actions";
@@ -21,9 +22,8 @@ const SignupFormContent = ({
   showHeader = true,
   showLoginLink = true,
 }: SignupFormContentProps = {}) => {
+  const { t } = useTranslation("common");
   const router = useRouter();
-  const params = useParams<{ locale: string }>();
-  const locale = params?.locale ?? "ja";
 
   const [loading, setLoading] = useState(false);
   const { error } = useBanner();
@@ -47,7 +47,7 @@ const SignupFormContent = ({
       });
 
       if (!result.success) {
-        error(result.error || "このメールアドレスは既に使用されています");
+        error(result.error || t("auth.signup.errorEmailTaken"));
         return;
       }
 
@@ -60,16 +60,13 @@ const SignupFormContent = ({
         "flash",
         JSON.stringify({
           variant: "success",
-          message: "アカウントの作成に成功しました。ログインしてください。",
+          message: t("auth.signup.successMessage"),
         }),
       );
 
-      // i18n前提: "/" へ戻すのはやめろ
-      router.push(`/${locale}/login`);
+      router.push("/login");
     } catch {
-      error(
-        "ネットワークエラーが発生しました。時間を置いて再度お試しください。",
-      );
+      error(t("auth.signup.errorNetworkError"));
     } finally {
       setLoading(false);
     }
@@ -84,7 +81,7 @@ const SignupFormContent = ({
       <div className="space-y-4">
         <div>
           <label htmlFor="name" className="form-label">
-            名前
+            {t("auth.signup.nameLabel")}
           </label>
           <input
             {...register("name")}
@@ -92,7 +89,7 @@ const SignupFormContent = ({
             type="text"
             autoComplete="name"
             className={`form-input ${errors.name ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`}
-            placeholder="山田太郎"
+            placeholder={t("auth.signup.namePlaceholder")}
           />
           {errors.name && (
             <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
@@ -101,7 +98,7 @@ const SignupFormContent = ({
 
         <div>
           <label htmlFor="email" className="form-label">
-            メールアドレス
+            {t("auth.signup.emailLabel")}
           </label>
           <input
             {...register("email")}
@@ -109,7 +106,7 @@ const SignupFormContent = ({
             type="email"
             autoComplete="email"
             className={`form-input ${errors.email ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`}
-            placeholder="example@example.com"
+            placeholder={t("auth.signup.emailPlaceholder")}
           />
           {errors.email && (
             <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
@@ -118,7 +115,7 @@ const SignupFormContent = ({
 
         <div>
           <label htmlFor="password" className="form-label">
-            パスワード
+            {t("auth.signup.passwordLabel")}
           </label>
           <input
             {...register("password")}
@@ -126,7 +123,7 @@ const SignupFormContent = ({
             type="password"
             autoComplete="new-password"
             className={`form-input ${errors.password ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`}
-            placeholder="パスワードを入力"
+            placeholder={t("auth.signup.passwordPlaceholder")}
           />
           {errors.password && (
             <p className="mt-1 text-sm text-red-600">
@@ -137,7 +134,7 @@ const SignupFormContent = ({
 
         <div>
           <label htmlFor="confirmPassword" className="form-label">
-            パスワード（確認）
+            {t("auth.signup.confirmPasswordLabel")}
           </label>
           <input
             {...register("confirmPassword")}
@@ -145,7 +142,7 @@ const SignupFormContent = ({
             type="password"
             autoComplete="new-password"
             className={`form-input ${errors.confirmPassword ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`}
-            placeholder="パスワードを再度入力"
+            placeholder={t("auth.signup.confirmPasswordPlaceholder")}
           />
           {errors.confirmPassword && (
             <p className="mt-1 text-sm text-red-600">
@@ -161,18 +158,18 @@ const SignupFormContent = ({
           disabled={loading}
           className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-booking-600 hover:bg-booking-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-booking-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
         >
-          {loading ? "登録中..." : "新規登録"}
+          {loading ? t("auth.signup.signingUp") : t("auth.signup.signupButton")}
         </button>
       </div>
 
       {showLoginLink && (
         <div className="text-center text-sm">
-          <span className="text-gray-600">既にアカウントをお持ちの方は </span>
+          <span className="text-gray-600">{t("auth.signup.hasAccount")} </span>
           <Link
-            href={`/${locale}/login`}
+            href="/login"
             className="font-medium text-booking-600 hover:text-booking-500"
           >
-            ログイン
+            {t("auth.signup.loginLink")}
           </Link>
         </div>
       )}
@@ -189,15 +186,15 @@ const SignupFormContent = ({
             <h1 className="text-4xl font-bold text-gray-900">GoGym</h1>
           </div>
           <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-            新規登録
+            {t("auth.signup.title")}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            既にアカウントをお持ちの方は{" "}
+            {t("auth.signup.hasAccount")}{" "}
             <Link
-              href={`/${locale}/login`}
+              href="/login"
               className="font-medium text-booking-600 hover:text-booking-500"
             >
-              ログイン
+              {t("auth.signup.loginLink")}
             </Link>
           </p>
         </div>

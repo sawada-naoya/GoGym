@@ -1,25 +1,28 @@
 import { z } from "zod";
+import i18n from "@/lib/i18n/client";
 
 export const signUpSchema = z
   .object({
-    name: z.string().min(1, "名前は必須です"),
+    name: z.string().min(1, i18n.t("auth.validation.nameRequired")),
     email: z
       .string()
-      .min(1, "メールアドレスは必須です")
+      .min(1, i18n.t("auth.validation.emailRequired"))
       .regex(
         /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-        "有効なメールアドレスを入力してください",
+        i18n.t("auth.validation.emailInvalid"),
       ),
     password: z
       .string()
-      .min(8, "パスワードは8文字以上で入力してください")
-      .regex(/[A-Z]/, "パスワードには大文字を1文字以上含めてください")
-      .regex(/[a-z]/, "パスワードには小文字を1文字以上含めてください")
-      .regex(/[0-9]/, "パスワードには数字を1文字以上含めてください"),
-    confirmPassword: z.string().min(1, "パスワード（確認）は必須です"),
+      .min(8, i18n.t("auth.validation.passwordMinLength"))
+      .regex(/[A-Z]/, i18n.t("auth.validation.passwordUppercase"))
+      .regex(/[a-z]/, i18n.t("auth.validation.passwordLowercase"))
+      .regex(/[0-9]/, i18n.t("auth.validation.passwordNumber")),
+    confirmPassword: z
+      .string()
+      .min(1, i18n.t("auth.validation.confirmPasswordRequired")),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "パスワードが一致しません",
+    message: i18n.t("auth.validation.passwordMismatch"),
     path: ["confirmPassword"],
   });
 

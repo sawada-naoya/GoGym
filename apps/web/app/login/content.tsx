@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams, useParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslation } from "react-i18next";
 
 import { signIn } from "next-auth/react";
 import { useBanner } from "@/components/Banner";
@@ -15,25 +16,19 @@ type LoginFormContentProps = {
   showSignupLink?: boolean;
 };
 
-const normalizeCallbackUrl = (candidate: string, locale: string) => {
+const normalizeCallbackUrl = (candidate: string) => {
   // open redirect対策：外部URLは禁止。相対パスのみ許可
-  if (!candidate.startsWith("/")) return `/${locale}/workout`;
-
-  // locale未付与なら付ける（/workout -> /ja/workout）
-  const hasLocale = /^\/[a-z]{2}(\/|$)/.test(candidate);
-  if (hasLocale) return candidate;
-
-  return `/${locale}${candidate}`;
+  if (!candidate.startsWith("/")) return "/workout";
+  return candidate;
 };
 
 const LoginFormContent = ({
   showHeader = true,
   showSignupLink = true,
 }: LoginFormContentProps = {}) => {
+  const { t } = useTranslation("common");
   const router = useRouter();
   const searchParams = useSearchParams();
-  const params = useParams<{ locale: string }>();
-  const locale = params?.locale ?? "ja";
 
   const [loading, setLoading] = useState(false);
   const { error } = useBanner();
@@ -52,7 +47,7 @@ const LoginFormContent = ({
     setLoading(true);
     try {
       const rawCallbackUrl = searchParams.get("callbackUrl") ?? "/workout";
-      const callbackUrl = normalizeCallbackUrl(rawCallbackUrl, locale);
+      const callbackUrl = normalizeCallbackUrl(rawCallbackUrl);
 
       const result = await signIn("credentials", {
         email: data.email,
@@ -63,9 +58,9 @@ const LoginFormContent = ({
 
       if (result?.error) {
         if (result.error === "CredentialsSignin") {
-          error("メールアドレスまたはパスワードが正しくありません");
+          error(t("auth.login.errorInvalidCredentials"));
         } else {
-          error("ログインに失敗しました");
+          error(t("auth.login.errorLoginFailed"));
         }
         return;
       }
@@ -74,7 +69,7 @@ const LoginFormContent = ({
         "flash",
         JSON.stringify({
           variant: "success",
-          message: "ログインに成功しました",
+          message: t("auth.login.successMessage"),
         }),
       );
 
@@ -93,7 +88,7 @@ const LoginFormContent = ({
       <div className="space-y-4">
         <div>
           <label htmlFor="email" className="form-label">
-            メールアドレス
+            {t("auth.login.emailLabel")}
           </label>
           <input
             {...register("email")}
@@ -101,7 +96,7 @@ const LoginFormContent = ({
             type="email"
             autoComplete="email"
             className={`form-input ${errors.email ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`}
-            placeholder="example@example.com"
+            placeholder={t("auth.login.emailPlaceholder")}
           />
           {errors.email && (
             <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
@@ -110,7 +105,7 @@ const LoginFormContent = ({
 
         <div>
           <label htmlFor="password" className="form-label">
-            パスワード
+            {t("auth.login.passwordLabel")}
           </label>
           <input
             {...register("password")}
@@ -118,7 +113,7 @@ const LoginFormContent = ({
             type="password"
             autoComplete="current-password"
             className={`form-input ${errors.password ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`}
-            placeholder="パスワードを入力"
+            placeholder={t("auth.login.passwordPlaceholder")}
           />
           {errors.password && (
             <p className="mt-1 text-sm text-red-600">
@@ -134,7 +129,7 @@ const LoginFormContent = ({
           disabled={loading}
           className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-booking-600 hover:bg-booking-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-booking-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
         >
-          {loading ? "ログイン中..." : "ログイン"}
+          {loading ? t("auth.login.loggingIn") : t("auth.login.loginButton")}
         </button>
       </div>
 
@@ -145,7 +140,9 @@ const LoginFormContent = ({
             <div className="w-full border-t border-gray-300" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-gray-50 text-gray-500">または</span>
+            <span className="px-2 bg-gray-50 text-gray-500">
+              {t("auth.login.orDivider")}
+            </span>
           </div>
         </div>
 
@@ -153,30 +150,30 @@ const LoginFormContent = ({
           <button
             type="button"
             className="w-full inline-flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors duration-200"
-            onClick={() => alert("Googleログイン機能は開発中です")}
+            onClick={() => alert(t("auth.login.googleLoginAlert"))}
           >
-            Googleでログイン
+            {t("auth.login.googleLogin")}
           </button>
         </div>
       </div>
 
       <div className="text-center text-sm">
         <Link
-          href={`/${locale}/forgot-password`}
+          href="/forgot-password"
           className="font-medium text-booking-600 hover:text-booking-500"
         >
-          パスワードを忘れた方はこちら
+          {t("auth.login.forgotPassword")}
         </Link>
       </div>
 
       {showSignupLink && (
         <div className="text-center text-sm">
-          <span className="text-gray-600">アカウントをお持ちでない方は </span>
+          <span className="text-gray-600">{t("auth.login.noAccount")} </span>
           <Link
-            href={`/${locale}/signup`}
+            href="/signup"
             className="font-medium text-booking-600 hover:text-booking-500"
           >
-            新規登録
+            {t("auth.login.signupLink")}
           </Link>
         </div>
       )}
@@ -190,10 +187,10 @@ const LoginFormContent = ({
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            アカウントにログイン
+            {t("auth.login.title")}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            トレーニング記録を開始しましょう
+            {t("auth.login.subtitle")}
           </p>
         </div>
         {formElement}

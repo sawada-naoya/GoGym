@@ -1,6 +1,6 @@
 "use client";
 import { useRef } from "react";
-import { useScrollToCenter } from "@/features/workout/hooks";
+import { useScrollToCenter } from "@/features/workout/hooks/useScrollToCenter";
 
 export default function MonthlyStrip({
   year,

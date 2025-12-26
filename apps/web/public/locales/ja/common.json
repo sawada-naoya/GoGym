@@ -1,0 +1,146 @@
+{
+  "header": {
+    "appName": "GoGym",
+    "trainingNote": "トレーニングノート",
+    "logout": "ログアウト",
+    "menu": "メニュー"
+  },
+  "landing": {
+    "hero": {
+      "title": "GoGym",
+      "description": "日々のトレーニングを記録できるアプリです",
+      "startButton": "今すぐトレーニングを開始する"
+    },
+    "features": {
+      "trainingRecord": {
+        "title": "トレーニング記録",
+        "description": "セット数、重量、回数を簡単に記録"
+      },
+      "progressTracking": {
+        "title": "進捗管理",
+        "description": "日々の成長を可視化して確認"
+      },
+      "simpleUsage": {
+        "title": "シンプルで使いやすい",
+        "description": "直感的な操作で素早く記録"
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "アカウントにログイン",
+      "subtitle": "トレーニング記録を開始しましょう",
+      "emailLabel": "メールアドレス",
+      "emailPlaceholder": "example@example.com",
+      "passwordLabel": "パスワード",
+      "passwordPlaceholder": "パスワードを入力",
+      "loginButton": "ログイン",
+      "loggingIn": "ログイン中...",
+      "orDivider": "または",
+      "googleLogin": "Googleでログイン",
+      "googleLoginAlert": "Googleログイン機能は開発中です",
+      "forgotPassword": "パスワードを忘れた方はこちら",
+      "noAccount": "アカウントをお持ちでない方は",
+      "signupLink": "新規登録",
+      "errorInvalidCredentials": "メールアドレスまたはパスワードが正しくありません",
+      "errorLoginFailed": "ログインに失敗しました",
+      "successMessage": "ログインに成功しました"
+    },
+    "signup": {
+      "title": "新規登録",
+      "nameLabel": "名前",
+      "namePlaceholder": "山田太郎",
+      "emailLabel": "メールアドレス",
+      "emailPlaceholder": "example@example.com",
+      "passwordLabel": "パスワード",
+      "passwordPlaceholder": "パスワードを入力",
+      "confirmPasswordLabel": "パスワード（確認）",
+      "confirmPasswordPlaceholder": "パスワードを再度入力",
+      "signupButton": "新規登録",
+      "signingUp": "登録中...",
+      "hasAccount": "既にアカウントをお持ちの方は",
+      "loginLink": "ログイン",
+      "errorEmailTaken": "このメールアドレスは既に使用されています",
+      "errorNetworkError": "ネットワークエラーが発生しました。時間を置いて再度お試しください。",
+      "successMessage": "アカウントの作成に成功しました。ログインしてください。"
+    },
+    "validation": {
+      "emailRequired": "メールアドレスは必須です",
+      "emailInvalid": "有効なメールアドレスを入力してください",
+      "passwordRequired": "パスワードは必須です",
+      "passwordMinLength": "パスワードは8文字以上で入力してください",
+      "passwordUppercase": "パスワードには大文字を1文字以上含めてください",
+      "passwordLowercase": "パスワードには小文字を1文字以上含めてください",
+      "passwordNumber": "パスワードには数字を1文字以上含めてください",
+      "confirmPasswordRequired": "パスワード（確認）は必須です",
+      "passwordMismatch": "パスワードが一致しません",
+      "nameRequired": "名前は必須です"
+    }
+  },
+  "workout": {
+    "title": "トレーニングノート",
+    "metadata": {
+      "year": "年",
+      "month": "月",
+      "detailsButton": "詳細情報",
+      "timeLabel": "時間",
+      "locationLabel": "場所",
+      "locationPlaceholder": "ジム名を入力",
+      "conditionLabel": "体調",
+      "daysOfWeek": {
+        "sun": "日",
+        "mon": "月",
+        "tue": "火",
+        "wed": "水",
+        "thu": "木",
+        "fri": "金",
+        "sat": "土"
+      }
+    },
+    "exercises": {
+      "partLabel": "部位",
+      "partPlaceholder": "選択してください",
+      "createExerciseButton": "種目作成",
+      "addExerciseButton": "種目を追加",
+      "exercisePlaceholder": "種目を選択",
+      "notePlaceholder": "メモ",
+      "setLabel": "セット",
+      "weightLabel": "重量",
+      "repsLabel": "回数",
+      "previousLabel": "前回",
+      "kg": "kg",
+      "reps": "回",
+      "rep": "rep",
+      "copyLastRecord": "前回記録をコピー",
+      "copySetBelow": "下にコピー",
+      "registerButton": "登録",
+      "updateButton": "更新",
+      "registerButtonMobile": "登録する",
+      "updateButtonMobile": "更新する",
+      "errorUpdateFailed": "更新に失敗しました",
+      "errorSaveFailed": "保存に失敗しました",
+      "errorNetworkError": "通信エラーが発生しました",
+      "successUpdate": "更新しました",
+      "successSave": "保存しました"
+    },
+    "exerciseModal": {
+      "title": "の種目を追加",
+      "partLabel": "部位",
+      "exercisePlaceholder": "種目名",
+      "registerButton": "登録",
+      "registering": "登録中...",
+      "deleteConfirmTitle": "種目を削除しますか？",
+      "deleteConfirmMessage": "を削除します。この操作は取り消せません。",
+      "cancelButton": "キャンセル",
+      "deleteButton": "削除する",
+      "errorSelectPart": "部位を選択してください",
+      "errorEnterExerciseName": "種目名を入力してください",
+      "errorRegisterFailed": "登録に失敗しました",
+      "errorRegistering": "登録中にエラーが発生しました",
+      "errorDeleteFailed": "削除に失敗しました",
+      "errorDeleting": "削除中にエラーが発生しました",
+      "successRegister": "種目を登録しました",
+      "successDelete": "種目を削除しました"
+    }
+  }
+}

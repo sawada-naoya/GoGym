@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, Fragment } from "react";
+import { useTranslation } from "react-i18next";
 import type { ExerciseRow } from "@/features/workout/lib/utils";
 import type { WorkoutPartDTO, ExerciseDTO } from "@/types/workout";
 import {
@@ -8,10 +9,8 @@ import {
   createEmptyExerciseRow,
 } from "@/features/workout/lib/utils";
 import ExerciseManageModal from "./ExerciseManageModal";
-import {
-  useIsMobile,
-  useMobileExerciseAdjustment,
-} from "@/features/workout/hooks";
+import { useIsMobile } from "@/features/workout/hooks/useIsMobile";
+import { useMobileExerciseAdjustment } from "@/features/workout/hooks/useMobileExerciseAdjustment";
 
 type Props = {
   allExercises: ExerciseRow[]; // 全部位の種目
@@ -38,6 +37,8 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
   dataKey,
   onFetchLastRecord,
 }) => {
+  const { t } = useTranslation("common");
+
   // 選択中の部位でフィルタリング
   const displayedExercises = selectedPartId
     ? allExercises.filter((ex) => ex.workout_part_id === selectedPartId)
@@ -272,14 +273,14 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2 flex-1">
             <label className="text-xs font-semibold text-gray-700 whitespace-nowrap">
-              部位
+              {t("workout.exercises.partLabel")}
             </label>
             <select
               value={selectedPartId?.toString() ?? ""}
               onChange={(e) => handlePartChange(e.target.value)}
               className="flex-1 px-2 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-booking-500 focus:border-booking-500 bg-white transition-colors"
             >
-              <option value="">選択してください</option>
+              <option value="">{t("workout.exercises.partPlaceholder")}</option>
               {workoutParts.map((part) => (
                 <option key={part.id} value={part.id.toString()}>
                   {part.name}
@@ -292,7 +293,7 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
             onClick={() => setIsModalOpen(true)}
             className="px-2.5 py-1.5 rounded-lg text-booking-600 bg-booking-50 hover:bg-booking-100 transition-colors text-xs border border-booking-200 font-semibold whitespace-nowrap"
           >
-            種目作成
+            {t("workout.exercises.createExerciseButton")}
           </button>
         </div>
       </div>
@@ -313,7 +314,9 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
                 }
                 className="flex-1 px-2 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-booking-500 focus:border-booking-500 bg-white text-xs font-semibold transition-colors"
               >
-                <option value="">種目を選択</option>
+                <option value="">
+                  {t("workout.exercises.exercisePlaceholder")}
+                </option>
                 {partExercises.map((partExercise) => (
                   <option key={partExercise.id} value={partExercise.name}>
                     {partExercise.name}
@@ -325,7 +328,7 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
                   type="button"
                   onClick={() => handleCopyLastRecord(exerciseIndex)}
                   className="p-1.5 text-booking-600 hover:text-booking-700 bg-booking-50 hover:bg-booking-100 rounded-lg transition-colors border border-booking-200"
-                  title="前回記録をコピー"
+                  title={t("workout.exercises.copyLastRecord")}
                 >
                   <svg
                     className="w-4 h-4"
@@ -395,7 +398,7 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
                         className="w-12 px-1 py-1 text-xs font-semibold border border-gray-300 rounded-md text-center focus:outline-none focus:ring-1 focus:ring-booking-500 focus:border-booking-500 bg-white transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                       <span className="text-[9px] font-medium text-gray-600">
-                        kg
+                        {t("workout.exercises.kg")}
                       </span>
                       <span className="text-gray-300 text-xs font-bold">×</span>
                       <input
@@ -412,11 +415,13 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
                         className="w-12 px-1 py-1 text-xs font-semibold border border-gray-300 rounded-md text-center focus:outline-none focus:ring-1 focus:ring-booking-500 focus:border-booking-500 bg-white transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                       <span className="text-[9px] font-medium text-gray-600">
-                        回
+                        {t("workout.exercises.reps")}
                       </span>
                       {previousSet && (
                         <span className="text-[9px] text-gray-500 ml-1">
-                          前回 : {previousSet.weight_kg}kg×{previousSet.reps}
+                          {t("workout.exercises.previousLabel")} :{" "}
+                          {previousSet.weight_kg}
+                          {t("workout.exercises.kg")}×{previousSet.reps}
                         </span>
                       )}
                       <div className="ml-auto flex items-center gap-0.5">
@@ -427,7 +432,7 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
                           }
                           className="p-0.5 text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 rounded transition-colors border border-purple-200 disabled:opacity-30 disabled:cursor-not-allowed"
                           disabled={exercise.sets.length >= 5}
-                          title="下にコピー"
+                          title={t("workout.exercises.copySetBelow")}
                         >
                           <svg
                             className="w-3.5 h-3.5"
@@ -502,7 +507,7 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
               <input
                 type="text"
                 value={exercise.sets[0]?.note ?? ""}
-                placeholder="メモ"
+                placeholder={t("workout.exercises.notePlaceholder")}
                 onChange={(e) =>
                   handleUpdateNote(exerciseIndex, e.target.value)
                 }
@@ -532,7 +537,7 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
                 d="M12 4v16m8-8H4"
               />
             </svg>
-            <span>種目を追加</span>
+            <span>{t("workout.exercises.addExerciseButton")}</span>
           </button>
         </div>
       </div>
@@ -542,13 +547,15 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
         {/* ヘッダー: 部位選択と種目作成ボタン、登録/更新ボタン */}
         <div className="flex items-center justify-between gap-2 mb-6">
           <div className="flex items-center gap-2">
-            <label className="text-base font-medium text-gray-700">部位</label>
+            <label className="text-base font-medium text-gray-700">
+              {t("workout.exercises.partLabel")}
+            </label>
             <select
               value={selectedPartId?.toString() ?? ""}
               onChange={(e) => handlePartChange(e.target.value)}
               className="w-40 px-3 py-2.5 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-booking-500 bg-white"
             >
-              <option value="">選択してください</option>
+              <option value="">{t("workout.exercises.partPlaceholder")}</option>
               {workoutParts.map((part) => (
                 <option key={part.id} value={part.id.toString()}>
                   {part.name}
@@ -560,7 +567,7 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
               onClick={() => setIsModalOpen(true)}
               className="px-4 py-2.5 rounded-md text-booking-600 hover:bg-booking-50 transition-colors whitespace-nowrap text-base border border-gray-200 hover:border-booking-300 font-medium"
             >
-              種目作成
+              {t("workout.exercises.createExerciseButton")}
             </button>
           </div>
 
@@ -568,7 +575,9 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
             onClick={onSubmit}
             className="px-8 py-2.5 text-base rounded-md bg-booking-600 text-white hover:bg-booking-700 transition-colors font-medium"
           >
-            {isUpdate ? "更新" : "登録"}
+            {isUpdate
+              ? t("workout.exercises.updateButton")
+              : t("workout.exercises.registerButton")}
           </button>
         </div>
 
@@ -578,7 +587,7 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
             <thead>
               <tr className="border-b-2 border-gray-300">
                 <th className="px-4 py-3 text-left font-medium text-gray-700 border-r border-gray-300 min-w-[240px]">
-                  種目
+                  {t("workout.exercises.exercisePlaceholder")}
                 </th>
                 {[1, 2, 3, 4, 5].map((setNumber) => (
                   <th
@@ -586,7 +595,8 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
                     colSpan={2}
                     className="px-4 py-3 text-center font-medium text-gray-700 border-r border-gray-300"
                   >
-                    {setNumber}セット
+                    {setNumber}
+                    {t("workout.exercises.setLabel")}
                   </th>
                 ))}
                 <th className="px-4 py-3 text-center font-medium text-gray-700 w-12"></th>
@@ -596,10 +606,10 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
                 {[1, 2, 3, 4, 5].map((setNumber) => (
                   <Fragment key={setNumber}>
                     <th className="px-2 py-2 text-center text-sm font-medium text-gray-600 border-r border-gray-200">
-                      重量
+                      {t("workout.exercises.weightLabel")}
                     </th>
                     <th className="px-2 py-2 text-center text-sm font-medium text-gray-600 border-r border-gray-300">
-                      回数
+                      {t("workout.exercises.repsLabel")}
                     </th>
                   </Fragment>
                 ))}
@@ -623,7 +633,9 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
                           }
                           className="flex-1 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-booking-500 bg-white text-sm truncate"
                         >
-                          <option value="">種目を選択</option>
+                          <option value="">
+                            {t("workout.exercises.exercisePlaceholder")}
+                          </option>
                           {partExercises.map((partExercise) => (
                             <option
                               key={partExercise.id}
@@ -638,7 +650,7 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
                             type="button"
                             onClick={() => handleCopyLastRecord(exerciseIndex)}
                             className="p-1 text-booking-600 hover:text-booking-700 hover:bg-booking-50 rounded transition-colors flex-shrink-0"
-                            title="前回記録をコピー"
+                            title={t("workout.exercises.copyLastRecord")}
                           >
                             <svg
                               className="w-4 h-4"
@@ -685,12 +697,14 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
                                     className="w-14 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-booking-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                   />
                                   <span className="text-xs text-gray-600">
-                                    kg
+                                    {t("workout.exercises.kg")}
                                   </span>
                                 </div>
                                 {previousSet && (
                                   <span className="text-[10px] text-gray-500 text-center">
-                                    前回: {previousSet.weight_kg}kg
+                                    {t("workout.exercises.previousLabel")}:{" "}
+                                    {previousSet.weight_kg}
+                                    {t("workout.exercises.kg")}
                                   </span>
                                 )}
                               </div>
@@ -716,12 +730,14 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
                                     className="w-14 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-booking-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                   />
                                   <span className="text-xs text-gray-600">
-                                    rep
+                                    {t("workout.exercises.rep")}
                                   </span>
                                 </div>
                                 {previousSet && (
                                   <span className="text-[10px] text-gray-500 text-center">
-                                    前回: {previousSet.reps}回
+                                    {t("workout.exercises.previousLabel")}:{" "}
+                                    {previousSet.reps}
+                                    {t("workout.exercises.reps")}
                                   </span>
                                 )}
                               </div>
@@ -765,7 +781,7 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
                         <input
                           type="text"
                           value={exercise.sets[0]?.note ?? ""}
-                          placeholder="メモ"
+                          placeholder={t("workout.exercises.notePlaceholder")}
                           onChange={(e) =>
                             handleUpdateNote(exerciseIndex, e.target.value)
                           }
@@ -813,7 +829,9 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
           onClick={onSubmit}
           className="w-full py-2.5 text-sm rounded-xl bg-booking-600 text-white hover:bg-booking-700 active:bg-booking-800 transition-colors font-bold shadow-sm"
         >
-          {isUpdate ? "更新する" : "登録する"}
+          {isUpdate
+            ? t("workout.exercises.updateButtonMobile")
+            : t("workout.exercises.registerButtonMobile")}
         </button>
       </div>
     </>

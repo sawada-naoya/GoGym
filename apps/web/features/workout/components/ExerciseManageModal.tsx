@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { WorkoutPartDTO } from "@/types/workout";
 import { useBanner } from "@/components/Banner";
 // Removed lib/bff/workout import - now using direct fetch to Route Handler (BFF)
@@ -22,6 +23,7 @@ const ExerciseManageModal: React.FC<Props> = ({
   workoutParts,
   onSuccess,
 }) => {
+  const { t } = useTranslation("common");
   const { success, error } = useBanner();
   const [selectedPart, setSelectedPart] = useState<number | null>(null);
   const [exercises, setExercises] = useState<ExerciseFormItem[]>([
@@ -103,14 +105,13 @@ const ExerciseManageModal: React.FC<Props> = ({
         if (exercises.length > 1) {
           setExercises(exercises.filter((_, i) => i !== deleteTarget.index));
         }
-        success("種目を削除しました");
+        success(t("workout.exerciseModal.successDelete"));
         onSuccess?.(); // 親側で再取得させる
       } else {
-        error("削除に失敗しました");
+        error(t("workout.exerciseModal.errorDeleteFailed"));
       }
     } catch (err) {
-      console.error("種目削除エラー:", err);
-      error("削除中にエラーが発生しました");
+      error(t("workout.exerciseModal.errorDeleting"));
     } finally {
       setIsSubmitting(false);
       setDeleteTarget(null);
@@ -123,13 +124,13 @@ const ExerciseManageModal: React.FC<Props> = ({
 
   const handleRegister = async () => {
     if (!selectedPart) {
-      error("部位を選択してください");
+      error(t("workout.exerciseModal.errorSelectPart"));
       return;
     }
 
     const validExercises = exercises.filter((ex) => ex.name.trim() !== "");
     if (validExercises.length === 0) {
-      error("種目名を入力してください");
+      error(t("workout.exerciseModal.errorEnterExerciseName"));
       return;
     }
 
@@ -149,15 +150,14 @@ const ExerciseManageModal: React.FC<Props> = ({
       });
 
       if (res.ok) {
-        success("種目を登録しました");
+        success(t("workout.exerciseModal.successRegister"));
         onSuccess?.();
         // モーダルは閉じない
       } else {
-        error("登録に失敗しました");
+        error(t("workout.exerciseModal.errorRegisterFailed"));
       }
     } catch (err) {
-      console.error("種目登録エラー:", err);
-      error("登録中にエラーが発生しました");
+      error(t("workout.exerciseModal.errorRegistering"));
     } finally {
       setIsSubmitting(false);
     }
@@ -170,24 +170,24 @@ const ExerciseManageModal: React.FC<Props> = ({
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[60] p-3 md:p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-[340px] md:max-w-[400px] p-4 md:p-6">
             <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-1.5 md:mb-2">
-              種目を削除しますか？
+              {t("workout.exerciseModal.deleteConfirmTitle")}
             </h3>
             <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6">
-              「{deleteTarget.exercise.name}
-              」を削除します。この操作は取り消せません。
+              「{deleteTarget.exercise.name}」
+              {t("workout.exerciseModal.deleteConfirmMessage")}
             </p>
             <div className="flex gap-2 md:gap-3 justify-center">
               <button
                 onClick={handleCancelDelete}
                 className="px-3 md:px-4 py-1.5 md:py-2 text-sm md:text-base rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                キャンセル
+                {t("workout.exerciseModal.cancelButton")}
               </button>
               <button
                 onClick={handleConfirmDelete}
                 className="px-3 md:px-4 py-1.5 md:py-2 text-sm md:text-base rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors"
               >
-                削除する
+                {t("workout.exerciseModal.deleteButton")}
               </button>
             </div>
           </div>
@@ -210,7 +210,9 @@ const ExerciseManageModal: React.FC<Props> = ({
                   }
                   className="w-24 md:w-32 px-2 md:px-3 py-1.5 md:py-2 text-sm md:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500 bg-white"
                 >
-                  <option value="">部位</option>
+                  <option value="">
+                    {t("workout.exerciseModal.partLabel")}
+                  </option>
                   {workoutParts.map((part) => (
                     <option key={part.id} value={part.id.toString()}>
                       {part.name}
@@ -218,7 +220,7 @@ const ExerciseManageModal: React.FC<Props> = ({
                   ))}
                 </select>
                 <h2 className="text-sm md:text-xl font-semibold text-gray-900 truncate">
-                  の種目を追加
+                  {t("workout.exerciseModal.title")}
                 </h2>
               </div>
               <button
@@ -253,7 +255,7 @@ const ExerciseManageModal: React.FC<Props> = ({
                     onChange={(e) =>
                       handleUpdateExerciseName(index, e.target.value)
                     }
-                    placeholder="種目名"
+                    placeholder={t("workout.exerciseModal.exercisePlaceholder")}
                     className="flex-1 px-2 md:px-3 py-1.5 md:py-2 text-sm md:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500"
                   />
                   <button
@@ -309,7 +311,9 @@ const ExerciseManageModal: React.FC<Props> = ({
               disabled={isSubmitting}
               className="px-6 md:px-8 py-1.5 md:py-2 text-sm md:text-base rounded-md bg-booking-600 text-white hover:bg-booking-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
             >
-              {isSubmitting ? "登録中..." : "登録"}
+              {isSubmitting
+                ? t("workout.exerciseModal.registering")
+                : t("workout.exerciseModal.registerButton")}
             </button>
           </div>
         </div>

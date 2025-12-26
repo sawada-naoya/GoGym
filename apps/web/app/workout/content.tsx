@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useForm, FormProvider, useWatch } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { useBanner } from "@/components/Banner";
 import { WorkoutFormDTO, WorkoutPartDTO, ExerciseDTO } from "@/types/workout";
 import { transformFormDataForSubmit } from "@/features/workout/lib/utils";
@@ -24,6 +25,7 @@ const WorkoutContent = ({
   availableParts: initialParts,
   isUpdate,
 }: Props) => {
+  const { t } = useTranslation("common");
   const { success, error } = useBanner();
   const [selectedDay, setSelectedDay] = useState(Day);
   const [selectedYear, setSelectedYear] = useState(Year);
@@ -74,8 +76,8 @@ const WorkoutContent = ({
           body: JSON.stringify(body),
           cache: "no-store",
         });
-        if (!res.ok) return error("更新に失敗しました");
-        success("更新しました");
+        if (!res.ok) return error(t("workout.exercises.errorUpdateFailed"));
+        success(t("workout.exercises.successUpdate"));
       } else {
         const res = await fetch("/api/workouts/records", {
           method: "POST",
@@ -83,11 +85,11 @@ const WorkoutContent = ({
           body: JSON.stringify(body),
           cache: "no-store",
         });
-        if (!res.ok) return error("保存に失敗しました");
-        success("保存しました");
+        if (!res.ok) return error(t("workout.exercises.errorSaveFailed"));
+        success(t("workout.exercises.successSave"));
       }
     } catch {
-      error("通信エラーが発生しました");
+      error(t("workout.exercises.errorNetworkError"));
     }
   };
 
@@ -132,7 +134,7 @@ const WorkoutContent = ({
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex items-center justify-between mb-4">
-            <div className="text-xl font-semibold">トレーニングノート</div>
+            <div className="text-xl font-semibold">{t("workout.title")}</div>
           </div>
 
           {/* メタデータエディター（日付・時間・場所・コンディション） */}
