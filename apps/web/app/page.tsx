@@ -1,6 +1,6 @@
-import { LoginForm } from "./_components/auth/LoginForm";
+import LoginFormContent from "./[locale]/(auth)/login/content";
 import { redirect } from "next/navigation";
-import { auth } from "@/app/api/auth/[...nextauth]/authOptions";
+import { auth } from "@/features/auth/nextauth/auth";
 
 const Home = async () => {
   const session = await auth();
@@ -60,7 +60,7 @@ const Home = async () => {
           <div className="bg-white rounded-2xl shadow-xl p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">今すぐトレーニングを開始する</h2>
 
-            <LoginForm showHeader={false} showSignupLink={true} />
+            <LoginFormContent showHeader={false} showSignupLink={true} />
           </div>
         </div>
       </div>
