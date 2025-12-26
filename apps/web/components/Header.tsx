@@ -1,17 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useTranslation } from "react-i18next";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const { data: session, status } = useSession();
   const userName = session?.user?.name;
   const { t, i18n } = useTranslation("common");
 
   const currentLocale = i18n.language || "ja";
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/", redirect: true });
@@ -62,13 +67,13 @@ const Header = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handleLocaleChange("ja")}
-                className={`px-2 py-1 rounded transition-colors ${currentLocale === "ja" ? "bg-white text-booking-700 font-medium" : "text-white hover:text-booking-200"}`}
+                className={`px-2 py-1 rounded transition-colors ${!isMounted || currentLocale === "ja" ? "bg-white text-booking-700 font-medium" : "text-white hover:text-booking-200"}`}
               >
                 日
               </button>
               <button
                 onClick={() => handleLocaleChange("en")}
-                className={`px-2 py-1 rounded transition-colors ${currentLocale === "en" ? "bg-white text-booking-700 font-medium" : "text-white hover:text-booking-200"}`}
+                className={`px-2 py-1 rounded transition-colors ${isMounted && currentLocale === "en" ? "bg-white text-booking-700 font-medium" : "text-white hover:text-booking-200"}`}
               >
                 EN
               </button>
@@ -122,13 +127,13 @@ const Header = () => {
               <div className="flex items-center gap-2 py-2">
                 <button
                   onClick={() => handleLocaleChange("ja")}
-                  className={`px-3 py-1.5 rounded transition-colors text-sm ${currentLocale === "ja" ? "bg-white text-booking-700 font-medium" : "bg-booking-600 text-white hover:bg-booking-500"}`}
+                  className={`px-3 py-1.5 rounded transition-colors text-sm ${!isMounted || currentLocale === "ja" ? "bg-white text-booking-700 font-medium" : "bg-booking-600 text-white hover:bg-booking-500"}`}
                 >
                   日本語
                 </button>
                 <button
                   onClick={() => handleLocaleChange("en")}
-                  className={`px-3 py-1.5 rounded transition-colors text-sm ${currentLocale === "en" ? "bg-white text-booking-700 font-medium" : "bg-booking-600 text-white hover:bg-booking-500"}`}
+                  className={`px-3 py-1.5 rounded transition-colors text-sm ${isMounted && currentLocale === "en" ? "bg-white text-booking-700 font-medium" : "bg-booking-600 text-white hover:bg-booking-500"}`}
                 >
                   English
                 </button>

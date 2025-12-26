@@ -38,7 +38,7 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
   dataKey,
   onFetchLastRecord,
 }) => {
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
 
   // 選択中の部位でフィルタリング
   const displayedExercises = selectedPartId
@@ -284,7 +284,7 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
               <option value="">{t("workout.exercises.partPlaceholder")}</option>
               {workoutParts.map((part) => (
                 <option key={part.id} value={part.id.toString()}>
-                  {getLocalizedPartName(part)}
+                  {getLocalizedPartName(part, i18n.language)}
                 </option>
               ))}
             </select>
@@ -559,7 +559,7 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
               <option value="">{t("workout.exercises.partPlaceholder")}</option>
               {workoutParts.map((part) => (
                 <option key={part.id} value={part.id.toString()}>
-                  {getLocalizedPartName(part)}
+                  {getLocalizedPartName(part, i18n.language)}
                 </option>
               ))}
             </select>

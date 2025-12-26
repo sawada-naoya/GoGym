@@ -24,7 +24,7 @@ const ExerciseManageModal: React.FC<Props> = ({
   workoutParts,
   onSuccess,
 }) => {
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
   const { success, error } = useBanner();
   const [selectedPart, setSelectedPart] = useState<number | null>(null);
   const [exercises, setExercises] = useState<ExerciseFormItem[]>([
@@ -216,7 +216,7 @@ const ExerciseManageModal: React.FC<Props> = ({
                   </option>
                   {workoutParts.map((part) => (
                     <option key={part.id} value={part.id.toString()}>
-                      {getLocalizedPartName(part)}
+                      {getLocalizedPartName(part, i18n.language)}
                     </option>
                   ))}
                 </select>
