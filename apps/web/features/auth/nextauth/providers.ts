@@ -1,10 +1,14 @@
 import type { User } from "next-auth";
 import type { LoginResponse } from "../../../types/session";
 
-const API_BASE = process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_URL;
+const API_BASE =
+  process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_URL;
 
 export const buildCredentialsProviderAuthorize = () => {
-  return async (credentials: Partial<Record<"email" | "password", unknown>>, _request: Request) => {
+  return async (
+    credentials: Partial<Record<"email" | "password", unknown>>,
+    _request: Request,
+  ) => {
     const email = credentials?.email?.toString().trim();
     const password = credentials?.password?.toString();
     if (!email || !password || !API_BASE) return null;
@@ -20,7 +24,13 @@ export const buildCredentialsProviderAuthorize = () => {
 
       const data = (await res.json()) as LoginResponse;
       const { user, access_token, refresh_token, expires_in } = data ?? {};
-      if (!user?.id || !user?.name || !user?.email || !access_token || !refresh_token) {
+      if (
+        !user?.id ||
+        !user?.name ||
+        !user?.email ||
+        !access_token ||
+        !refresh_token
+      ) {
         return null;
       }
 

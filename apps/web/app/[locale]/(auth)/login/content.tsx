@@ -26,7 +26,10 @@ const normalizeCallbackUrl = (candidate: string, locale: string) => {
   return `/${locale}${candidate}`;
 };
 
-const LoginFormContent = ({ showHeader = true, showSignupLink = true }: LoginFormContentProps = {}) => {
+const LoginFormContent = ({
+  showHeader = true,
+  showSignupLink = true,
+}: LoginFormContentProps = {}) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const params = useParams<{ locale: string }>();
@@ -67,7 +70,13 @@ const LoginFormContent = ({ showHeader = true, showSignupLink = true }: LoginFor
         return;
       }
 
-      sessionStorage.setItem("flash", JSON.stringify({ variant: "success", message: "ログインに成功しました" }));
+      sessionStorage.setItem(
+        "flash",
+        JSON.stringify({
+          variant: "success",
+          message: "ログインに成功しました",
+        }),
+      );
 
       router.replace(result?.url ?? callbackUrl);
     } finally {
@@ -76,22 +85,46 @@ const LoginFormContent = ({ showHeader = true, showSignupLink = true }: LoginFor
   };
 
   const formElement = (
-    <form className={showHeader ? "mt-8 space-y-6" : "space-y-4"} onSubmit={handleSubmit(onSubmit)} noValidate>
+    <form
+      className={showHeader ? "mt-8 space-y-6" : "space-y-4"}
+      onSubmit={handleSubmit(onSubmit)}
+      noValidate
+    >
       <div className="space-y-4">
         <div>
           <label htmlFor="email" className="form-label">
             メールアドレス
           </label>
-          <input {...register("email")} id="email" type="email" autoComplete="email" className={`form-input ${errors.email ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`} placeholder="example@example.com" />
-          {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
+          <input
+            {...register("email")}
+            id="email"
+            type="email"
+            autoComplete="email"
+            className={`form-input ${errors.email ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`}
+            placeholder="example@example.com"
+          />
+          {errors.email && (
+            <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+          )}
         </div>
 
         <div>
           <label htmlFor="password" className="form-label">
             パスワード
           </label>
-          <input {...register("password")} id="password" type="password" autoComplete="current-password" className={`form-input ${errors.password ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`} placeholder="パスワードを入力" />
-          {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
+          <input
+            {...register("password")}
+            id="password"
+            type="password"
+            autoComplete="current-password"
+            className={`form-input ${errors.password ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`}
+            placeholder="パスワードを入力"
+          />
+          {errors.password && (
+            <p className="mt-1 text-sm text-red-600">
+              {errors.password.message}
+            </p>
+          )}
         </div>
       </div>
 
@@ -117,14 +150,21 @@ const LoginFormContent = ({ showHeader = true, showSignupLink = true }: LoginFor
         </div>
 
         <div className="mt-6">
-          <button type="button" className="w-full inline-flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors duration-200" onClick={() => alert("Googleログイン機能は開発中です")}>
+          <button
+            type="button"
+            className="w-full inline-flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors duration-200"
+            onClick={() => alert("Googleログイン機能は開発中です")}
+          >
             Googleでログイン
           </button>
         </div>
       </div>
 
       <div className="text-center text-sm">
-        <Link href={`/${locale}/forgot-password`} className="font-medium text-booking-600 hover:text-booking-500">
+        <Link
+          href={`/${locale}/forgot-password`}
+          className="font-medium text-booking-600 hover:text-booking-500"
+        >
           パスワードを忘れた方はこちら
         </Link>
       </div>
@@ -132,7 +172,10 @@ const LoginFormContent = ({ showHeader = true, showSignupLink = true }: LoginFor
       {showSignupLink && (
         <div className="text-center text-sm">
           <span className="text-gray-600">アカウントをお持ちでない方は </span>
-          <Link href={`/${locale}/signup`} className="font-medium text-booking-600 hover:text-booking-500">
+          <Link
+            href={`/${locale}/signup`}
+            className="font-medium text-booking-600 hover:text-booking-500"
+          >
             新規登録
           </Link>
         </div>
@@ -146,8 +189,12 @@ const LoginFormContent = ({ showHeader = true, showSignupLink = true }: LoginFor
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">アカウントにログイン</h2>
-          <p className="mt-2 text-center text-sm text-gray-600">トレーニング記録を開始しましょう</p>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            アカウントにログイン
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            トレーニング記録を開始しましょう
+          </p>
         </div>
         {formElement}
       </div>

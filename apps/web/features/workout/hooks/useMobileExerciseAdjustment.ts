@@ -10,7 +10,12 @@ import type { ExerciseRow } from "@/features/workout/lib/utils";
  * @param onChangeExercises データ変更コールバック
  * @param dataKey データを識別するキー（日付など、データが変わる度に変わる値）
  */
-export const useMobileExerciseAdjustment = (isMobile: boolean, exercises: ExerciseRow[] | undefined, onChangeExercises: (exercises: ExerciseRow[]) => void, dataKey?: string) => {
+export const useMobileExerciseAdjustment = (
+  isMobile: boolean,
+  exercises: ExerciseRow[] | undefined,
+  onChangeExercises: (exercises: ExerciseRow[]) => void,
+  dataKey?: string,
+) => {
   const initializedForRef = useRef<string>("");
 
   useEffect(() => {
@@ -29,7 +34,15 @@ export const useMobileExerciseAdjustment = (isMobile: boolean, exercises: Exerci
     }
 
     // 既存レコード判定：セットに実データ（weight_kg or reps）が入っているか
-    const hasExistingData = exercises.some((ex) => ex.sets.some((set: ExerciseRow["sets"][number]) => (set.weight_kg !== null && set.weight_kg !== "" && set.weight_kg !== 0) || (set.reps !== null && set.reps !== "" && set.reps !== 0)));
+    const hasExistingData = exercises.some((ex) =>
+      ex.sets.some(
+        (set: ExerciseRow["sets"][number]) =>
+          (set.weight_kg !== null &&
+            set.weight_kg !== "" &&
+            set.weight_kg !== 0) ||
+          (set.reps !== null && set.reps !== "" && set.reps !== 0),
+      ),
+    );
 
     // 既存レコードがある場合は調整せずに全セット表示
     if (hasExistingData) {

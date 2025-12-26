@@ -8,7 +8,10 @@ import {
   createEmptyExerciseRow,
 } from "@/features/workout/lib/utils";
 import ExerciseManageModal from "./ExerciseManageModal";
-import { useIsMobile, useMobileExerciseAdjustment } from "@/features/workout/hooks";
+import {
+  useIsMobile,
+  useMobileExerciseAdjustment,
+} from "@/features/workout/hooks";
 
 type Props = {
   allExercises: ExerciseRow[]; // 全部位の種目
@@ -363,106 +366,110 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
 
             {/* セットリスト（縦並び） */}
             <div className="space-y-1 mb-1.5">
-              {exercise.sets.map((set: ExerciseRow["sets"][number], setIndex: number) => {
-                const previousRecord = exercise.id
-                  ? lastRecords.get(exercise.id)
-                  : null;
-                const previousSet = previousRecord?.sets?.[setIndex];
+              {exercise.sets.map(
+                (set: ExerciseRow["sets"][number], setIndex: number) => {
+                  const previousRecord = exercise.id
+                    ? lastRecords.get(exercise.id)
+                    : null;
+                  const previousSet = previousRecord?.sets?.[setIndex];
 
-                return (
-                  <div
-                    key={setIndex}
-                    className="flex items-center gap-1 bg-gradient-to-r from-gray-50 to-gray-50/50 rounded-lg p-1.5 border border-gray-100"
-                  >
-                    <span className="text-xs font-bold text-gray-600 w-4 flex-shrink-0">
-                      {setIndex + 1}
-                    </span>
-                    <input
-                      type="number"
-                      value={set.weight_kg as any}
-                      onChange={(e) =>
-                        handleUpdateCell(
-                          exerciseIndex,
-                          setIndex,
-                          "weight_kg",
-                          e.target.value,
-                        )
-                      }
-                      className="w-12 px-1 py-1 text-xs font-semibold border border-gray-300 rounded-md text-center focus:outline-none focus:ring-1 focus:ring-booking-500 focus:border-booking-500 bg-white transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    />
-                    <span className="text-[9px] font-medium text-gray-600">
-                      kg
-                    </span>
-                    <span className="text-gray-300 text-xs font-bold">×</span>
-                    <input
-                      type="number"
-                      value={set.reps as any}
-                      onChange={(e) =>
-                        handleUpdateCell(
-                          exerciseIndex,
-                          setIndex,
-                          "reps",
-                          e.target.value,
-                        )
-                      }
-                      className="w-12 px-1 py-1 text-xs font-semibold border border-gray-300 rounded-md text-center focus:outline-none focus:ring-1 focus:ring-booking-500 focus:border-booking-500 bg-white transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    />
-                    <span className="text-[9px] font-medium text-gray-600">
-                      回
-                    </span>
-                    {previousSet && (
-                      <span className="text-[9px] text-gray-500 ml-1">
-                        前回 : {previousSet.weight_kg}kg×{previousSet.reps}
+                  return (
+                    <div
+                      key={setIndex}
+                      className="flex items-center gap-1 bg-gradient-to-r from-gray-50 to-gray-50/50 rounded-lg p-1.5 border border-gray-100"
+                    >
+                      <span className="text-xs font-bold text-gray-600 w-4 flex-shrink-0">
+                        {setIndex + 1}
                       </span>
-                    )}
-                    <div className="ml-auto flex items-center gap-0.5">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleCopySetBelow(exerciseIndex, setIndex)
+                      <input
+                        type="number"
+                        value={set.weight_kg as any}
+                        onChange={(e) =>
+                          handleUpdateCell(
+                            exerciseIndex,
+                            setIndex,
+                            "weight_kg",
+                            e.target.value,
+                          )
                         }
-                        className="p-0.5 text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 rounded transition-colors border border-purple-200 disabled:opacity-30 disabled:cursor-not-allowed"
-                        disabled={exercise.sets.length >= 5}
-                        title="下にコピー"
-                      >
-                        <svg
-                          className="w-3.5 h-3.5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          strokeWidth={2.5}
+                        className="w-12 px-1 py-1 text-xs font-semibold border border-gray-300 rounded-md text-center focus:outline-none focus:ring-1 focus:ring-booking-500 focus:border-booking-500 bg-white transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      />
+                      <span className="text-[9px] font-medium text-gray-600">
+                        kg
+                      </span>
+                      <span className="text-gray-300 text-xs font-bold">×</span>
+                      <input
+                        type="number"
+                        value={set.reps as any}
+                        onChange={(e) =>
+                          handleUpdateCell(
+                            exerciseIndex,
+                            setIndex,
+                            "reps",
+                            e.target.value,
+                          )
+                        }
+                        className="w-12 px-1 py-1 text-xs font-semibold border border-gray-300 rounded-md text-center focus:outline-none focus:ring-1 focus:ring-booking-500 focus:border-booking-500 bg-white transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      />
+                      <span className="text-[9px] font-medium text-gray-600">
+                        回
+                      </span>
+                      {previousSet && (
+                        <span className="text-[9px] text-gray-500 ml-1">
+                          前回 : {previousSet.weight_kg}kg×{previousSet.reps}
+                        </span>
+                      )}
+                      <div className="ml-auto flex items-center gap-0.5">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleCopySetBelow(exerciseIndex, setIndex)
+                          }
+                          className="p-0.5 text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 rounded transition-colors border border-purple-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                          disabled={exercise.sets.length >= 5}
+                          title="下にコピー"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M15 13l-3 3m0 0l-3-3m3 3V8m0 13a9 9 0 110-18 9 9 0 010 18z"
-                          />
-                        </svg>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveSet(exerciseIndex, setIndex)}
-                        className="p-0.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                        disabled={exercise.sets.length === 1}
-                      >
-                        <svg
-                          className="w-3.5 h-3.5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          strokeWidth={2.5}
+                          <svg
+                            className="w-3.5 h-3.5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            strokeWidth={2.5}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M15 13l-3 3m0 0l-3-3m3 3V8m0 13a9 9 0 110-18 9 9 0 010 18z"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleRemoveSet(exerciseIndex, setIndex)
+                          }
+                          className="p-0.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                          disabled={exercise.sets.length === 1}
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </button>
+                          <svg
+                            className="w-3.5 h-3.5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            strokeWidth={2.5}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M6 18L18 6M6 6l12 12"
+                            />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                },
+              )}
             </div>
 
             {/* セット追加ボタン（5セット未満の場合のみ表示） */}

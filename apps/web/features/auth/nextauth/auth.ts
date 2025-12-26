@@ -25,7 +25,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     jwt: async ({ token, user }) => {
       if (user) {
-        const expiresAt = Math.floor(Date.now() / 1000) + ((user as any).expiresIn || 900);
+        const expiresAt =
+          Math.floor(Date.now() / 1000) + ((user as any).expiresIn || 900);
 
         return {
           ...token,

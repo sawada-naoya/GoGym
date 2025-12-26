@@ -16,7 +16,15 @@ type Props = {
   onDayChange: (day: number) => void;
 };
 
-const WorkoutMetadataEditor = ({ form, selectedYear, selectedMonth, selectedDay, onYearChange, onMonthChange, onDayChange }: Props) => {
+const WorkoutMetadataEditor = ({
+  form,
+  selectedYear,
+  selectedMonth,
+  selectedDay,
+  onYearChange,
+  onMonthChange,
+  onDayChange,
+}: Props) => {
   const router = useRouter();
   const [isMetadataOpen, setIsMetadataOpen] = useState(false);
   const [gyms, setGyms] = useState<GymDTO[]>([]);
@@ -51,7 +59,9 @@ const WorkoutMetadataEditor = ({ form, selectedYear, selectedMonth, selectedDay,
   // 入力値に応じてフィルタリング
   useEffect(() => {
     if (gymInputValue) {
-      const filtered = gyms.filter((gym) => gym.name.toLowerCase().includes(gymInputValue.toLowerCase()));
+      const filtered = gyms.filter((gym) =>
+        gym.name.toLowerCase().includes(gymInputValue.toLowerCase()),
+      );
       setFilteredGyms(filtered);
     } else {
       setFilteredGyms([]);
@@ -116,14 +126,33 @@ const WorkoutMetadataEditor = ({ form, selectedYear, selectedMonth, selectedDay,
       </div>
 
       {/* 日付選択 */}
-      <MonthlyStrip year={selectedYear} month={selectedMonth} selectedDay={selectedDay} onSelectDay={handleDayChange} />
+      <MonthlyStrip
+        year={selectedYear}
+        month={selectedMonth}
+        selectedDay={selectedDay}
+        onSelectDay={handleDayChange}
+      />
 
       {/* モバイル: 折りたたみトグル */}
       <div className="mt-2 md:hidden">
-        <button type="button" onClick={() => setIsMetadataOpen(!isMetadataOpen)} className="w-full flex items-center justify-between px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
+        <button
+          type="button"
+          onClick={() => setIsMetadataOpen(!isMetadataOpen)}
+          className="w-full flex items-center justify-between px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
+        >
           <span>詳細情報</span>
-          <svg className={`w-4 h-4 transition-transform ${isMetadataOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          <svg
+            className={`w-4 h-4 transition-transform ${isMetadataOpen ? "rotate-180" : ""}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
           </svg>
         </button>
       </div>
@@ -132,10 +161,14 @@ const WorkoutMetadataEditor = ({ form, selectedYear, selectedMonth, selectedDay,
       <div className="hidden md:block my-6 border-t border-gray-200"></div>
 
       {/* トレーニング詳細（時刻・場所・コンディション） */}
-      <div className={`flex flex-col md:flex-row md:flex-wrap items-start justify-start gap-2 md:gap-3 text-left ${isMetadataOpen ? "mt-2" : "hidden"} md:flex`}>
+      <div
+        className={`flex flex-col md:flex-row md:flex-wrap items-start justify-start gap-2 md:gap-3 text-left ${isMetadataOpen ? "mt-2" : "hidden"} md:flex`}
+      >
         {/* 時間 */}
         <div className="flex items-center gap-1 w-full md:w-auto">
-          <label className="text-xs md:text-sm font-medium text-gray-700 min-w-[44px] md:min-w-[60px]">時間</label>
+          <label className="text-xs md:text-sm font-medium text-gray-700 min-w-[44px] md:min-w-[60px]">
+            時間
+          </label>
           <input
             type="time"
             className="w-24 md:w-28 px-1.5 md:px-2 py-1.5 md:py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-booking-500"
@@ -161,7 +194,9 @@ const WorkoutMetadataEditor = ({ form, selectedYear, selectedMonth, selectedDay,
 
         {/* 場所（ジム予測入力） */}
         <div className="flex items-center gap-2 w-full md:w-auto relative">
-          <label className="text-xs md:text-sm font-medium text-gray-700 min-w-[44px] md:min-w-[60px]">場所</label>
+          <label className="text-xs md:text-sm font-medium text-gray-700 min-w-[44px] md:min-w-[60px]">
+            場所
+          </label>
           <div className="flex-1 md:w-80 relative">
             <input
               type="text"
@@ -171,7 +206,9 @@ const WorkoutMetadataEditor = ({ form, selectedYear, selectedMonth, selectedDay,
                 setGymInputValue(value);
                 setShowSuggestions(true);
                 // gym_name を form に反映（バックエンドで使用）
-                form.setValue("gym_name", value.trim() || null, { shouldDirty: true });
+                form.setValue("gym_name", value.trim() || null, {
+                  shouldDirty: true,
+                });
                 if (!value) {
                   form.setValue("gym_id", null, { shouldDirty: true });
                 }
@@ -182,7 +219,9 @@ const WorkoutMetadataEditor = ({ form, selectedYear, selectedMonth, selectedDay,
                 setTimeout(() => {
                   setShowSuggestions(false);
                   // blur時にも最終的な値を反映
-                  form.setValue("gym_name", gymInputValue.trim() || null, { shouldDirty: true });
+                  form.setValue("gym_name", gymInputValue.trim() || null, {
+                    shouldDirty: true,
+                  });
                 }, 200);
               }}
               placeholder="ジム名を入力"
@@ -196,7 +235,9 @@ const WorkoutMetadataEditor = ({ form, selectedYear, selectedMonth, selectedDay,
                     onClick={() => {
                       setGymInputValue(gym.name);
                       form.setValue("gym_id", gym.id, { shouldDirty: true });
-                      form.setValue("gym_name", gym.name.trim(), { shouldDirty: true });
+                      form.setValue("gym_name", gym.name.trim(), {
+                        shouldDirty: true,
+                      });
                       setShowSuggestions(false);
                     }}
                     className="px-3 py-2 text-xs md:text-sm hover:bg-gray-100 cursor-pointer"
@@ -211,7 +252,9 @@ const WorkoutMetadataEditor = ({ form, selectedYear, selectedMonth, selectedDay,
 
         {/* コンディション（1〜5） */}
         <div className="flex items-center gap-2 w-full md:w-auto">
-          <label className="text-xs md:text-sm font-medium text-gray-700 min-w-[44px] md:min-w-[60px]">体調</label>
+          <label className="text-xs md:text-sm font-medium text-gray-700 min-w-[44px] md:min-w-[60px]">
+            体調
+          </label>
           <div className="flex gap-1">
             {[1, 2, 3, 4, 5].map((n) => (
               <button

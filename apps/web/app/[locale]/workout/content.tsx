@@ -16,16 +16,26 @@ type Props = {
   isUpdate: boolean;
 };
 
-const WorkoutContent = ({ Year, Month, Day, defaultValues, availableParts: initialParts, isUpdate }: Props) => {
+const WorkoutContent = ({
+  Year,
+  Month,
+  Day,
+  defaultValues,
+  availableParts: initialParts,
+  isUpdate,
+}: Props) => {
   const { success, error } = useBanner();
   const [selectedDay, setSelectedDay] = useState(Day);
   const [selectedYear, setSelectedYear] = useState(Year);
   const [selectedMonth, setSelectedMonth] = useState(Month);
-  const [availableParts, setAvailableParts] = useState<WorkoutPartDTO[]>(initialParts);
+  const [availableParts, setAvailableParts] =
+    useState<WorkoutPartDTO[]>(initialParts);
 
   // 既存データがある場合、最初のexerciseの部位を初期選択
   const initialPartId = defaultValues.exercises?.[0]?.workout_part_id ?? null;
-  const [selectedPartId, setSelectedPartId] = useState<number | null>(initialPartId);
+  const [selectedPartId, setSelectedPartId] = useState<number | null>(
+    initialPartId,
+  );
 
   const form = useForm<WorkoutFormDTO>({
     defaultValues,
@@ -49,7 +59,12 @@ const WorkoutContent = ({ Year, Month, Day, defaultValues, availableParts: initi
   }, [defaultValues]);
 
   const handleSubmit = async (data: WorkoutFormDTO) => {
-    const body = transformFormDataForSubmit(data, selectedYear, selectedMonth, selectedDay);
+    const body = transformFormDataForSubmit(
+      data,
+      selectedYear,
+      selectedMonth,
+      selectedDay,
+    );
 
     try {
       if (isUpdate && data.id) {
@@ -88,13 +103,18 @@ const WorkoutContent = ({ Year, Month, Day, defaultValues, availableParts: initi
     }
   };
 
-  const fetchLastExerciseRecord = async (exerciseID: number): Promise<ExerciseDTO | null> => {
+  const fetchLastExerciseRecord = async (
+    exerciseID: number,
+  ): Promise<ExerciseDTO | null> => {
     if (!exerciseID) {
       return null;
     }
 
     try {
-      const res = await fetch(`/api/workouts/exercises?id=${exerciseID}&action=last`, { cache: "no-store" });
+      const res = await fetch(
+        `/api/workouts/exercises?id=${exerciseID}&action=last`,
+        { cache: "no-store" },
+      );
 
       if (!res.ok || res.status === 204) {
         return null;
@@ -116,12 +136,22 @@ const WorkoutContent = ({ Year, Month, Day, defaultValues, availableParts: initi
           </div>
 
           {/* メタデータエディター（日付・時間・場所・コンディション） */}
-          <WorkoutMetadataEditor form={form} selectedYear={selectedYear} selectedMonth={selectedMonth} selectedDay={selectedDay} onYearChange={setSelectedYear} onMonthChange={setSelectedMonth} onDayChange={setSelectedDay} />
+          <WorkoutMetadataEditor
+            form={form}
+            selectedYear={selectedYear}
+            selectedMonth={selectedMonth}
+            selectedDay={selectedDay}
+            onYearChange={setSelectedYear}
+            onMonthChange={setSelectedMonth}
+            onDayChange={setSelectedDay}
+          />
 
           {/* 種目エディター（部位選択・種目・セット） */}
           <WorkoutExercisesEditor
             allExercises={allExercises ?? defaultValues.exercises}
-            onChangeExercises={(next) => form.setValue("exercises", next, { shouldDirty: true })}
+            onChangeExercises={(next) =>
+              form.setValue("exercises", next, { shouldDirty: true })
+            }
             workoutParts={availableParts}
             selectedPartId={selectedPartId}
             onPartChange={setSelectedPartId}

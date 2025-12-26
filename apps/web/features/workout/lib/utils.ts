@@ -39,7 +39,12 @@ export const extractDateParts = (dateStr: string | null | undefined) => {
  * @param hm - HH:mm形式の時刻文字列
  * @returns ISO形式の日時文字列 or null
  */
-export const toISO = (y: number, m: number, d: number, hm?: string | null): string | null => {
+export const toISO = (
+  y: number,
+  m: number,
+  d: number,
+  hm?: string | null,
+): string | null => {
   if (!hm) return null;
   const [hh, mm] = hm.split(":").map(Number);
   return new Date(y, m - 1, d, hh, mm, 0).toISOString();
@@ -49,7 +54,11 @@ export const toISO = (y: number, m: number, d: number, hm?: string | null): stri
  * 年月日から YYYY-MM-DD 形式の日付文字列を生成
  * @deprecated lib/time.ts の formatDate を使用してください
  */
-export const formatDateYMD = (year: number, month: number, day: number): string => {
+export const formatDateYMD = (
+  year: number,
+  month: number,
+  day: number,
+): string => {
   return formatDate(year, month, day);
 };
 
@@ -63,12 +72,15 @@ export const ensureFiveSets = (row: ExerciseRow): ExerciseRow => {
   if (sets.length >= 5) return row;
 
   const baseLen = sets.length;
-  const add: ExerciseRow["sets"] = Array.from({ length: 5 - baseLen }, (_, i) => ({
-    set_number: baseLen + i + 1,
-    weight_kg: 0,
-    reps: 0,
-    note: null,
-  }));
+  const add: ExerciseRow["sets"] = Array.from(
+    { length: 5 - baseLen },
+    (_, i) => ({
+      set_number: baseLen + i + 1,
+      weight_kg: 0,
+      reps: 0,
+      note: null,
+    }),
+  );
 
   return { ...row, sets: [...sets, ...add] };
 };
@@ -92,7 +104,13 @@ export const createEmptyExerciseRow = (setCount: number = 5): ExerciseRow => ({
 /**
  * Exercise行配列のセル値を更新
  */
-export const updateExerciseCell = (rows: ExerciseRow[], rowIndex: number, setIndex: number, key: "weight_kg" | "reps", value: string): ExerciseRow[] => {
+export const updateExerciseCell = (
+  rows: ExerciseRow[],
+  rowIndex: number,
+  setIndex: number,
+  key: "weight_kg" | "reps",
+  value: string,
+): ExerciseRow[] => {
   const next = structuredClone(rows);
   (next[rowIndex].sets[setIndex] as any)[key] = value;
   return next;
@@ -101,7 +119,11 @@ export const updateExerciseCell = (rows: ExerciseRow[], rowIndex: number, setInd
 /**
  * Exerciseのメモを更新（最初のセットに保存）
  */
-export const updateExerciseNote = (rows: ExerciseRow[], rowIndex: number, note: string): ExerciseRow[] => {
+export const updateExerciseNote = (
+  rows: ExerciseRow[],
+  rowIndex: number,
+  note: string,
+): ExerciseRow[] => {
   const next = structuredClone(rows);
   if (next[rowIndex].sets[0]) {
     next[rowIndex].sets[0].note = note || null;
@@ -112,7 +134,11 @@ export const updateExerciseNote = (rows: ExerciseRow[], rowIndex: number, note: 
 /**
  * Exercise名を変更
  */
-export const updateExerciseName = (rows: ExerciseRow[], rowIndex: number, name: string): ExerciseRow[] => {
+export const updateExerciseName = (
+  rows: ExerciseRow[],
+  rowIndex: number,
+  name: string,
+): ExerciseRow[] => {
   const next = structuredClone(rows);
   next[rowIndex].name = name;
   // 自由入力なので既存IDに紐づけない（新規扱い）
@@ -127,7 +153,12 @@ export const updateExerciseName = (rows: ExerciseRow[], rowIndex: number, name: 
  * フォームデータを送信用に変換
  * 空のセット（weight_kg と reps が両方とも空）は除外
  */
-export const transformFormDataForSubmit = (data: WorkoutFormDTO, year: number, month: number, day: number) => ({
+export const transformFormDataForSubmit = (
+  data: WorkoutFormDTO,
+  year: number,
+  month: number,
+  day: number,
+) => ({
   ...data,
   performed_date: formatDate(year, month, day),
   started_at: data.started_at || null, // HH:mm形式のまま送る
@@ -139,7 +170,10 @@ export const transformFormDataForSubmit = (data: WorkoutFormDTO, year: number, m
       .map((s) => ({
         ...s,
         id: null, // 新規作成時はIDをnullにする（upsert時にバックエンドで処理）
-        weight_kg: s.weight_kg === "" || s.weight_kg === null ? null : Number(s.weight_kg),
+        weight_kg:
+          s.weight_kg === "" || s.weight_kg === null
+            ? null
+            : Number(s.weight_kg),
         reps: s.reps === "" || s.reps === null ? null : Number(s.reps),
       }))
       .filter((s) => s.weight_kg !== null || s.reps !== null), // 空のセットを除外

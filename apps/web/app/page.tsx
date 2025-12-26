@@ -18,23 +18,49 @@ const Home = async () => {
           {/* 左側：説明 */}
           <div className="space-y-6">
             <h1 className="text-5xl font-bold text-gray-900">GoGym</h1>
-            <p className="text-2xl text-gray-700">日々のトレーニングを記録できるアプリです</p>
+            <p className="text-2xl text-gray-700">
+              日々のトレーニングを記録できるアプリです
+            </p>
             <div className="space-y-4">
               <div className="flex items-start gap-3">
                 <div className="flex-shrink-0 w-8 h-8 bg-booking-600 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  <svg
+                    className="w-5 h-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">トレーニング記録</h3>
-                  <p className="text-gray-600">セット数、重量、回数を簡単に記録</p>
+                  <h3 className="font-semibold text-gray-900">
+                    トレーニング記録
+                  </h3>
+                  <p className="text-gray-600">
+                    セット数、重量、回数を簡単に記録
+                  </p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <div className="flex-shrink-0 w-8 h-8 bg-booking-600 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  <svg
+                    className="w-5 h-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
                 </div>
                 <div>
@@ -44,12 +70,24 @@ const Home = async () => {
               </div>
               <div className="flex items-start gap-3">
                 <div className="flex-shrink-0 w-8 h-8 bg-booking-600 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  <svg
+                    className="w-5 h-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">シンプルで使いやすい</h3>
+                  <h3 className="font-semibold text-gray-900">
+                    シンプルで使いやすい
+                  </h3>
                   <p className="text-gray-600">直感的な操作で素早く記録</p>
                 </div>
               </div>
@@ -58,7 +96,9 @@ const Home = async () => {
 
           {/* 右側：ログインフォーム */}
           <div className="bg-white rounded-2xl shadow-xl p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">今すぐトレーニングを開始する</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+              今すぐトレーニングを開始する
+            </h2>
 
             <LoginFormContent showHeader={false} showSignupLink={true} />
           </div>

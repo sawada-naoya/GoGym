@@ -1,11 +1,14 @@
 import type { RefreshResponse } from "../../../types/refresh";
 
-const API_BASE = process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_URL;
+const API_BASE =
+  process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_URL;
 
 /**
  * リフレッシュトークンを使って新しいアクセストークンを取得
  */
-export const refreshAccessToken = async (refreshToken: string): Promise<RefreshResponse | null> => {
+export const refreshAccessToken = async (
+  refreshToken: string,
+): Promise<RefreshResponse | null> => {
   try {
     const res = await fetch(`${API_BASE}/api/v1/sessions/refresh`, {
       method: "POST",

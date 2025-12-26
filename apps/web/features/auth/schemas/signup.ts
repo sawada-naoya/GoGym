@@ -6,8 +6,16 @@ export const signUpSchema = z
     email: z
       .string()
       .min(1, "メールアドレスは必須です")
-      .regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, "有効なメールアドレスを入力してください"),
-    password: z.string().min(8, "パスワードは8文字以上で入力してください").regex(/[A-Z]/, "パスワードには大文字を1文字以上含めてください").regex(/[a-z]/, "パスワードには小文字を1文字以上含めてください").regex(/[0-9]/, "パスワードには数字を1文字以上含めてください"),
+      .regex(
+        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+        "有効なメールアドレスを入力してください",
+      ),
+    password: z
+      .string()
+      .min(8, "パスワードは8文字以上で入力してください")
+      .regex(/[A-Z]/, "パスワードには大文字を1文字以上含めてください")
+      .regex(/[a-z]/, "パスワードには小文字を1文字以上含めてください")
+      .regex(/[0-9]/, "パスワードには数字を1文字以上含めてください"),
     confirmPassword: z.string().min(1, "パスワード（確認）は必須です"),
   })
   .refine((data) => data.password === data.confirmPassword, {

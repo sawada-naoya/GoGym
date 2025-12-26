@@ -2,9 +2,12 @@
 
 import type { SignUpPayload } from "./schemas/signup";
 
-const API_BASE = process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_URL;
+const API_BASE =
+  process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_URL;
 
-type ActionResult<T = void> = { success: true; data?: T } | { success: false; error: string };
+type ActionResult<T = void> =
+  | { success: true; data?: T }
+  | { success: false; error: string };
 
 export const signup = async (payload: SignUpPayload): Promise<ActionResult> => {
   try {
