@@ -1,16 +1,29 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
+import { useTranslation } from "react-i18next";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const { data: session, status } = useSession();
   const userName = session?.user?.name;
+  const { t, i18n } = useTranslation("common");
+
+  const currentLocale = i18n.language || "ja";
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/", redirect: true });
+  };
+
+  const handleLocaleChange = (newLocale: string) => {
+    i18n.changeLanguage(newLocale);
   };
 
   return (
@@ -20,7 +33,7 @@ const Header = () => {
           {/* ロゴ */}
           <Link href="/" className="flex items-center">
             <span className="text-xl md:text-3xl font-bold text-white">
-              GoGym
+              {t("header.appName")}
             </span>
           </Link>
 
@@ -30,7 +43,7 @@ const Header = () => {
               href="/"
               className="text-white hover:text-booking-200 transition-colors"
             >
-              トレーニングノート
+              {t("header.trainingNote")}
             </Link>
           </nav>
 
@@ -45,17 +58,33 @@ const Header = () => {
                   onClick={handleSignOut}
                   className="bg-white text-booking-700 hover:bg-booking-50 transition-colors px-4 py-2 rounded-md font-medium"
                 >
-                  ログアウト
+                  {t("header.logout")}
                 </button>
               </>
             ) : null}
+
+            {/* 言語切り替え */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handleLocaleChange("ja")}
+                className={`px-2 py-1 rounded transition-colors ${!isMounted || currentLocale === "ja" ? "bg-white text-booking-700 font-medium" : "text-white hover:text-booking-200"}`}
+              >
+                日
+              </button>
+              <button
+                onClick={() => handleLocaleChange("en")}
+                className={`px-2 py-1 rounded transition-colors ${isMounted && currentLocale === "en" ? "bg-white text-booking-700 font-medium" : "text-white hover:text-booking-200"}`}
+              >
+                EN
+              </button>
+            </div>
           </div>
 
           {/* ハンバーガーメニューボタン（モバイル） */}
           <button
             className="md:hidden text-white p-1"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="メニュー"
+            aria-label={t("header.menu")}
           >
             <svg
               className="w-6 h-6"
@@ -91,8 +120,25 @@ const Header = () => {
                 className="text-white hover:text-booking-200 transition-colors py-2 text-sm"
                 onClick={() => setIsMenuOpen(false)}
               >
-                トレーニングノート
+                {t("header.trainingNote")}
               </Link>
+
+              {/* 言語切り替え（モバイル） */}
+              <div className="flex items-center gap-2 py-2">
+                <button
+                  onClick={() => handleLocaleChange("ja")}
+                  className={`px-3 py-1.5 rounded transition-colors text-sm ${!isMounted || currentLocale === "ja" ? "bg-white text-booking-700 font-medium" : "bg-booking-600 text-white hover:bg-booking-500"}`}
+                >
+                  日本語
+                </button>
+                <button
+                  onClick={() => handleLocaleChange("en")}
+                  className={`px-3 py-1.5 rounded transition-colors text-sm ${isMounted && currentLocale === "en" ? "bg-white text-booking-700 font-medium" : "bg-booking-600 text-white hover:bg-booking-500"}`}
+                >
+                  English
+                </button>
+              </div>
+
               {userName && (
                 <div className="flex flex-col space-y-2 pt-3 border-t border-booking-600">
                   <span className="text-white py-1 text-sm">{userName}</span>
@@ -100,7 +146,7 @@ const Header = () => {
                     onClick={handleSignOut}
                     className="bg-white text-booking-700 hover:bg-booking-50 transition-colors px-3 py-1.5 rounded-md font-medium text-center text-sm"
                   >
-                    ログアウト
+                    {t("header.logout")}
                   </button>
                 </div>
               )}

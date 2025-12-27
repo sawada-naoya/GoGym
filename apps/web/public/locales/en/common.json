@@ -1,0 +1,146 @@
+{
+  "header": {
+    "appName": "GoGym",
+    "trainingNote": "Training Note",
+    "logout": "Logout",
+    "menu": "Menu"
+  },
+  "landing": {
+    "hero": {
+      "title": "GoGym",
+      "description": "An app to record your daily training",
+      "startButton": "Start Training Now"
+    },
+    "features": {
+      "trainingRecord": {
+        "title": "Training Record",
+        "description": "Easily record sets, weights, and reps"
+      },
+      "progressTracking": {
+        "title": "Progress Tracking",
+        "description": "Visualize and track your daily growth"
+      },
+      "simpleUsage": {
+        "title": "Simple and Easy to Use",
+        "description": "Quick recording with intuitive operations"
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Login to Your Account",
+      "subtitle": "Let's start recording your training",
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "example@example.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter password",
+      "loginButton": "Login",
+      "loggingIn": "Logging in...",
+      "orDivider": "or",
+      "googleLogin": "Login with Google",
+      "googleLoginAlert": "Google login is currently under development",
+      "forgotPassword": "Forgot your password?",
+      "noAccount": "Don't have an account?",
+      "signupLink": "Sign Up",
+      "errorInvalidCredentials": "Incorrect email or password",
+      "errorLoginFailed": "Login failed",
+      "successMessage": "Login successful"
+    },
+    "signup": {
+      "title": "Sign Up",
+      "nameLabel": "Name",
+      "namePlaceholder": "John Doe",
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "example@example.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter password",
+      "confirmPasswordLabel": "Confirm Password",
+      "confirmPasswordPlaceholder": "Re-enter password",
+      "signupButton": "Sign Up",
+      "signingUp": "Signing up...",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Login",
+      "errorEmailTaken": "This email address is already in use",
+      "errorNetworkError": "A network error occurred. Please try again later.",
+      "successMessage": "Account created successfully. Please login."
+    },
+    "validation": {
+      "emailRequired": "Email address is required",
+      "emailInvalid": "Please enter a valid email address",
+      "passwordRequired": "Password is required",
+      "passwordMinLength": "Password must be at least 8 characters",
+      "passwordUppercase": "Password must contain at least one uppercase letter",
+      "passwordLowercase": "Password must contain at least one lowercase letter",
+      "passwordNumber": "Password must contain at least one number",
+      "confirmPasswordRequired": "Password confirmation is required",
+      "passwordMismatch": "Passwords do not match",
+      "nameRequired": "Name is required"
+    }
+  },
+  "workout": {
+    "title": "Training Note",
+    "metadata": {
+      "year": "Year",
+      "month": "Month",
+      "detailsButton": "Details",
+      "timeLabel": "Time",
+      "locationLabel": "Location",
+      "locationPlaceholder": "Enter gym name",
+      "conditionLabel": "Condition",
+      "daysOfWeek": {
+        "sun": "Sun",
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat"
+      }
+    },
+    "exercises": {
+      "partLabel": "Body Part",
+      "partPlaceholder": "Select",
+      "createExerciseButton": "Create Exercise",
+      "addExerciseButton": "Add Exercise",
+      "exercisePlaceholder": "Select exercise",
+      "notePlaceholder": "Note",
+      "setLabel": "Set",
+      "weightLabel": "Weight",
+      "repsLabel": "Reps",
+      "previousLabel": "Previous",
+      "kg": "kg",
+      "reps": "reps",
+      "rep": "rep",
+      "copyLastRecord": "Copy last record",
+      "copySetBelow": "Copy below",
+      "registerButton": "Register",
+      "updateButton": "Update",
+      "registerButtonMobile": "Register",
+      "updateButtonMobile": "Update",
+      "errorUpdateFailed": "Update failed",
+      "errorSaveFailed": "Save failed",
+      "errorNetworkError": "Communication error occurred",
+      "successUpdate": "Updated",
+      "successSave": "Saved"
+    },
+    "exerciseModal": {
+      "title": "Add exercises for",
+      "partLabel": "Body Part",
+      "exercisePlaceholder": "Exercise name",
+      "registerButton": "Register",
+      "registering": "Registering...",
+      "deleteConfirmTitle": "Delete this exercise?",
+      "deleteConfirmMessage": "will be deleted. This action cannot be undone.",
+      "cancelButton": "Cancel",
+      "deleteButton": "Delete",
+      "errorSelectPart": "Please select a body part",
+      "errorEnterExerciseName": "Please enter an exercise name",
+      "errorRegisterFailed": "Registration failed",
+      "errorRegistering": "An error occurred during registration",
+      "errorDeleteFailed": "Deletion failed",
+      "errorDeleting": "An error occurred during deletion",
+      "successRegister": "Exercise registered",
+      "successDelete": "Exercise deleted"
+    }
+  }
+}

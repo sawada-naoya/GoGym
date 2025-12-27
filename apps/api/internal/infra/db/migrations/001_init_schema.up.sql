@@ -55,14 +55,28 @@ CREATE INDEX idx_user_active ON refresh_tokens(user_id, revoked_at, expires_at);
 -- Workout parts table: トレーニング部位（胸、背中、脚など）
 CREATE TABLE workout_parts (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
+    key VARCHAR(50) NOT NULL,
     user_id CHAR(26) NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL,
     CONSTRAINT fk_workout_parts_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    CONSTRAINT uq_workout_parts_name_user UNIQUE (name, user_id)
+    CONSTRAINT uq_workout_parts_key_user UNIQUE (key, user_id)
 );
+
+-- Workout part translations table: 部位名の多言語対応
+CREATE TABLE workout_part_translations (
+    id SERIAL PRIMARY KEY,
+    workout_part_id INT NOT NULL,
+    locale VARCHAR(5) NOT NULL,
+    name VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_workout_part_translations_part FOREIGN KEY (workout_part_id) REFERENCES workout_parts(id) ON DELETE CASCADE,
+    CONSTRAINT uq_workout_part_translations UNIQUE (workout_part_id, locale)
+);
+
+CREATE INDEX idx_workout_part_translations_locale ON workout_part_translations(locale);
 
 -- Workout exercises table: 種目（ベンチプレス、スクワットなど）
 CREATE TABLE workout_exercises (

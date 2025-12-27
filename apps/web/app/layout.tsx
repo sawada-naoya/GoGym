@@ -1,12 +1,9 @@
-// app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
 import React from "react";
-import Providers from "./provider";
+import ClientProviders from "./ClientProviders";
 import Header from "../components/Header";
-
-import { BannerProvider, BannerHost } from "@/components/Banner";
-import GlobalBanners from "./GlobalBanners";
+import { BannerHost } from "@/components/Banner";
 
 export const metadata: Metadata = {
   title: "GoGym - トレーニング記録アプリ",
@@ -16,21 +13,16 @@ export const metadata: Metadata = {
 const RootLayout = ({ children }: { children: React.ReactNode }) => (
   <html lang="ja" className="h-full">
     <body className="h-full bg-gray-50 font-sans">
-      <Providers>
-        <BannerProvider>
-          <Header />
-          {/* 全ページ共通のバナー表示領域（画面上部に固定） */}
-          <BannerHost />
-          {/* （任意）/signup→/login用のフラッシュ読取り */}
-          <GlobalBanners />
-          <main>{children}</main>
-          <footer className="mt-16 border-t bg-white">
-            <div className="container mx-auto px-4 py-8 text-sm text-gray-500">
-              © {new Date().getFullYear()} GoGym
-            </div>
-          </footer>
-        </BannerProvider>
-      </Providers>
+      <ClientProviders>
+        <Header />
+        <BannerHost />
+        <main>{children}</main>
+        <footer className="mt-16 border-t bg-white">
+          <div className="container mx-auto px-4 py-8 text-sm text-gray-500">
+            © {new Date().getFullYear()} GoGym
+          </div>
+        </footer>
+      </ClientProviders>
     </body>
   </html>
 );

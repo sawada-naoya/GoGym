@@ -114,6 +114,17 @@ func WorkoutPartToDomain(rec *WorkoutPart) *dom.WorkoutPart {
 		return nil
 	}
 
+	// Translationsを変換
+	translations := make([]dom.WorkoutPartTranslation, 0, len(rec.Translations))
+	for _, trans := range rec.Translations {
+		translations = append(translations, dom.WorkoutPartTranslation{
+			ID:            dom.ID(trans.ID),
+			WorkoutPartID: dom.ID(trans.WorkoutPartID),
+			Locale:        trans.Locale,
+			Name:          trans.Name,
+		})
+	}
+
 	// Exercisesを変換
 	exercises := make([]dom.WorkoutExerciseRef, 0, len(rec.Exercises))
 	for _, ex := range rec.Exercises {
@@ -138,10 +149,11 @@ func WorkoutPartToDomain(rec *WorkoutPart) *dom.WorkoutPart {
 	}
 
 	return &dom.WorkoutPart{
-		ID:        dom.ID(rec.ID),
-		Name:      rec.Name,
-		Owner:     stringPtrToULIDPtr(rec.UserID),
-		Exercises: exercises,
+		ID:           dom.ID(rec.ID),
+		Key:          rec.Key,
+		Owner:        stringPtrToULIDPtr(rec.UserID),
+		Translations: translations,
+		Exercises:    exercises,
 	}
 }
 

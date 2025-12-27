@@ -1,14 +1,9 @@
-import { Suspense } from "react";
-import SignupClient from "../_components/auth/SignupForm";
+import SignupFormContent from "./content";
 
 export const dynamic = "force-dynamic";
 
 const SignUpPage = () => {
-  return (
-    <Suspense fallback={null}>
-      <SignupClient />
-    </Suspense>
-  );
+  return <SignupFormContent />;
 };
 
 export default SignUpPage;
