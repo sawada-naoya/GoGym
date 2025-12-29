@@ -4,6 +4,7 @@ package di
 
 import (
 	"gogym-api/internal/infra/security"
+	"gogym-api/internal/infra/slack"
 
 	"github.com/google/wire"
 	"gorm.io/gorm"
@@ -13,6 +14,7 @@ import (
 	userrepo "gogym-api/internal/adapter/repository/user"
 	workoutrepo "gogym-api/internal/adapter/repository/workout"
 
+	contactuc "gogym-api/internal/usecase/contact"
 	gymuc "gogym-api/internal/usecase/gym"
 	sessionuc "gogym-api/internal/usecase/session"
 	useruc "gogym-api/internal/usecase/user"
@@ -24,6 +26,7 @@ type Handlers struct {
 	Session *handler.SessionHandler
 	Gym     *handler.GymHandler
 	Workout *handler.WorkoutHandler
+	Contact *handler.ContactHandler
 }
 
 func NewHandlers(
@@ -31,12 +34,14 @@ func NewHandlers(
 	session *handler.SessionHandler,
 	gym *handler.GymHandler,
 	workout *handler.WorkoutHandler,
+	contact *handler.ContactHandler,
 ) *Handlers {
 	return &Handlers{
 		User:    user,
 		Session: session,
 		Gym:     gym,
 		Workout: workout,
+		Contact: contact,
 	}
 }
 
@@ -60,6 +65,7 @@ var usecaseSet = wire.NewSet(
 	sessionuc.NewSessionInteractor,
 	gymuc.NewGymInteractor,
 	workoutuc.NewWorkoutInteractor,
+	contactuc.NewContactInteractor,
 )
 
 var handlerSet = wire.NewSet(
@@ -67,13 +73,24 @@ var handlerSet = wire.NewSet(
 	handler.NewSessionHandler,
 	handler.NewGymHandler,
 	handler.NewWorkoutHandler,
+	handler.NewContactHandler,
 	NewHandlers,
 )
 
-func Initialize(db *gorm.DB) *Handlers {
+// provideSlackGateway converts *slack.Client to contactuc.SlackGateway interface
+func provideSlackGateway(client *slack.Client) contactuc.SlackGateway {
+	return client
+}
+
+var gatewaySet = wire.NewSet(
+	provideSlackGateway,
+)
+
+func Initialize(db *gorm.DB, slackClient *slack.Client) *Handlers {
 	wire.Build(
 		repositorySet,
 		securitySet,
+		gatewaySet,
 		usecaseSet,
 		handlerSet,
 	)

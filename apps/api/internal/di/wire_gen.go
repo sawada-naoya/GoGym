@@ -13,6 +13,8 @@ import (
 	"gogym-api/internal/adapter/repository/user"
 	"gogym-api/internal/adapter/repository/workout"
 	"gogym-api/internal/infra/security"
+	"gogym-api/internal/infra/slack"
+	"gogym-api/internal/usecase/contact"
 	gym2 "gogym-api/internal/usecase/gym"
 	"gogym-api/internal/usecase/session"
 	user2 "gogym-api/internal/usecase/user"
@@ -22,7 +24,7 @@ import (
 
 // Injectors from wire.go:
 
-func Initialize(db *gorm.DB) *Handlers {
+func Initialize(db *gorm.DB, slackClient *slack.Client) *Handlers {
 	userRepository := user.NewUserRepository(db)
 	bcryptPasswordHasher := security.NewBcryptPasswordHasher()
 	userUseCase := user2.NewUserInteractor(userRepository, bcryptPasswordHasher)
@@ -35,7 +37,10 @@ func Initialize(db *gorm.DB) *Handlers {
 	workoutRepository := workout.NewWorkoutRepository(db)
 	workoutUseCase := workout2.NewWorkoutInteractor(workoutRepository, repository)
 	workoutHandler := handler.NewWorkoutHandler(workoutUseCase)
-	handlers := NewHandlers(userHandler, sessionHandler, gymHandler, workoutHandler)
+	slackGateway := provideSlackGateway(slackClient)
+	contactUseCase := contact.NewContactInteractor(slackGateway)
+	contactHandler := handler.NewContactHandler(contactUseCase)
+	handlers := NewHandlers(userHandler, sessionHandler, gymHandler, workoutHandler, contactHandler)
 	return handlers
 }
 
@@ -46,15 +51,17 @@ type Handlers struct {
 	Session *handler.SessionHandler
 	Gym     *handler.GymHandler
 	Workout *handler.WorkoutHandler
+	Contact *handler.ContactHandler
 }
 
-func NewHandlers(user3 *handler.UserHandler, session2 *handler.SessionHandler, gym3 *handler.GymHandler, workout3 *handler.WorkoutHandler,
+func NewHandlers(user3 *handler.UserHandler, session2 *handler.SessionHandler, gym3 *handler.GymHandler, workout3 *handler.WorkoutHandler, contact2 *handler.ContactHandler,
 ) *Handlers {
 	return &Handlers{
 		User:    user3,
 		Session: session2,
 		Gym:     gym3,
 		Workout: workout3,
+		Contact: contact2,
 	}
 }
 
@@ -62,6 +69,15 @@ var repositorySet = wire.NewSet(user.NewUserRepository, gym.NewGymRepository, wo
 
 var securitySet = wire.NewSet(security.NewBcryptPasswordHasher, wire.Bind(new(user2.PasswordHasher), new(*security.BcryptPasswordHasher)), wire.Bind(new(session.PasswordHasher), new(*security.BcryptPasswordHasher)))
 
-var usecaseSet = wire.NewSet(user2.NewUserInteractor, session.NewSessionInteractor, gym2.NewGymInteractor, workout2.NewWorkoutInteractor)
+var usecaseSet = wire.NewSet(user2.NewUserInteractor, session.NewSessionInteractor, gym2.NewGymInteractor, workout2.NewWorkoutInteractor, contact.NewContactInteractor)
 
-var handlerSet = wire.NewSet(handler.NewUserHandler, handler.NewSessionHandler, handler.NewGymHandler, handler.NewWorkoutHandler, NewHandlers)
+var handlerSet = wire.NewSet(handler.NewUserHandler, handler.NewSessionHandler, handler.NewGymHandler, handler.NewWorkoutHandler, handler.NewContactHandler, NewHandlers)
+
+// provideSlackGateway converts *slack.Client to contactuc.SlackGateway interface
+func provideSlackGateway(client *slack.Client) contact.SlackGateway {
+	return client
+}
+
+var gatewaySet = wire.NewSet(
+	provideSlackGateway,
+)

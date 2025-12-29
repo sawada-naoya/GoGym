@@ -3,18 +3,18 @@ package main
 import (
 	"context"
 	"fmt"
+	"gogym-api/internal/adapter/router"
+	"gogym-api/internal/configs"
+	"gogym-api/internal/di"
+	"gogym-api/internal/infra/db"
+	"gogym-api/internal/infra/server"
+	"gogym-api/internal/infra/slack"
 	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-
-	"gogym-api/internal/adapter/router"
-	"gogym-api/internal/configs"
-	"gogym-api/internal/di"
-	"gogym-api/internal/infra/db"
-	"gogym-api/internal/infra/server"
 
 	"github.com/joho/godotenv"
 )
@@ -45,8 +45,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	handlers := di.Initialize(database)
-	router.RegisterRoutes(e, handlers.Gym, handlers.User, handlers.Session, handlers.Workout, config.Auth.JWTSecret)
+	slackClient, err := slack.NewClient(config.Slack)
+	if err != nil {
+		slog.Error("Failed to initialize Slack client", "error", err)
+		os.Exit(1)
+	}
+
+	handlers := di.Initialize(database, slackClient)
+	router.RegisterRoutes(e, handlers.Gym, handlers.User, handlers.Session, handlers.Workout, handlers.Contact, config.Auth.JWTSecret)
 
 	addr := fmt.Sprintf("%s:%d", config.HTTP.Host, config.HTTP.Port)
 	slog.Info("Starting server", "address", addr)

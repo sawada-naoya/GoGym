@@ -13,6 +13,7 @@ func RegisterRoutes(
 	userHandler *handler.UserHandler,
 	sessionHandler *handler.SessionHandler,
 	workoutHandler *handler.WorkoutHandler,
+	contactHandler *handler.ContactHandler,
 	jwtSecret string,
 ) {
 	v1 := e.Group("/api/v1")
@@ -20,6 +21,7 @@ func RegisterRoutes(
 	// 認証不要なルート
 	UserRoutes(v1, userHandler)
 	SessionRoutes(v1, sessionHandler)
+	ContactRoutes(v1, contactHandler)
 
 	// 認証が必要なルート
 	authMiddleware := middleware.AuthMiddleware(jwtSecret)
