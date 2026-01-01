@@ -4,10 +4,12 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useTranslation } from "react-i18next";
+import ContactModal from "./ContactModal";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const { data: session, status } = useSession();
   const userName = session?.user?.name;
   const { t, i18n } = useTranslation("common");
@@ -45,6 +47,12 @@ const Header = () => {
             >
               {t("header.trainingNote")}
             </Link>
+            <button
+              onClick={() => setIsContactModalOpen(true)}
+              className="text-white hover:text-booking-200 transition-colors"
+            >
+              {t("header.contact")}
+            </button>
           </nav>
 
           {/* ユーザーメニュー（デスクトップ） */}
@@ -122,6 +130,15 @@ const Header = () => {
               >
                 {t("header.trainingNote")}
               </Link>
+              <button
+                onClick={() => {
+                  setIsContactModalOpen(true);
+                  setIsMenuOpen(false);
+                }}
+                className="text-white hover:text-booking-200 transition-colors py-2 text-sm text-left"
+              >
+                {t("header.contact")}
+              </button>
 
               {/* 言語切り替え（モバイル） */}
               <div className="flex items-center gap-2 py-2">
@@ -154,6 +171,12 @@ const Header = () => {
           </div>
         )}
       </div>
+
+      {/* お問い合わせモーダル */}
+      <ContactModal
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
+      />
     </header>
   );
 };

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"gogym-api/internal/usecase/contact"
+	"log/slog"
 
 	"github.com/labstack/echo/v4"
 )
@@ -23,21 +24,24 @@ type ContactRequest struct {
 
 func (h *ContactHandler) PostContact(c echo.Context) error {
 	ctx := c.Request().Context()
+	slog.InfoContext(ctx, "PostContact Handler")
+
+	ip := c.RealIP()
+	ua := c.Request().UserAgent()
 
 	var req ContactRequest
 	if err := c.Bind(&req); err != nil {
 		return echo.NewHTTPError(400, "invalid request body")
 	}
 
-	in := contact.SendContactInput{
-		Email:   req.Email,
-		Message: req.Message,
-		UserID:  nil, // 未ログイン時の問い合わせ対応
-		IP:      c.RealIP(),
-		UA:      c.Request().UserAgent(),
+	// ユーザーIDはnil許容なので、存在しない場合もある
+	userID, _ := c.Get("user_id").(string)
+	var userIDPtr *string
+	if userID != "" {
+		userIDPtr = &userID
 	}
 
-	err := h.cu.SendContact(ctx, in)
+	err := h.cu.SendContact(ctx, req.Email, req.Message, userIDPtr, ip, ua)
 	if err != nil {
 		// エラーログは出力するが、通知失敗でもユーザーには成功を返す
 		// （問い合わせ自体は受け付けたとみなす）

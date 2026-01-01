@@ -48,7 +48,6 @@ type HTTPConfig struct {
 
 type SlackConfig struct {
 	ContactWebhookURL string `env:"SLACK_CONTACT_WEBHOOK_URL"` // 問い合わせ通知用WebhookURL
-	ErrorsWebhookURL  string `env:"SLACK_ERRORS_WEBHOOK_URL"`  // エラー通知用WebhookURL
 }
 
 type Config struct {

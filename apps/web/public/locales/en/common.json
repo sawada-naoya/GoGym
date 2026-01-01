@@ -2,6 +2,7 @@
   "header": {
     "appName": "GoGym",
     "trainingNote": "Training Note",
+    "contact": "Contact",
     "logout": "Logout",
     "menu": "Menu"
   },
@@ -142,5 +143,18 @@
       "successRegister": "Exercise registered",
       "successDelete": "Exercise deleted"
     }
+  },
+  "contact": {
+    "title": "Contact Us",
+    "emailLabel": "Email Address",
+    "emailPlaceholder": "your@email.com",
+    "messageLabel": "Message",
+    "messagePlaceholder": "Please enter your message",
+    "cancelButton": "Cancel",
+    "sendButton": "Send",
+    "sending": "Sending...",
+    "errorRequired": "Please enter your email address and message",
+    "errorSending": "Failed to send. Please try again later.",
+    "successMessage": "Your message has been sent. Thank you for contacting us."
   }
 }

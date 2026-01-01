@@ -13,14 +13,12 @@ import (
 type Client struct {
 	httpClient *http.Client
 	contactURL string
-	errorsURL  string
 }
 
 func NewClient(sc configs.SlackConfig) (*Client, error) {
 	return &Client{
 		httpClient: &http.Client{Timeout: 5 * time.Second},
 		contactURL: sc.ContactWebhookURL,
-		errorsURL:  sc.ErrorsWebhookURL,
 	}, nil
 }
 
@@ -30,10 +28,6 @@ type payload struct {
 
 func (c *Client) NotifyContact(ctx context.Context, text string) error {
 	return c.postJSON(ctx, c.contactURL, payload{Text: text})
-}
-
-func (c *Client) NotifyError(ctx context.Context, text string) error {
-	return c.postJSON(ctx, c.errorsURL, payload{Text: text})
 }
 
 func (c *Client) postJSON(ctx context.Context, url string, body any) error {

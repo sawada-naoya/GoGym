@@ -2,6 +2,7 @@
   "header": {
     "appName": "GoGym",
     "trainingNote": "トレーニングノート",
+    "contact": "お問い合わせ",
     "logout": "ログアウト",
     "menu": "メニュー"
   },
@@ -142,5 +143,18 @@
       "successRegister": "種目を登録しました",
       "successDelete": "種目を削除しました"
     }
+  },
+  "contact": {
+    "title": "お問い合わせ",
+    "emailLabel": "メールアドレス",
+    "emailPlaceholder": "your@email.com",
+    "messageLabel": "お問い合わせ内容",
+    "messagePlaceholder": "お問い合わせ内容をご記入ください",
+    "cancelButton": "キャンセル",
+    "sendButton": "送信",
+    "sending": "送信中...",
+    "errorRequired": "メールアドレスとお問い合わせ内容を入力してください",
+    "errorSending": "送信に失敗しました。時間をおいて再度お試しください。",
+    "successMessage": "お問い合わせを送信しました。ご連絡ありがとうございます。"
   }
 }

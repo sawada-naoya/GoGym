@@ -16,37 +16,30 @@ func NewContactInteractor(sg SlackGateway) ContactUseCase {
 	}
 }
 
-type SendContactInput struct {
-	Email   string
-	Message string
-	UserID  *string
-	IP      string
-	UA      string
-}
+func (i *contactInteractor) SendContact(ctx context.Context, email, message string, userID *string, ip, ua string) error {
+	// ビジネスロジック: バリデーション
+	email = strings.TrimSpace(email)
+	message = strings.TrimSpace(message)
 
-func (i *contactInteractor) SendContact(ctx context.Context, in SendContactInput) error {
-	email := strings.TrimSpace(in.Email)
-	msg := strings.TrimSpace(in.Message)
-
-	if email == "" || msg == "" {
+	if email == "" || message == "" {
 		return errors.New("email and message are required")
 	}
-	if len(email) > 255 || len(msg) > 2000 {
+	if len(email) > 255 || len(message) > 2000 {
 		return errors.New("email or message is too long")
 	}
 
-	// 「何を送るか」はusecaseで決める
-	text := "📩 Contact\nEmail: " + email + "\n\n" + msg
-	return i.sg.NotifyContact(ctx, text)
-}
+	// メッセージの整形（ビジネスロジック）
+	userIDStr := "anonymous"
+	if userID != nil && *userID != "" {
+		userIDStr = *userID
+	}
 
-func (i *contactInteractor) SendError(ctx context.Context, text string) error {
-	t := strings.TrimSpace(text)
-	if t == "" {
-		return errors.New("text is required")
-	}
-	if len(t) > 4000 {
-		return errors.New("text is too long")
-	}
-	return i.sg.NotifyError(ctx, t)
+	text := "📩 Contact Form Submission\n\n" +
+		"From: " + email + "\n" +
+		"User ID: " + userIDStr + "\n" +
+		"IP: " + ip + "\n" +
+		"User Agent: " + ua + "\n\n" +
+		"Message:\n" + message
+
+	return i.sg.NotifyContact(ctx, text)
 }
