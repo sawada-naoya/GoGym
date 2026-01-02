@@ -20,11 +20,13 @@ import (
 )
 
 func init() {
-	// デフォルト APP_ENV
+	// APP_ENV 未設定なら production 扱いに寄せる（PaaS前提）
 	if os.Getenv("APP_ENV") == "" {
-		_ = os.Setenv("APP_ENV", "development")
+		_ = os.Setenv("APP_ENV", "production")
 	}
-	if os.Getenv("APP_ENV") != "production" {
+
+	// ローカルだけ dotenv を読む（明示的に development のときのみ）
+	if os.Getenv("APP_ENV") == "development" {
 		_ = godotenv.Load(".env.local")
 		_ = godotenv.Overload(".env")
 	}

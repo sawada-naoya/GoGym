@@ -2,6 +2,8 @@ package configs
 
 import (
 	"errors"
+	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -69,6 +71,13 @@ func Load() (*Config, error) {
 	// 前後空白の除去（CORS）
 	for i, o := range cfg.HTTP.CORS.AllowOrigins {
 		cfg.HTTP.CORS.AllowOrigins[i] = strings.TrimSpace(o)
+	}
+
+	// Render互換: PORT を優先（APP_PORTより上位）
+	if v := strings.TrimSpace(os.Getenv("PORT")); v != "" {
+		if p, err := strconv.Atoi(v); err == nil && p > 0 {
+			cfg.HTTP.Port = p
+		}
 	}
 
 	if err := validate(cfg); err != nil {
