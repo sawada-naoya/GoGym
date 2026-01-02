@@ -2,25 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { getServerAccessToken } from "@/features/auth/server/token";
-import type {
-  WorkoutFormDTO,
-  WorkoutPartDTO,
-  ExerciseDTO,
-} from "@/types/workout";
+import type { WorkoutFormDTO, WorkoutPartDTO, ExerciseDTO } from "@/types/workout";
 
-const API_BASE =
-  process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_URL;
+const API_BASE = process.env.NEXT_PUBLIC_API_URL;
 
-type ActionResult<T = void> =
-  | { success: true; data?: T }
-  | { success: false; error: string };
+type ActionResult<T = void> = { success: true; data?: T } | { success: false; error: string };
 
 // ==================== Helper ====================
 
-const authorizedFetch = async (
-  url: string,
-  options?: RequestInit,
-): Promise<Response> => {
+const authorizedFetch = async (url: string, options?: RequestInit): Promise<Response> => {
   const token = await getServerAccessToken();
   if (!token) throw new Error("Unauthorized");
   if (!API_BASE) throw new Error("API base URL not configured");
@@ -38,18 +28,13 @@ const authorizedFetch = async (
 
 // ==================== Workout Records ====================
 
-export const getWorkoutRecords = async (params?: {
-  date?: string;
-  partId?: number;
-}): Promise<ActionResult<WorkoutFormDTO>> => {
+export const getWorkoutRecords = async (params?: { date?: string; partId?: number }): Promise<ActionResult<WorkoutFormDTO>> => {
   try {
     const searchParams = new URLSearchParams();
     if (params?.date) searchParams.set("date", params.date);
     if (params?.partId) searchParams.set("part_id", String(params.partId));
 
-    const queryString = searchParams.toString()
-      ? `?${searchParams.toString()}`
-      : "";
+    const queryString = searchParams.toString() ? `?${searchParams.toString()}` : "";
 
     const res = await authorizedFetch(`/api/v1/workouts/records${queryString}`);
 
@@ -67,9 +52,7 @@ export const getWorkoutRecords = async (params?: {
   }
 };
 
-export const createWorkoutRecord = async (
-  body: WorkoutFormDTO,
-): Promise<ActionResult> => {
+export const createWorkoutRecord = async (body: WorkoutFormDTO): Promise<ActionResult> => {
   try {
     const res = await authorizedFetch("/api/v1/workouts/records", {
       method: "POST",
@@ -90,10 +73,7 @@ export const createWorkoutRecord = async (
   }
 };
 
-export const updateWorkoutRecord = async (
-  id: string,
-  body: WorkoutFormDTO,
-): Promise<ActionResult> => {
+export const updateWorkoutRecord = async (id: string, body: WorkoutFormDTO): Promise<ActionResult> => {
   try {
     const res = await authorizedFetch(`/api/v1/workouts/records/${id}`, {
       method: "PUT",
@@ -116,13 +96,9 @@ export const updateWorkoutRecord = async (
 
 // ==================== Workout Exercises ====================
 
-export const getLastExerciseRecord = async (
-  exerciseId: number,
-): Promise<ActionResult<ExerciseDTO>> => {
+export const getLastExerciseRecord = async (exerciseId: number): Promise<ActionResult<ExerciseDTO>> => {
   try {
-    const res = await authorizedFetch(
-      `/api/v1/workouts/exercises/${exerciseId}/last`,
-    );
+    const res = await authorizedFetch(`/api/v1/workouts/exercises/${exerciseId}/last`);
 
     if (!res.ok || res.status === 204) {
       return { success: false, error: "No previous record found" };
@@ -165,9 +141,7 @@ export const upsertWorkoutExercises = async (body: {
   }
 };
 
-export const deleteWorkoutExercise = async (
-  id: number,
-): Promise<ActionResult> => {
+export const deleteWorkoutExercise = async (id: number): Promise<ActionResult> => {
   try {
     const res = await authorizedFetch(`/api/v1/workouts/exercises/${id}`, {
       method: "DELETE",
@@ -189,9 +163,7 @@ export const deleteWorkoutExercise = async (
 
 // ==================== Workout Parts ====================
 
-export const getWorkoutParts = async (): Promise<
-  ActionResult<WorkoutPartDTO[]>
-> => {
+export const getWorkoutParts = async (): Promise<ActionResult<WorkoutPartDTO[]>> => {
   try {
     const res = await authorizedFetch("/api/v1/workouts/parts");
 

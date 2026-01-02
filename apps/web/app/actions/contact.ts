@@ -1,7 +1,6 @@
 "use server";
 
-const API_BASE =
-  process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_URL;
+const API_BASE = process.env.NEXT_PUBLIC_API_URL;
 
 export async function sendContactMessage(email: string, message: string) {
   try {
