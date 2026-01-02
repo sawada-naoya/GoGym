@@ -12,8 +12,9 @@ import (
 )
 
 type DatabaseConfig struct {
-	Host     string `env:"DB_HOST,required"`           // データベースのホスト名（必須）
-	Port     string `env:"DB_PORT" envDefault:"3307"`  // データベースのポート番号（デフォルト: 3307）
+	Host string `env:"DB_HOST,required"` // データベースのホスト名（必須）
+	Port string `env:"DB_PORT" envDefault:"5432"`
+	// データベースのポート番号（デフォルト: 5432）
 	User     string `env:"DB_USER,required"`           // データベースユーザー名（必須）
 	Password string `env:"DB_PASSWORD,required"`       // データベースパスワード（必須）
 	Database string `env:"DB_NAME,required"`           // データベース名（必須）
