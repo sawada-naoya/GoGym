@@ -46,10 +46,15 @@ type HTTPConfig struct {
 	MaxHeaderBytes    int           `env:"HTTP_MAX_HEADER_BYTES"    envDefault:"1048576"` // 1<<20
 }
 
+type SlackConfig struct {
+	ContactWebhookURL string `env:"SLACK_CONTACT_WEBHOOK_URL"` // 問い合わせ通知用WebhookURL
+}
+
 type Config struct {
 	Database DatabaseConfig // データベース接続設定
 	Auth     AuthConfig     // JWT認証設定
 	HTTP     HTTPConfig     // HTTPサーバー設定
+	Slack    SlackConfig    // Slack通知設定
 }
 
 // Load は環境変数から設定を読み込む

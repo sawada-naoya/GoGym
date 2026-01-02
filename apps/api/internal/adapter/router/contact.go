@@ -6,6 +6,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func UserRoutes(e *echo.Group, uh *handler.UserHandler) {
-	e.POST("/users", uh.SignUp)
+func ContactRoutes(e *echo.Group, ch *handler.ContactHandler) {
+	e.POST("/contact", ch.PostContact)
 }

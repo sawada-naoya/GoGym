@@ -3,11 +3,11 @@ package workout
 import (
 	"context"
 	"errors"
+	"time"
 
 	dto "gogym-api/internal/adapter/dto"
 	dom "gogym-api/internal/domain/entities"
 	gymUsecase "gogym-api/internal/usecase/gym"
-	"time"
 )
 
 type workoutInteractor struct {
@@ -59,8 +59,6 @@ func (i *workoutInteractor) CreateWorkoutRecord(ctx context.Context, workout dom
 }
 
 func (i *workoutInteractor) UpsertWorkoutRecord(ctx context.Context, workout dom.WorkoutRecord) error {
-	// Domain logic can be added here (validation, business rules, etc.)
-
 	// 同日同部位ならupsert、それ以外は新規作成
 	err := i.repo.UpsertWorkoutRecord(ctx, workout)
 	if err != nil {
