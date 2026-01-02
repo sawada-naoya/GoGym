@@ -50,5 +50,5 @@ tasks:
     cmds:
       - |
         echo "🧱 migrate up..."
-        migrate -source "file://{{.MIGRATIONS_DIR}}" -database "{{.DB_URL}}" up
+        migrate -path "{{.MIGRATIONS_DIR}}" -database "{{.DB_URL}}" up
         echo "✅ migrate up 完了"
