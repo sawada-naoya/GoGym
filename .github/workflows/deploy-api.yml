@@ -6,7 +6,6 @@ on:
       - main
     paths:
       - 'apps/api/**'
-      - 'packages/openapi/**'
       - '.github/workflows/deploy-api.yml'
 
 jobs:
