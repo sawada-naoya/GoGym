@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
+	"github.com/labstack/echo/v4"
 )
 
 func init() {
@@ -40,6 +41,11 @@ func main() {
 	}
 
 	e := server.NewEcho(config.HTTP)
+
+	// renderヘルスチェック用エンドポイント
+	e.GET("/healthz", func(c echo.Context) error {
+		return c.NoContent(http.StatusOK)
+	})
 
 	database, err := db.NewDB(config.Database)
 	if err != nil {

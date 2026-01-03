@@ -18,11 +18,6 @@ func RegisterRoutes(
 ) {
 	v1 := e.Group("/api/v1")
 
-	// ヘルスチェック
-	v1.GET("/health", func(c echo.Context) error {
-		return c.JSON(200, map[string]string{"status": "ok"})
-	})
-
 	// 認証不要なルート
 	UserRoutes(v1, userHandler)
 	SessionRoutes(v1, sessionHandler)
