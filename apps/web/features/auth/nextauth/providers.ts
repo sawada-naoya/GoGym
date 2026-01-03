@@ -7,7 +7,13 @@ export const buildCredentialsProviderAuthorize = () => {
   return async (credentials: Partial<Record<"email" | "password", unknown>>, _request: Request) => {
     const email = credentials?.email?.toString().trim();
     const password = credentials?.password?.toString();
-    if (!email || !password || !API_BASE) return null;
+    console.log("[DEBUG Login] Attempting login for:", email);
+    console.log("[DEBUG Login] API_BASE:", API_BASE);
+
+    if (!email || !password || !API_BASE) {
+      console.error("[DEBUG Login] Missing credentials or API_BASE");
+      return null;
+    }
 
     try {
       const res = await fetch(`${API_BASE}/api/v1/sessions/login`, {
@@ -16,14 +22,29 @@ export const buildCredentialsProviderAuthorize = () => {
         body: JSON.stringify({ email, password }),
         cache: "no-store",
       });
-      if (!res.ok) return null;
 
-      const data = (await res.json()) as LoginResponse;
-      const { user, access_token, refresh_token, expires_in } = data ?? {};
-      if (!user?.id || !user?.name || !user?.email || !access_token || !refresh_token) {
+      console.log("[DEBUG Login] Response status:", res.status);
+      if (!res.ok) {
+        console.error("[DEBUG Login] Login failed with status:", res.status);
         return null;
       }
 
+      const data = (await res.json()) as LoginResponse;
+      const { user, access_token, refresh_token, expires_in } = data ?? {};
+
+      console.log("[DEBUG Login] Response data:", {
+        hasUser: !!user,
+        hasAccessToken: !!access_token,
+        hasRefreshToken: !!refresh_token,
+        expiresIn: expires_in,
+      });
+
+      if (!user?.id || !user?.name || !user?.email || !access_token || !refresh_token) {
+        console.error("[DEBUG Login] Missing required fields in response");
+        return null;
+      }
+
+      console.log("[DEBUG Login] Login successful for user:", user.id);
       return {
         id: String(user.id),
         name: user.name,
@@ -32,7 +53,8 @@ export const buildCredentialsProviderAuthorize = () => {
         refreshToken: refresh_token,
         expiresIn: expires_in,
       } as User;
-    } catch {
+    } catch (error) {
+      console.error("[DEBUG Login] Login error:", error);
       return null;
     }
   };
