@@ -25,7 +25,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     jwt: async ({ token, user }) => {
       if (user) {
-        console.log("[DEBUG JWT] New user login");
         const expiresAt = Math.floor(Date.now() / 1000) + ((user as any).expiresIn || 900);
 
         return {
@@ -39,21 +38,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       const now = Math.floor(Date.now() / 1000);
       const expiresAt = (token.expiresAt as number) || 0;
-      console.log("[DEBUG JWT] Token check - now:", now, "expiresAt:", expiresAt, "timeLeft:", expiresAt - now);
 
-      if (now < expiresAt - 60) {
-        console.log("[DEBUG JWT] Token still valid, skipping refresh");
-        return token;
-      }
+      if (now < expiresAt - 60) return token;
 
-      console.log("[DEBUG JWT] Token expired, attempting refresh");
       const refreshed = await refreshAccessToken(token.refreshToken as string);
-      if (!refreshed) {
-        console.error("[DEBUG JWT] Refresh failed, setting RefreshTokenError");
-        return { ...token, error: "RefreshTokenError" };
-      }
+      if (!refreshed) return { ...token, error: "RefreshTokenError" };
 
-      console.log("[DEBUG JWT] Refresh successful");
       const newExpiresAt = Math.floor(Date.now() / 1000) + refreshed.expires_in;
       return {
         ...token,
@@ -66,7 +56,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     session: async ({ session, token }) => {
       (session as any).authError = token.error ?? null;
       if (session.user) session.user.id = token.sub as string;
-      console.log("[DEBUG Session] authError:", token.error);
       return session;
     },
   },
