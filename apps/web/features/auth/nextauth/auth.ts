@@ -4,8 +4,14 @@ import Credentials from "next-auth/providers/credentials";
 import { refreshAccessToken } from "./refresh";
 import { buildCredentialsProviderAuthorize } from "./providers";
 
+const secret = process.env.NEXTAUTH_SECRET;
+
+if (!secret && process.env.NODE_ENV === "production") {
+  throw new Error("NEXTAUTH_SECRET is not set in production environment");
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: secret,
   trustHost: true,
 
   pages: {
