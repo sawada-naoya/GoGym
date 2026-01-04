@@ -15,8 +15,6 @@ type Props = {
 const Page = async ({ searchParams }: Props) => {
   const sp = await searchParams;
   const token = await getServerAccessToken();
-  console.log("DEBUG: Workout Page - token =", token);
-  console.log("DEBUG: Workout Page - API_BASE =", API_BASE);
 
   if (!token || !API_BASE) {
     return <div>認証エラー</div>;
