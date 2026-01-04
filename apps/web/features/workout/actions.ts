@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getServerAccessToken } from "@/features/auth/server/token";
+import { getServerAccessToken } from "@/features/auth/server/accessToken";
 import type { WorkoutFormDTO, WorkoutPartDTO, ExerciseDTO } from "@/types/workout";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL;

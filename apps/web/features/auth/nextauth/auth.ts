@@ -5,6 +5,9 @@ import { refreshAccessToken } from "./refresh";
 import { buildCredentialsProviderAuthorize } from "./providers";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  secret: process.env.NEXTAUTH_SECRET,
+  trustHost: true,
+
   pages: {
     signIn: "/",
     error: "/",
@@ -56,6 +59,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     session: async ({ session, token }) => {
       (session as any).authError = token.error ?? null;
       if (session.user) session.user.id = token.sub as string;
+      (session as any).expiresAt = token.expiresAt ?? null;
       return session;
     },
   },
