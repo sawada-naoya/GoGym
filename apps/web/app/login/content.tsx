@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 
 import { signIn } from "next-auth/react";
 import { useBanner } from "@/components/Banner";
-import { loginSchema, type LoginForm } from "@/features/auth/schemas/login";
+import { loginSchema, type LoginForm } from "@/features/auth/schemas";
 
 type LoginFormContentProps = {
   showHeader?: boolean;

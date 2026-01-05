@@ -1,6 +1,6 @@
 "use server";
 
-import type { SignUpPayload } from "./schemas/signup";
+import type { SignUpPayload } from "./schemas";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL;
 

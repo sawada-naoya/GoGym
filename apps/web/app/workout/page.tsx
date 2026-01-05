@@ -1,7 +1,7 @@
 import WorkoutContent from "./content";
 import { extractDateParts } from "@/features/workout/lib/utils";
 import { buildEmptyDTO, type WorkoutFormDTO, type WorkoutPartDTO } from "@/types/workout";
-import { getServerAccessToken } from "@/features/auth/server/accessToken";
+import { getServerAccessToken } from "@/features/auth/server";
 
 export const dynamic = "force-dynamic";
 

@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 
 import { useBanner } from "@/components/Banner";
 import { signup } from "@/features/auth/actions";
-import { signUpSchema, type SignUpForm } from "@/features/auth/schemas/signup";
+import { signUpSchema, type SignUpForm } from "@/features/auth/schemas";
 
 type SignupFormContentProps = {
   onSuccessCallback?: () => void;

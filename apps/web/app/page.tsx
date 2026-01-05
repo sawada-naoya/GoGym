@@ -1,7 +1,7 @@
 import LoginFormContent from "./login/content";
 import LandingHero from "./LandingHero";
 import { redirect } from "next/navigation";
-import { auth } from "@/features/auth/nextauth/auth";
+import { auth } from "@/features/auth/auth";
 
 const Home = async () => {
   const session = await auth();
