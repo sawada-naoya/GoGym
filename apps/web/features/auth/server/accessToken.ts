@@ -14,9 +14,13 @@ export const getServerAccessToken = async (): Promise<string | null> => {
   const headersList = await headers();
   const cookie = headersList.get("cookie") ?? "";
 
+  const isProduction = process.env.NODE_ENV === "production";
+
   const token = await getToken({
     req: { headers: { cookie } } as any,
     secret,
+    cookieName: isProduction ? "__Secure-next-auth.session-token" : "next-auth.session-token",
+    secureCookie: isProduction,
   });
 
   return (token?.accessToken as string) ?? null;
