@@ -20,7 +20,7 @@ export const getServerAccessToken = async (): Promise<string | null> => {
     req: { headers: { cookie } } as any,
     secret,
     cookieName: isProduction ? "__Secure-next-auth.session-token" : "next-auth.session-token",
-    secureCookie: isProduction,
+    secureCookie: true,
   });
 
   return (token?.accessToken as string) ?? null;
