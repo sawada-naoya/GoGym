@@ -45,13 +45,32 @@ export const GET = async () => {
   let token: any = null;
   let decodeError: string | null = null;
 
+  // 復号化時のAUTH_SECRETをログ出力
+  console.log("[DECRYPT_ATTEMPT] AUTH_SECRET debug:", {
+    length: effectiveSecret.length,
+    firstCharCode: effectiveSecret.charCodeAt(0),
+    lastCharCode: effectiveSecret.charCodeAt(effectiveSecret.length - 1),
+    firstThree: effectiveSecret.slice(0, 3),
+    lastThree: effectiveSecret.slice(-3),
+    vercelUrl: process.env.VERCEL_URL,
+    vercelEnv: process.env.VERCEL_ENV,
+    reqHost: h.get("host"),
+  });
+
   try {
     if (effectiveSecret) {
       token = await getToken({ req: { headers: { cookie: cookieHeader } } as any, secret: effectiveSecret });
+
+      if (token) {
+        console.log("[DECRYPT_SUCCESS] Token decoded successfully");
+      } else {
+        console.log("[DECRYPT_FAILED] getToken returned null");
+      }
     } else {
       decodeError = "NO_SECRET";
     }
   } catch (e: any) {
+    console.log("[DECRYPT_ERROR]", e);
     decodeError = `${e?.name ?? "Error"}: ${e?.message ?? ""}`.slice(0, 160);
   }
 
