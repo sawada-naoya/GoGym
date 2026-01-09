@@ -15,10 +15,7 @@ export const GET = async () => {
   const hasAuthjsSession = cookieNames.some((n) => n.includes("authjs") && n.includes("session-token"));
 
   // session cookie の長さ（破損/切断の疑いを見たい）
-  const sessionCookie =
-    store.get("__Secure-authjs.session-token") ??
-    store.get("__Host-authjs.session-token") ??
-    store.get("authjs.session-token");
+  const sessionCookie = store.get("__Secure-authjs.session-token") ?? store.get("__Host-authjs.session-token") ?? store.get("authjs.session-token");
 
   const sessionCookieLen = sessionCookie?.value.length ?? 0;
 
@@ -28,6 +25,20 @@ export const GET = async () => {
   const effectiveSecret = authSecret || nextAuthSecret;
 
   const effectiveSecretSource = authSecret ? "AUTH_SECRET" : nextAuthSecret ? "NEXTAUTH_SECRET" : "NONE";
+
+  // AUTH_SECRETの検証情報（実際の値は絶対に返さない）
+  const secretInfo = effectiveSecret
+    ? {
+        length: effectiveSecret.length,
+        firstCharCode: effectiveSecret.charCodeAt(0),
+        lastCharCode: effectiveSecret.charCodeAt(effectiveSecret.length - 1),
+        hasLeadingQuote: effectiveSecret.startsWith('"') || effectiveSecret.startsWith("'"),
+        hasTrailingQuote: effectiveSecret.endsWith('"') || effectiveSecret.endsWith("'"),
+        hasLeadingSpace: effectiveSecret[0] === " ",
+        hasTrailingSpace: effectiveSecret[effectiveSecret.length - 1] === " ",
+        hasNewline: effectiveSecret.includes("\n") || effectiveSecret.includes("\r"),
+      }
+    : null;
 
   const cookieHeader = all.map((c) => `${c.name}=${c.value}`).join("; ");
 
@@ -66,6 +77,7 @@ export const GET = async () => {
     hasAUTH_SECRET: Boolean(authSecret),
     hasNEXTAUTH_SECRET: Boolean(nextAuthSecret),
     effectiveSecretSource,
+    secretInfo,
 
     sessionCookieLen,
     cookieHeaderLen: cookieHeader.length,
