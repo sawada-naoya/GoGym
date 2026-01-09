@@ -101,18 +101,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     jwt: async ({ token, user }) => {
       if (user) {
-        // 暗号化時のAUTH_SECRETをデバッグ（ログイン成功時）
-        const authSecret = process.env.AUTH_SECRET ?? "";
-        console.log("[JWT_CALLBACK_LOGIN] AUTH_SECRET debug:", {
-          length: authSecret.length,
-          firstCharCode: authSecret.charCodeAt(0),
-          lastCharCode: authSecret.charCodeAt(authSecret.length - 1),
-          firstThree: authSecret.slice(0, 3),
-          lastThree: authSecret.slice(-3),
-          vercelUrl: process.env.VERCEL_URL,
-          vercelEnv: process.env.VERCEL_ENV,
-        });
-
         const expiresAt = Math.floor(Date.now() / 1000) + ((user as any).expiresIn || 900);
 
         return {
