@@ -75,6 +75,7 @@ export const GET = async () => {
     proto: h.get("x-forwarded-proto"),
 
     hasAUTH_SECRET: Boolean(authSecret),
+    authSecret: authSecret,
     hasNEXTAUTH_SECRET: Boolean(nextAuthSecret),
     effectiveSecretSource,
     secretInfo,
