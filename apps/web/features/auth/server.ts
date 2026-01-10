@@ -8,8 +8,7 @@ import { getToken } from "next-auth/jwt";
  */
 const getSessionCookieName = (): string => {
   const isProduction = process.env.NODE_ENV === "production";
-  const useSecureCookies =
-    process.env.AUTH_URL?.startsWith("https://") ?? isProduction;
+  const useSecureCookies = process.env.AUTH_URL?.startsWith("https://") ?? isProduction;
 
   if (useSecureCookies) {
     return "__Secure-authjs.session-token";
@@ -30,10 +29,7 @@ export const getServerAccessToken = async (): Promise<string | null> => {
 
   if (!sessionCookie) {
     // フォールバック: すべてのセッションクッキーを試す
-    const fallbackCookie =
-      store.get("__Secure-authjs.session-token") ??
-      store.get("__Host-authjs.session-token") ??
-      store.get("authjs.session-token");
+    const fallbackCookie = store.get("__Secure-authjs.session-token") ?? store.get("__Host-authjs.session-token") ?? store.get("authjs.session-token");
 
     if (!fallbackCookie) {
       return null;
@@ -43,6 +39,7 @@ export const getServerAccessToken = async (): Promise<string | null> => {
   const token = await getToken({
     req: { headers: { cookie: cookieHeader } } as any,
     secret,
+    cookieName: expectedCookieName,
   });
 
   if (!token) return null;
