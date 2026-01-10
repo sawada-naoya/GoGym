@@ -32,6 +32,10 @@ type GymRecord struct {
 	NormalizedName string `gorm:"size:255"`
 }
 
+func (GymRecord) TableName() string {
+	return "gyms"
+}
+
 func (WorkoutRecord) TableName() string {
 	return "workout_records"
 }
@@ -82,8 +86,8 @@ type WorkoutPart struct {
 	UpdatedAt time.Time      `gorm:"autoUpdateTime"`
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 
-	Exercises    []WorkoutExercise         `gorm:"foreignKey:WorkoutPartID"`
-	Translations []WorkoutPartTranslation  `gorm:"foreignKey:WorkoutPartID"`
+	Exercises    []WorkoutExercise        `gorm:"foreignKey:WorkoutPartID"`
+	Translations []WorkoutPartTranslation `gorm:"foreignKey:WorkoutPartID"`
 }
 
 func (WorkoutPart) TableName() string {
@@ -95,8 +99,8 @@ type WorkoutPartTranslation struct {
 	WorkoutPartID int `gorm:"index"`
 	Locale        string
 	Name          string
-	CreatedAt     time.Time      `gorm:"autoCreateTime"`
-	UpdatedAt     time.Time      `gorm:"autoUpdateTime"`
+	CreatedAt     time.Time `gorm:"autoCreateTime"`
+	UpdatedAt     time.Time `gorm:"autoUpdateTime"`
 }
 
 func (WorkoutPartTranslation) TableName() string {

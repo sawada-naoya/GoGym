@@ -40,12 +40,10 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
 }) => {
   const { t, i18n } = useTranslation("common");
 
-  // 選択中の部位でフィルタリング
   const displayedExercises = selectedPartId
     ? allExercises.filter((ex) => ex.workout_part_id === selectedPartId)
     : [];
 
-  // 表示用（最低1つの空種目を保証）
   const exercises =
     displayedExercises.length > 0
       ? displayedExercises
@@ -58,10 +56,8 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
     new Map(),
   );
 
-  // カスタムフック: モバイル判定
   const isMobile = useIsMobile();
 
-  // カスタムフック: モバイル時のセット数調整
   useMobileExerciseAdjustment(
     isMobile,
     allExercises,
@@ -109,7 +105,6 @@ const WorkoutExercisesEditor: React.FC<Props> = ({
     fetchPreviousRecords();
   }, [exercises.map((e) => e.id).join(","), onFetchLastRecord]);
 
-  // 表示されているexercise（フィルタ済み）を更新して、全体を再構築
   const updateDisplayedExercise = (updatedDisplayed: ExerciseRow[]) => {
     const otherExercises = allExercises.filter(
       (ex) => ex.workout_part_id !== selectedPartId,

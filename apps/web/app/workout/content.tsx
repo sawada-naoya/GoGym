@@ -5,7 +5,12 @@ import { useTranslation } from "react-i18next";
 import { useBanner } from "@/components/Banner";
 import { WorkoutFormDTO, WorkoutPartDTO, ExerciseDTO } from "@/types/workout";
 import { transformFormDataForSubmit } from "@/features/workout/lib/utils";
-import { getLastExerciseRecord } from "@/features/workout/actions";
+import {
+  getLastExerciseRecord,
+  createWorkoutRecord,
+  updateWorkoutRecord,
+  getWorkoutRecords,
+} from "@/features/workout/actions";
 import WorkoutMetadataEditor from "@/features/workout/components/WorkoutMetadataEditor";
 import WorkoutExercisesEditor from "@/features/workout/components/WorkoutExercisesEditor";
 
@@ -54,6 +59,30 @@ const WorkoutContent = ({
     setSelectedDay(Day);
   }, [Year, Month, Day]);
 
+  // 選択された日付が変わったら、その日のデータをリフェッチしてフォームをリセット
+  useEffect(() => {
+    const fetchRecordsForDate = async () => {
+      const dateStr = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}-${String(selectedDay).padStart(2, "0")}`;
+
+      // 元のdefaultValuesの日付と違う場合のみフェッチ
+      if (dateStr !== defaultValues.performed_date) {
+        try {
+          const result = await getWorkoutRecords({ date: dateStr });
+          if (result.success && result.data) {
+            form.reset(result.data);
+            const newPartId =
+              result.data.exercises?.[0]?.workout_part_id ?? null;
+            setSelectedPartId(newPartId);
+          }
+        } catch (err) {
+          console.error("Failed to fetch records for new date:", err);
+        }
+      }
+    };
+
+    fetchRecordsForDate();
+  }, [selectedYear, selectedMonth, selectedDay]);
+
   useEffect(() => {
     form.reset(defaultValues);
     // defaultValuesが変わったら部位も再設定
@@ -67,26 +96,21 @@ const WorkoutContent = ({
       selectedYear,
       selectedMonth,
       selectedDay,
-    );
+    ) as WorkoutFormDTO;
 
     try {
-      if (isUpdate && data.id) {
-        const res = await fetch(`/api/workouts/records/${data.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-          cache: "no-store",
-        });
-        if (!res.ok) return error(t("workout.exercises.errorUpdateFailed"));
+      // data.idの存在だけで新規作成/更新を判定
+      if (data.id) {
+        const result = await updateWorkoutRecord(String(data.id), body);
+        if (!result.success) {
+          return error(t("workout.exercises.errorUpdateFailed"));
+        }
         success(t("workout.exercises.successUpdate"));
       } else {
-        const res = await fetch("/api/workouts/records", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-          cache: "no-store",
-        });
-        if (!res.ok) return error(t("workout.exercises.errorSaveFailed"));
+        const result = await createWorkoutRecord(body);
+        if (!result.success) {
+          return error(t("workout.exercises.errorSaveFailed"));
+        }
         success(t("workout.exercises.successSave"));
       }
     } catch {

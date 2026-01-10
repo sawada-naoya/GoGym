@@ -11,7 +11,8 @@ export const metadata: Metadata = {
     default: "GoGym｜筋トレ・ワークアウト記録（トレーニングノート）",
     template: "%s | GoGym",
   },
-  description: "筋トレ・ワークアウトを簡単に記録できるトレーニングノート。部位・種目・重量・レップ・メモを残して成長を可視化。",
+  description:
+    "筋トレ・ワークアウトを簡単に記録できるトレーニングノート。部位・種目・重量・レップ・メモを残して成長を可視化。",
   applicationName: "GoGym",
   alternates: { canonical: "/" },
   robots: { index: true, follow: true },
@@ -20,7 +21,8 @@ export const metadata: Metadata = {
     url: "https://www.gogym.fitness",
     siteName: "GoGym",
     title: "GoGym｜筋トレ・ワークアウト記録（トレーニングノート）",
-    description: "筋トレ・ワークアウトを簡単に記録。部位・種目・重量・レップ・メモで成長を可視化。",
+    description:
+      "筋トレ・ワークアウトを簡単に記録。部位・種目・重量・レップ・メモで成長を可視化。",
     locale: "ja_JP",
   },
   twitter: {
@@ -29,7 +31,11 @@ export const metadata: Metadata = {
     description: "トレーニングノートで記録を習慣化。",
   },
   icons: {
-    icon: [{ url: "/images/favicon.ico" }, { url: "/images/favicon-16x16.png", sizes: "16x16", type: "image/png" }, { url: "/images/favicon-32x32.png", sizes: "32x32", type: "image/png" }],
+    icon: [
+      { url: "/images/favicon.ico" },
+      { url: "/images/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/images/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
     apple: "/images/apple-touch-icon.png",
   },
   manifest: "/images/site.webmanifest",
@@ -43,7 +49,9 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => (
         <BannerHost />
         <main>{children}</main>
         <footer className="mt-16 border-t bg-white">
-          <div className="container mx-auto px-4 py-8 text-sm text-gray-500">© {new Date().getFullYear()} GoGym</div>
+          <div className="container mx-auto px-4 py-8 text-sm text-gray-500">
+            © {new Date().getFullYear()} GoGym
+          </div>
         </footer>
       </ClientProviders>
     </body>
