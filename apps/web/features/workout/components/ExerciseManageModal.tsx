@@ -4,7 +4,10 @@ import { useTranslation } from "react-i18next";
 import { WorkoutPartDTO } from "@/types/workout";
 import { useBanner } from "@/components/Banner";
 import { getLocalizedPartName } from "@/features/workout/lib/utils";
-// Removed lib/bff/workout import - now using direct fetch to Route Handler (BFF)
+import {
+  upsertWorkoutExercises,
+  deleteWorkoutExercise,
+} from "@/features/workout/actions";
 
 type Props = {
   isOpen: boolean;
@@ -93,15 +96,9 @@ const ExerciseManageModal: React.FC<Props> = ({
 
     setIsSubmitting(true);
     try {
-      const res = await fetch(
-        `/api/workouts/exercises?id=${deleteTarget.exercise.id}`,
-        {
-          method: "DELETE",
-          cache: "no-store",
-        },
-      );
+      const result = await deleteWorkoutExercise(deleteTarget.exercise.id);
 
-      if (res.ok) {
+      if (result.success) {
         // 削除成功：フロント側も削除
         if (exercises.length > 1) {
           setExercises(exercises.filter((_, i) => i !== deleteTarget.index));
@@ -138,19 +135,16 @@ const ExerciseManageModal: React.FC<Props> = ({
     setIsSubmitting(true);
     try {
       const exercisesWithPart = validExercises.map((ex) => ({
-        id: ex.id,
+        id: ex.id ?? null,
         name: ex.name,
         workout_part_id: selectedPart,
       }));
 
-      const res = await fetch("/api/workouts/exercises", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ exercises: exercisesWithPart }),
-        cache: "no-store",
+      const result = await upsertWorkoutExercises({
+        exercises: exercisesWithPart,
       });
 
-      if (res.ok) {
+      if (result.success) {
         success(t("workout.exerciseModal.successRegister"));
         onSuccess?.();
         // モーダルは閉じない

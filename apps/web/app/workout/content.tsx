@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useBanner } from "@/components/Banner";
 import { WorkoutFormDTO, WorkoutPartDTO, ExerciseDTO } from "@/types/workout";
 import { transformFormDataForSubmit } from "@/features/workout/lib/utils";
+import { getLastExerciseRecord } from "@/features/workout/actions";
 import WorkoutMetadataEditor from "@/features/workout/components/WorkoutMetadataEditor";
 import WorkoutExercisesEditor from "@/features/workout/components/WorkoutExercisesEditor";
 
@@ -113,17 +114,8 @@ const WorkoutContent = ({
     }
 
     try {
-      const res = await fetch(
-        `/api/workouts/exercises?id=${exerciseID}&action=last`,
-        { cache: "no-store" },
-      );
-
-      if (!res.ok || res.status === 204) {
-        return null;
-      }
-
-      const data = await res.json();
-      return data || null;
+      const result = await getLastExerciseRecord(exerciseID);
+      return result.success ? (result.data ?? null) : null;
     } catch {
       return null;
     }

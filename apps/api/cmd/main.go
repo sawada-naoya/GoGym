@@ -21,15 +21,11 @@ import (
 )
 
 func init() {
-	// APP_ENV 未設定なら production 扱いに寄せる（PaaS前提）
+	_ = godotenv.Load(".env.local")
+	_ = godotenv.Load(".env")
+
 	if os.Getenv("APP_ENV") == "" {
 		_ = os.Setenv("APP_ENV", "production")
-	}
-
-	// ローカルだけ dotenv を読む（明示的に development のときのみ）
-	if os.Getenv("APP_ENV") == "development" {
-		_ = godotenv.Load(".env.local")
-		_ = godotenv.Overload(".env")
 	}
 }
 
@@ -59,7 +55,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	handlers := di.Initialize(database, slackClient)
+	handlers := di.Initialize(database, slackClient, config.Auth.JWTSecret)
 	router.RegisterRoutes(e, handlers.Gym, handlers.User, handlers.Session, handlers.Workout, handlers.Contact, config.Auth.JWTSecret)
 
 	addr := fmt.Sprintf("%s:%d", config.HTTP.Host, config.HTTP.Port)

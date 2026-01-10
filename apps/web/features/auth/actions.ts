@@ -4,7 +4,9 @@ import type { SignUpPayload } from "./schemas";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL;
 
-type ActionResult<T = void> = { success: true; data?: T } | { success: false; error: string };
+type ActionResult<T = void> =
+  | { success: true; data?: T }
+  | { success: false; error: string };
 
 export const signup = async (payload: SignUpPayload): Promise<ActionResult> => {
   try {

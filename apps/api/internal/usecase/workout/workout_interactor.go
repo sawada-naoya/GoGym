@@ -48,8 +48,6 @@ func (i *workoutInteractor) GetWorkoutRecords(ctx context.Context, userID string
 }
 
 func (i *workoutInteractor) CreateWorkoutRecord(ctx context.Context, workout dom.WorkoutRecord) error {
-	// Domain logic can be added here (validation, business rules, etc.)
-
 	// 同日同部位ならupsert、それ以外は新規作成
 	err := i.repo.UpsertWorkoutRecord(ctx, workout)
 	if err != nil {
@@ -146,7 +144,6 @@ func (i *workoutInteractor) SeedWorkoutParts(ctx context.Context, userID string)
 }
 
 func (i *workoutInteractor) CreateWorkoutExercise(ctx context.Context, userID string, exercises []dto.CreateWorkoutExerciseItem) error {
-	// ユーザーIDをULIDに変換
 	ownerULID := dom.ULID(userID)
 
 	// DTOをドメインモデルに変換
@@ -167,7 +164,6 @@ func (i *workoutInteractor) CreateWorkoutExercise(ctx context.Context, userID st
 		domainExercises = append(domainExercises, exerciseRef)
 	}
 
-	// リポジトリを通じてデータベースに保存（upsert）
 	return i.repo.UpsertWorkoutExercises(ctx, userID, domainExercises)
 }
 

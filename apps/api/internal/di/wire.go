@@ -86,7 +86,7 @@ var gatewaySet = wire.NewSet(
 	provideSlackGateway,
 )
 
-func Initialize(db *gorm.DB, slackClient *slack.Client) *Handlers {
+func Initialize(db *gorm.DB, slackClient *slack.Client, jwtSecret string) *Handlers {
 	wire.Build(
 		repositorySet,
 		securitySet,
