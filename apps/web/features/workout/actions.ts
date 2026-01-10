@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { getServerAccessToken } from "@/features/auth/server";
 import type {
   WorkoutFormDTO,
@@ -79,7 +78,6 @@ export const createWorkoutRecord = async (
       return { success: false, error: "Failed to create workout record" };
     }
 
-    revalidatePath("/[locale]/workout", "page");
     return { success: true };
   } catch (error) {
     return {
@@ -103,7 +101,6 @@ export const updateWorkoutRecord = async (
       return { success: false, error: "Failed to update workout record" };
     }
 
-    revalidatePath("/[locale]/workout", "page");
     return { success: true };
   } catch (error) {
     return {
@@ -154,7 +151,6 @@ export const upsertWorkoutExercises = async (body: {
       return { success: false, error: "Failed to upsert exercises" };
     }
 
-    revalidatePath("/[locale]/workout", "page");
     return { success: true };
   } catch (error) {
     return {
@@ -176,7 +172,6 @@ export const deleteWorkoutExercise = async (
       return { success: false, error: "Failed to delete exercise" };
     }
 
-    revalidatePath("/[locale]/workout", "page");
     return { success: true };
   } catch (error) {
     return {
@@ -218,7 +213,6 @@ export const seedWorkoutParts = async (): Promise<ActionResult> => {
       return { success: false, error: "Failed to seed workout parts" };
     }
 
-    revalidatePath("/[locale]/workout", "page");
     return { success: true };
   } catch (error) {
     return {

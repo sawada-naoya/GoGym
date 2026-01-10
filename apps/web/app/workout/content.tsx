@@ -113,6 +113,16 @@ const WorkoutContent = ({
         }
         success(t("workout.exercises.successSave"));
       }
+
+      // 成功したら手動でリフェッチ
+      const dateStr = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}-${String(selectedDay).padStart(2, "0")}`;
+      const refreshResult = await getWorkoutRecords({ date: dateStr });
+      if (refreshResult.success && refreshResult.data) {
+        form.reset(refreshResult.data);
+        const newPartId =
+          refreshResult.data.exercises?.[0]?.workout_part_id ?? null;
+        setSelectedPartId(newPartId);
+      }
     } catch {
       error(t("workout.exercises.errorNetworkError"));
     }
@@ -127,6 +137,15 @@ const WorkoutContent = ({
       }
     } catch (err) {
       console.error("Failed to refetch workout parts:", err);
+    }
+
+    // ワークアウトレコードも再取得して最新の状態に同期
+    const dateStr = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}-${String(selectedDay).padStart(2, "0")}`;
+    const result = await getWorkoutRecords({ date: dateStr });
+    if (result.success && result.data) {
+      form.reset(result.data);
+      const newPartId = result.data.exercises?.[0]?.workout_part_id ?? null;
+      setSelectedPartId(newPartId);
     }
   };
 
