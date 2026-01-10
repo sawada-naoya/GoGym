@@ -12,7 +12,7 @@ func WorkoutRoutes(e *echo.Group, wh *handler.WorkoutHandler) {
 	e.PUT("/workouts/records/:id", wh.UpdateWorkoutRecord)
 	e.GET("/workouts/parts", wh.GetWorkoutParts)
 	e.POST("/workouts/seed", wh.SeedWorkoutParts)
-	e.POST("/workouts/exercises/bulk", wh.CreateWorkoutExercise)
+	e.POST("/workouts/exercises", wh.CreateWorkoutExercise)
 	e.DELETE("/workouts/exercises/:id", wh.DeleteWorkoutExercise)
 	e.GET("/workouts/exercises/:id/last", wh.GetLastWorkoutRecord)
 }

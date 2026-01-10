@@ -1,6 +1,10 @@
 import WorkoutContent from "./content";
 import { extractDateParts } from "@/features/workout/lib/utils";
-import { buildEmptyDTO, type WorkoutFormDTO, type WorkoutPartDTO } from "@/types/workout";
+import {
+  buildEmptyDTO,
+  type WorkoutFormDTO,
+  type WorkoutPartDTO,
+} from "@/types/workout";
 import { getServerAccessToken } from "@/features/auth/server";
 
 export const dynamic = "force-dynamic";
@@ -43,13 +47,24 @@ const Page = async ({ searchParams }: Props) => {
     }),
   ]);
 
-  const dto: WorkoutFormDTO = recordsRes.ok ? await recordsRes.json() : buildEmptyDTO();
+  const dto: WorkoutFormDTO = recordsRes.ok
+    ? await recordsRes.json()
+    : buildEmptyDTO();
   const parts: WorkoutPartDTO[] = partsRes.ok ? await partsRes.json() : [];
 
   // バックエンドから返された日付を使用（通常は必ず返される）
   const { year, month, day } = extractDateParts(dto.performed_date);
 
-  return <WorkoutContent Year={year} Month={month} Day={day} defaultValues={dto} availableParts={parts} isUpdate={!!dto.id} />;
+  return (
+    <WorkoutContent
+      Year={year}
+      Month={month}
+      Day={day}
+      defaultValues={dto}
+      availableParts={parts}
+      isUpdate={!!dto.id}
+    />
+  );
 };
 
 export default Page;

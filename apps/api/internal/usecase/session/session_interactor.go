@@ -7,10 +7,8 @@ package session
 import (
 	"context"
 	"errors"
-	"os"
-	"time"
-
 	"gogym-api/internal/adapter/dto"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/oklog/ulid/v2"
@@ -18,22 +16,24 @@ import (
 
 type sessionInteractor struct {
 	// 外部依存関係
-	ur UserRepository
-	ph PasswordHasher
+	ur        UserRepository
+	ph        PasswordHasher
+	jwtSecret string
 }
 
 func NewSessionInteractor(
 	ur UserRepository,
 	ph PasswordHasher,
+	jwtSecret string,
 ) SessionUseCase {
 	return &sessionInteractor{
-		ur: ur,
-		ph: ph,
+		ur:        ur,
+		ph:        ph,
+		jwtSecret: jwtSecret,
 	}
 }
 
 func (i *sessionInteractor) Login(ctx context.Context, req dto.LoginRequest) error {
-
 	// ユーザー検索
 	user, err := i.ur.FindByEmail(ctx, req.Email)
 	if err != nil {
@@ -51,7 +51,6 @@ func (i *sessionInteractor) Login(ctx context.Context, req dto.LoginRequest) err
 }
 
 func (i *sessionInteractor) CreateSession(ctx context.Context, email string) (dto.TokenResponse, error) {
-
 	user, err := i.ur.FindByEmail(ctx, email)
 	if err != nil {
 		return dto.TokenResponse{}, errors.New("email_not_found")
@@ -64,7 +63,7 @@ func (i *sessionInteractor) CreateSession(ctx context.Context, email string) (dt
 	accessTTL := 15 * time.Minute    // アクセストークンは短めに設定
 	refreshTTL := 7 * 24 * time.Hour // リフレッシュトークンは7日間
 
-	secret := []byte(os.Getenv("JWT_SECRET"))
+	secret := []byte(i.jwtSecret)
 
 	// アクセストークン生成
 	accessClaims := jwt.MapClaims{
@@ -105,7 +104,7 @@ func (i *sessionInteractor) CreateSession(ctx context.Context, email string) (dt
 }
 
 func (i *sessionInteractor) RefreshToken(ctx context.Context, refreshToken string) (dto.TokenResponse, error) {
-	secret := []byte(os.Getenv("JWT_SECRET"))
+	secret := []byte(i.jwtSecret)
 
 	// リフレッシュトークンを検証
 	token, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {

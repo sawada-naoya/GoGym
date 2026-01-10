@@ -14,7 +14,9 @@ if (!secret && process.env.NODE_ENV === "production") {
 /**
  * リフレッシュトークンを使って新しいアクセストークンを取得
  */
-export const refreshAccessToken = async (refreshToken: string): Promise<RefreshResponse | null> => {
+export const refreshAccessToken = async (
+  refreshToken: string,
+): Promise<RefreshResponse | null> => {
   try {
     const res = await fetch(`${API_BASE}/api/v1/sessions/refresh`, {
       method: "POST",
@@ -40,7 +42,10 @@ export const refreshAccessToken = async (refreshToken: string): Promise<RefreshR
  * Credentials Provider の authorize 関数
  */
 const buildCredentialsProviderAuthorize = () => {
-  return async (credentials: Partial<Record<"email" | "password", unknown>>, _request: Request) => {
+  return async (
+    credentials: Partial<Record<"email" | "password", unknown>>,
+    _request: Request,
+  ) => {
     const email = credentials?.email?.toString().trim();
     const password = credentials?.password?.toString();
     if (!email || !password || !API_BASE) return null;
@@ -56,7 +61,13 @@ const buildCredentialsProviderAuthorize = () => {
 
       const data = (await res.json()) as LoginResponse;
       const { user, access_token, refresh_token, expires_in } = data ?? {};
-      if (!user?.id || !user?.name || !user?.email || !access_token || !refresh_token) {
+      if (
+        !user?.id ||
+        !user?.name ||
+        !user?.email ||
+        !access_token ||
+        !refresh_token
+      ) {
         return null;
       }
 
@@ -81,6 +92,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   secret: secret,
   trustHost: true,
 
+  // クッキー設定: 環境に応じたプレフィックスを使用
+  cookies: {
+    sessionToken: {
+      name:
+        process.env.NODE_ENV === "production"
+          ? "__Secure-authjs.session-token"
+          : "authjs.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
+  },
+
   pages: {
     signIn: "/",
     error: "/",
@@ -101,7 +128,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     jwt: async ({ token, user }) => {
       if (user) {
-        const expiresAt = Math.floor(Date.now() / 1000) + ((user as any).expiresIn || 900);
+        const expiresAt =
+          Math.floor(Date.now() / 1000) + ((user as any).expiresIn || 900);
 
         return {
           ...token,

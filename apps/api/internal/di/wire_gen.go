@@ -24,12 +24,12 @@ import (
 
 // Injectors from wire.go:
 
-func Initialize(db *gorm.DB, slackClient *slack.Client) *Handlers {
+func Initialize(db *gorm.DB, slackClient *slack.Client, jwtSecret string) *Handlers {
 	userRepository := user.NewUserRepository(db)
 	bcryptPasswordHasher := security.NewBcryptPasswordHasher()
 	userUseCase := user2.NewUserInteractor(userRepository, bcryptPasswordHasher)
 	userHandler := handler.NewUserHandler(userUseCase)
-	sessionUseCase := session.NewSessionInteractor(userRepository, bcryptPasswordHasher)
+	sessionUseCase := session.NewSessionInteractor(userRepository, bcryptPasswordHasher, jwtSecret)
 	sessionHandler := handler.NewSessionHandler(sessionUseCase)
 	repository := gym.NewGymRepository(db)
 	gymUseCase := gym2.NewGymInteractor(repository)
