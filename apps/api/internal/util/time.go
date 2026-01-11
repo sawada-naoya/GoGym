@@ -1,10 +1,13 @@
 package util
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 const (
-	// JSTLocation は日本標準時のタイムゾーン
 	JSTLocation = "Asia/Tokyo"
+	DateLayout  = "2006-01-02"
 )
 
 var jstLoc *time.Location
@@ -13,13 +16,15 @@ func init() {
 	var err error
 	jstLoc, err = time.LoadLocation(JSTLocation)
 	if err != nil {
-		// フォールバック: FixedZone を使用
 		jstLoc = time.FixedZone("JST", 9*60*60)
 	}
 }
 
-// ToJST converts UTC time to JST
-// DBから取得したUTC時刻をJSTに変換してフロントエンドに返す
+//
+// ===== 基本変換 =====
+//
+
+// UTC → JST
 func ToJST(t time.Time) time.Time {
 	if t.IsZero() {
 		return t
@@ -27,8 +32,7 @@ func ToJST(t time.Time) time.Time {
 	return t.In(jstLoc)
 }
 
-// ToUTC converts JST time to UTC
-// フロントエンドから受け取ったJST時刻をUTCに変換してDBに保存する
+// JST/Local → UTC
 func ToUTC(t time.Time) time.Time {
 	if t.IsZero() {
 		return t
@@ -36,15 +40,19 @@ func ToUTC(t time.Time) time.Time {
 	return t.UTC()
 }
 
-// FormatJSTDate formats a time as YYYY-MM-DD in JST
+//
+// ===== フォーマット（表示専用） =====
+//
+
+// JSTの YYYY-MM-DD
 func FormatJSTDate(t time.Time) string {
 	if t.IsZero() {
 		return ""
 	}
-	return ToJST(t).Format("2006-01-02")
+	return ToJST(t).Format(DateLayout)
 }
 
-// FormatJSTDateTime formats a time as YYYY-MM-DD HH:mm:ss in JST
+// JSTの YYYY-MM-DD HH:mm:ss
 func FormatJSTDateTime(t time.Time) string {
 	if t.IsZero() {
 		return ""
@@ -52,10 +60,68 @@ func FormatJSTDateTime(t time.Time) string {
 	return ToJST(t).Format("2006-01-02 15:04:05")
 }
 
-// FormatJSTTime formats a time as HH:mm in JST
+// JSTの HH:mm
 func FormatJSTTime(t time.Time) string {
 	if t.IsZero() {
 		return ""
 	}
 	return ToJST(t).Format("15:04")
+}
+
+//
+// ===== パース（入力専用） =====
+//
+
+// YYYY-MM-DD（JST）→ time.Time（JST 00:00）
+func ParseJSTDate(dateStr string) (time.Time, error) {
+	if dateStr == "" {
+		return time.Time{}, errors.New("date is empty")
+	}
+	t, err := time.ParseInLocation(DateLayout, dateStr, jstLoc)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return normalizeJSTDate(t), nil
+}
+
+// 空なら今日のJST日付を返す
+func ParseJSTDateOrToday(dateStr string) (time.Time, error) {
+	if dateStr == "" {
+		return TodayJST(), nil
+	}
+	return ParseJSTDate(dateStr)
+}
+
+//
+// ===== 正規化（DB向け） =====
+//
+
+// JSTの「日付」を 00:00:00 に正規化
+func normalizeJSTDate(t time.Time) time.Time {
+	y, m, d := t.In(jstLoc).Date()
+	return time.Date(y, m, d, 0, 0, 0, 0, jstLoc)
+}
+
+// DB保存用：JST日付 → UTC
+func NormalizeDateForDB(t time.Time) time.Time {
+	if t.IsZero() {
+		return t
+	}
+	return ToUTC(normalizeJSTDate(t))
+}
+
+//
+// ===== 補助 =====
+//
+
+// 今日のJST日付（00:00）
+func TodayJST() time.Time {
+	now := time.Now().In(jstLoc)
+	y, m, d := now.Date()
+	return time.Date(y, m, d, 0, 0, 0, 0, jstLoc)
+}
+
+// 現在時刻（JST）
+func NowJST() time.Time {
+	return time.Now().In(jstLoc)
 }
