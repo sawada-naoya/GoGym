@@ -8,6 +8,7 @@ import (
 	context "context"
 	entities "gogym-api/internal/domain/entities"
 	reflect "reflect"
+	"time"
 
 	gomock "github.com/golang/mock/gomock"
 )
@@ -108,7 +109,7 @@ func (mr *MockRepositoryMockRecorder) GetLastWorkoutRecord(ctx, userID, exercise
 }
 
 // GetRecordsByDate mocks base method.
-func (m *MockRepository) GetRecordsByDate(ctx context.Context, userID, date string) (entities.WorkoutRecord, error) {
+func (m *MockRepository) GetRecordsByDate(ctx context.Context, userID string, date time.Time) (entities.WorkoutRecord, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRecordsByDate", ctx, userID, date)
 	ret0, _ := ret[0].(entities.WorkoutRecord)
@@ -120,21 +121,6 @@ func (m *MockRepository) GetRecordsByDate(ctx context.Context, userID, date stri
 func (mr *MockRepositoryMockRecorder) GetRecordsByDate(ctx, userID, date interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRecordsByDate", reflect.TypeOf((*MockRepository)(nil).GetRecordsByDate), ctx, userID, date)
-}
-
-// GetRecordsByDateAndPart mocks base method.
-func (m *MockRepository) GetRecordsByDateAndPart(ctx context.Context, userID, date string, partID *int64) (entities.WorkoutRecord, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetRecordsByDateAndPart", ctx, userID, date, partID)
-	ret0, _ := ret[0].(entities.WorkoutRecord)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetRecordsByDateAndPart indicates an expected call of GetRecordsByDateAndPart.
-func (mr *MockRepositoryMockRecorder) GetRecordsByDateAndPart(ctx, userID, date, partID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRecordsByDateAndPart", reflect.TypeOf((*MockRepository)(nil).GetRecordsByDateAndPart), ctx, userID, date, partID)
 }
 
 // GetWorkoutParts mocks base method.

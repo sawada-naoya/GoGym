@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"gogym-api/internal/adapter/dto"
+	"gogym-api/internal/util"
 	"log/slog"
 	"net/http"
 
@@ -32,8 +33,12 @@ func (h *WorkoutHandler) GetWorkoutRecords(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Unauthorized"})
 	}
 
-	// dateクエリパラメータを取得（空文字列の場合はUseCaseで今日のJST日付を使用）
-	date := c.QueryParam("date")
+	dateStr := c.QueryParam("date")
+	date, err := util.ParseJSTDateOrToday(dateStr)
+	if err != nil {
+		slog.ErrorContext(ctx, "Failed to parse date", "dateStr", dateStr, "error", err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid date format"})
+	}
 
 	response, err := h.wu.GetWorkoutRecords(ctx, userID, date)
 	if err != nil {
@@ -41,7 +46,6 @@ func (h *WorkoutHandler) GetWorkoutRecords(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	slog.InfoContext(ctx, "Successfully retrieved workout records", "userID", userID, "date", date)
 	return c.JSON(http.StatusOK, response)
 }
 
@@ -88,7 +92,6 @@ func (h *WorkoutHandler) CreateWorkoutRecord(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	slog.InfoContext(ctx, "Successfully created workout record", "userID", userID)
 	return c.JSON(http.StatusCreated, map[string]string{"message": "Workout record created successfully"})
 }
 
@@ -139,7 +142,6 @@ func (h *WorkoutHandler) UpdateWorkoutRecord(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	slog.InfoContext(ctx, "Successfully updated workout record", "userID", userID)
 	return c.JSON(http.StatusOK, map[string]string{"message": "Workout record updated successfully"})
 }
 
@@ -179,7 +181,6 @@ func (h *WorkoutHandler) SeedWorkoutParts(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	slog.InfoContext(ctx, "Successfully seeded workout parts", "userID", userID)
 	return c.JSON(http.StatusOK, map[string]string{"message": "Workout parts seeded successfully"})
 }
 
@@ -206,7 +207,6 @@ func (h *WorkoutHandler) CreateWorkoutExercise(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	slog.InfoContext(ctx, "Successfully created workout exercises", "userID", userID)
 	return c.JSON(http.StatusCreated, map[string]string{"message": "Workout exercises created successfully"})
 }
 
@@ -232,7 +232,6 @@ func (h *WorkoutHandler) DeleteWorkoutExercise(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	slog.InfoContext(ctx, "Successfully deleted workout exercise", "userID", userID, "exerciseID", exerciseID)
 	return c.JSON(http.StatusOK, map[string]string{"message": "Workout exercise deleted successfully"})
 }
 
@@ -258,6 +257,5 @@ func (h *WorkoutHandler) GetLastWorkoutRecord(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	slog.InfoContext(ctx, "Successfully retrieved last workout record", "userID", userID, "exerciseID", exerciseID)
 	return c.JSON(http.StatusOK, response)
 }

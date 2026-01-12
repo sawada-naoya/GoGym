@@ -2,38 +2,43 @@ package dto
 
 import (
 	"fmt"
+	"gogym-api/internal/util"
+	"sort"
 	"time"
 
 	dom "gogym-api/internal/domain/entities"
-	"gogym-api/internal/util"
 )
 
-// WorkoutPartDTO represents a workout part (e.g., chest, back, legs)
 type WorkoutPartListItemDTO struct {
-	ID           int64                          `json:"id"`
-	Key          string                         `json:"key"`
-	Translations []WorkoutPartTranslationDTO    `json:"translations"`
-	Exercises    []WorkoutExerciseListItemDTO   `json:"exercises"`
+	ID           int64                        `json:"id"`
+	Key          string                       `json:"key"`
+	Translations []WorkoutPartTranslationDTO  `json:"translations"`
+	Exercises    []WorkoutExerciseListItemDTO `json:"exercises"`
 }
 
-// WorkoutPartTranslationDTO represents a translation for a workout part
 type WorkoutPartTranslationDTO struct {
 	Locale string `json:"locale"`
 	Name   string `json:"name"`
 }
 
 type WorkoutRecordDTO struct {
-	ID             *int64  `json:"id,omitempty"`         // 既存ならrecord id
-	PerformedDate  string  `json:"performed_date"`       // "YYYY-MM-DD"
-	StartedAt      *string `json:"started_at,omitempty"` // "HH:mm"
-	EndedAt        *string `json:"ended_at,omitempty"`   // "HH:mm"
-	GymID          *int64  `json:"gym_id,omitempty"`     // deprecated: use gym_name instead
-	GymName        *string `json:"gym_name,omitempty"`   // フロントから送信、正規化してgym_idに変換
+	ID             *int64  `json:"id,omitempty"`
+	PerformedDate  string  `json:"performed_date"`
+	StartedAt      *string `json:"started_at,omitempty"`
+	EndedAt        *string `json:"ended_at,omitempty"`
+	GymID          *int64  `json:"gym_id,omitempty"`
+	GymName        *string `json:"gym_name,omitempty"`
 	Note           *string `json:"note,omitempty"`
-	ConditionLevel *int    `json:"condition_level,omitempty"` // 1..5
+	ConditionLevel *int    `json:"condition_level,omitempty"`
 
-	WorkoutPart WorkoutPartDTO `json:"workout_part"`
-	Exercises   []ExerciseDTO  `json:"exercises"`
+	Parts []WorkoutPartGroupDTO `json:"parts"`
+}
+
+type WorkoutPartGroupDTO struct {
+	ID           int64                       `json:"id"`
+	Key          string                      `json:"key"`
+	Translations []WorkoutPartTranslationDTO `json:"translations"`
+	Exercises    []ExerciseDTO               `json:"exercises"`
 }
 
 type WorkoutPartDTO struct {
@@ -73,78 +78,139 @@ type WorkoutExerciseListItemDTO struct {
 	WorkoutPartID *int64 `json:"workout_part_id,omitempty"`
 }
 
-// DomainToDTO converts domain.WorkoutRecord to WorkoutFormDTO
-func WorkoutRecordToDTO(record *dom.WorkoutRecord) *WorkoutRecordDTO {
+func WorkoutDomainToDTO(record *dom.WorkoutRecord) *WorkoutRecordDTO {
 	if record == nil {
 		return nil
 	}
 
-	dto := &WorkoutRecordDTO{
-		ID:             domainIDToInt64Ptr(record.ID),
-		PerformedDate:  util.FormatJSTDate(record.PerformedDate),
-		StartedAt:      timeToJSTHHmm(record.StartedAt),
-		EndedAt:        timeToJSTHHmm(record.EndedAt),
-		GymID:          domainIDToInt64Ptr(record.GymID),
-		GymName:        record.GymName,
-		Note:           record.Note,
-		ConditionLevel: conditionLevelToIntPtr(record.Condition),
-		WorkoutPart:    WorkoutPartDTO{}, // 最初のセットから部位情報を取得
-		Exercises:      []ExerciseDTO{},
+	var id *int64
+	if record.ID != nil {
+		i := int64(*record.ID)
+		id = &i
 	}
 
-	// Setsを Exercise ごとにグループ化し、最初の部位情報を取得
-	exerciseMap := make(map[dom.ID]*ExerciseDTO)
-	var firstPartID *int64
+	var startedAt *string
+	if record.StartedAt != nil && !record.StartedAt.IsZero() {
+		s := util.FormatJSTTime(*record.StartedAt)
+		startedAt = &s
+	}
+
+	var endedAt *string
+	if record.EndedAt != nil && !record.EndedAt.IsZero() {
+		s := util.FormatJSTTime(*record.EndedAt)
+		endedAt = &s
+	}
+
+	var gymID *int64
+	if record.GymID != nil {
+		gid := int64(*record.GymID)
+		gymID = &gid
+	}
+
+	var conditionLevel *int
+	if record.Condition != dom.CondUnknown {
+		cl := int(record.Condition)
+		conditionLevel = &cl
+	}
+
+	out := &WorkoutRecordDTO{
+		ID:             id,
+		PerformedDate:  util.FormatJSTDate(record.PerformedDate),
+		StartedAt:      startedAt,
+		EndedAt:        endedAt,
+		GymID:          gymID,
+		GymName:        record.GymName,
+		Note:           record.Note,
+		ConditionLevel: conditionLevel,
+		Parts:          []WorkoutPartGroupDTO{},
+	}
+
+	// partId -> partGroup (部位情報は種目から取得)
+	partMap := map[int64]*WorkoutPartGroupDTO{}
+	// partId -> exerciseId -> exerciseDTO
+	exMap := map[int64]map[int64]*ExerciseDTO{}
 
 	for _, set := range record.Sets {
-		exerciseID := set.Exercise.ID
+		ex := set.Exercise
 
-		// 最初のセットから部位IDを取得
-		if firstPartID == nil && set.Exercise.PartID != nil {
-			partID := int64(*set.Exercise.PartID)
-			firstPartID = &partID
+		// 部位IDがない場合はスキップ
+		if ex.PartID == nil {
+			continue
 		}
 
-		// 初めて見るExerciseの場合、ExerciseDTOを作成
-		if _, exists := exerciseMap[exerciseID]; !exists {
-			exerciseMap[exerciseID] = &ExerciseDTO{
-				ID:            domainIDToInt64Ptr(&exerciseID),
-				Name:          set.Exercise.Name,
-				WorkoutPartID: domainIDToInt64Ptr(set.Exercise.PartID),
+		pid := int64(*ex.PartID)
+
+		// 部位グループが存在しない場合は作成（簡易版、翻訳データなし）
+		if _, ok := partMap[pid]; !ok {
+			p := &WorkoutPartGroupDTO{
+				ID:           pid,
+				Key:          "", // 部位のKeyはセット情報からは取得できない
+				Translations: []WorkoutPartTranslationDTO{},
+				Exercises:    []ExerciseDTO{},
+			}
+			partMap[pid] = p
+			exMap[pid] = map[int64]*ExerciseDTO{}
+		}
+
+		eid := int64(ex.ID)
+		if _, ok := exMap[pid][eid]; !ok {
+			exID := eid
+			partID := pid
+			exMap[pid][eid] = &ExerciseDTO{
+				ID:            &exID,
+				Name:          ex.Name,
+				WorkoutPartID: &partID,
 				Sets:          []SetDTO{},
 			}
 		}
 
-		// SetDTOを追加
-		weightKg := float64(set.Weight)
+		var setID *int64
+		if set.ID != nil {
+			sid := int64(*set.ID)
+			setID = &sid
+		}
+
+		weight := float64(set.Weight)
 		reps := int(set.Reps)
-		exerciseMap[exerciseID].Sets = append(exerciseMap[exerciseID].Sets, SetDTO{
-			ID:        domainIDToInt64Ptr(set.ID),
+
+		exMap[pid][eid].Sets = append(exMap[pid][eid].Sets, SetDTO{
+			ID:        setID,
 			SetNumber: set.SetNumber,
-			WeightKg:  &weightKg,
+			WeightKg:  &weight,
 			Reps:      &reps,
 			Note:      set.Note,
 		})
 	}
 
-	// WorkoutPart情報を設定
-	if firstPartID != nil {
-		dto.WorkoutPart = WorkoutPartDTO{
-			ID:     firstPartID,
-			Name:   nil, // 部位名はフロントエンドで workout_parts から取得
-			Source: stringPtr("custom"),
+	partIDs := make([]int64, 0, len(partMap))
+	for pid := range partMap {
+		partIDs = append(partIDs, pid)
+	}
+	sort.Slice(partIDs, func(i, j int) bool { return partIDs[i] < partIDs[j] })
+
+	for _, pid := range partIDs {
+		p := partMap[pid]
+
+		// exercises を slice 化
+		exIDs := make([]int64, 0, len(exMap[pid]))
+		for eid := range exMap[pid] {
+			exIDs = append(exIDs, eid)
 		}
+		sort.Slice(exIDs, func(i, j int) bool { return exIDs[i] < exIDs[j] })
+
+		for _, eid := range exIDs {
+			e := exMap[pid][eid]
+			// set_number で並べる
+			sort.Slice(e.Sets, func(i, j int) bool { return e.Sets[i].SetNumber < e.Sets[j].SetNumber })
+			p.Exercises = append(p.Exercises, *e)
+		}
+
+		out.Parts = append(out.Parts, *p)
 	}
 
-	// Mapから配列に変換
-	for _, exercise := range exerciseMap {
-		dto.Exercises = append(dto.Exercises, *exercise)
-	}
-
-	return dto
+	return out
 }
 
-// Helper functions
 func domainIDToInt64Ptr(id *dom.ID) *int64 {
 	if id == nil {
 		return nil
@@ -155,15 +221,6 @@ func domainIDToInt64Ptr(id *dom.ID) *int64 {
 
 func stringPtr(s string) *string {
 	return &s
-}
-
-func timeToJSTHHmm(t *time.Time) *string {
-	if t == nil || t.IsZero() {
-		return nil
-	}
-	// タイムゾーン変換せず、そのまま HH:mm 形式で返す
-	hhmm := fmt.Sprintf("%02d:%02d", t.Hour(), t.Minute())
-	return &hhmm
 }
 
 func stringPtrToString(s *string) string {
@@ -240,8 +297,7 @@ func WorkoutRecordDTOToDomain(dto *WorkoutRecordDTO) (*dom.WorkoutRecord, error)
 		record.GymID = &gymID
 	}
 
-	// Convert exercises to sets
-	for _, exercise := range dto.Exercises {
+	for _, exercise := range dto.Parts[0].Exercises {
 		exerciseRef := dom.WorkoutExerciseRef{
 			Name: exercise.Name,
 		}

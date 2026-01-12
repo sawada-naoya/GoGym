@@ -3,11 +3,11 @@ package workout
 import (
 	"context"
 	dom "gogym-api/internal/domain/entities"
+	"time"
 )
 
 type Repository interface {
-	GetRecordsByDate(ctx context.Context, userID string, date string) (dom.WorkoutRecord, error)
-	GetRecordsByDateAndPart(ctx context.Context, userID string, date string, partID *int64) (dom.WorkoutRecord, error)
+	GetRecordsByDate(ctx context.Context, userID string, date time.Time) (dom.WorkoutRecord, error)
 	CreateWorkoutRecord(ctx context.Context, workout dom.WorkoutRecord) error
 	UpsertWorkoutRecord(ctx context.Context, workout dom.WorkoutRecord) error
 	GetWorkoutParts(ctx context.Context, userID string) ([]dom.WorkoutPart, error)

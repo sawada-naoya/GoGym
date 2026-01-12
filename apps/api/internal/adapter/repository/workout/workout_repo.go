@@ -7,7 +7,7 @@ import (
 	"time"
 
 	dom "gogym-api/internal/domain/entities"
-	workoutUsecase "gogym-api/internal/usecase/workout"
+	wu "gogym-api/internal/usecase/workout"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -17,7 +17,7 @@ type workoutRepository struct {
 	db *gorm.DB
 }
 
-func NewWorkoutRepository(db *gorm.DB) workoutUsecase.Repository {
+func NewWorkoutRepository(db *gorm.DB) wu.Repository {
 	return &workoutRepository{db: db}
 }
 
@@ -49,56 +49,30 @@ func (r *workoutRepository) insertWorkoutSets(tx *gorm.DB, recordID int, sets []
 
 // GetRecordsByDate は指定日付のワークアウトレコードを取得（全部位）
 // レコードが存在しない場合は空のドメインモデルを返す
-func (r *workoutRepository) GetRecordsByDate(ctx context.Context, userID string, date string) (dom.WorkoutRecord, error) {
-	var rec WorkoutRecord
+func (r *workoutRepository) GetRecordsByDate(ctx context.Context, userID string, date time.Time) (dom.WorkoutRecord, error) {
+	var record WorkoutRecord
 	err := r.db.WithContext(ctx).
 		Preload("Gym").
-		Preload("Sets").
+		Preload("Sets", func(db *gorm.DB) *gorm.DB {
+			return db.Order("workout_sets.set_number ASC")
+		}).
 		Preload("Sets.Exercise").
 		Preload("Sets.Exercise.Part").
+		Preload("Sets.Exercise.Part.Translations").
 		Where("user_id = ? AND performed_date = ?", userID, date).
-		First(&rec).Error
+		First(&record).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
+			// レコードが存在しない場合は空のドメインエンティティを返す
 			return dom.WorkoutRecord{}, nil
 		}
 		return dom.WorkoutRecord{}, fmt.Errorf("error fetching workout records: %w", err)
 	}
 
-	domainRecord := ToEntity(&rec)
+	// リポジトリモデルをドメインエンティティに変換
+	domainRecord := ToEntity(&record)
 	if domainRecord == nil {
-		return dom.WorkoutRecord{}, fmt.Errorf("failed to convert record to domain")
-	}
-
-	return *domainRecord, nil
-}
-
-// GetRecordsByDateAndPart は指定日付と部位IDでワークアウトレコードを取得
-// partID が nil の場合は全ての部位を取得、指定された場合は該当部位のみフィルタ
-func (r *workoutRepository) GetRecordsByDateAndPart(ctx context.Context, userID string, date string, partID *int64) (dom.WorkoutRecord, error) {
-	if partID == nil {
-		return r.GetRecordsByDate(ctx, userID, date)
-	}
-
-	// 指定部位の種目のみを含むセットを Preload でフィルタリング
-	var rec WorkoutRecord
-	err := r.db.WithContext(ctx).
-		Preload("Gym").
-		Preload("Sets.Exercise.Part", "workout_parts.id = ?", *partID).
-		Preload("Sets", "workout_exercise_id IN (SELECT id FROM workout_exercises WHERE workout_part_id = ?)", *partID).
-		Preload("Sets.Exercise", "workout_part_id = ?", *partID).
-		Where("user_id = ? AND performed_date = ?", userID, date).
-		First(&rec).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return dom.WorkoutRecord{}, nil
-		}
-		return dom.WorkoutRecord{}, fmt.Errorf("error fetching workout records: %w", err)
-	}
-
-	domainRecord := ToEntity(&rec)
-	if domainRecord == nil {
-		return dom.WorkoutRecord{}, fmt.Errorf("failed to convert record to domain")
+		return dom.WorkoutRecord{}, fmt.Errorf("failed to convert record to domain entity")
 	}
 
 	return *domainRecord, nil
@@ -126,80 +100,43 @@ func (r *workoutRepository) CreateWorkoutRecord(ctx context.Context, workout dom
 	})
 }
 
-// UpsertWorkoutRecord は同日同部位のレコードがあれば更新、なければ新規作成
-// - 同じ日付 & 同じ部位: メタデータ（時刻・場所・コンディション）を更新し、セットを置き換え
-// - 異なる部位: 新規作成
+// UpsertWorkoutRecord は同日のレコードがあれば更新、なければ新規作成
+// - 同じ日付のレコードが存在: メタデータを更新し、セットを追加/置き換え
+// - 存在しない: 新規作成
 func (r *workoutRepository) UpsertWorkoutRecord(ctx context.Context, workout dom.WorkoutRecord) error {
 	recordWorkout := FromEntity(&workout)
 	if recordWorkout == nil {
 		return fmt.Errorf("failed to convert domain workout record to repository record")
 	}
 
-	// 最初のセットから部位IDを取得（同日同部位の検索に使用）
-	partID, err := r.getPartIDFromFirstSet(ctx, recordWorkout.Sets)
-	if err != nil {
-		return fmt.Errorf("failed to get part ID: %w", err)
-	}
-
 	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		existingRecord, err := r.findExistingRecord(tx, recordWorkout.UserID, recordWorkout.PerformedDate, partID)
-		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-			return fmt.Errorf("failed to check existing record: %w", err)
-		}
+		// 同日のレコードを検索（部位に関係なく）
+		var existingRecord WorkoutRecord
+		err := tx.
+			Preload("Sets.Exercise").
+			Where("user_id = ? AND performed_date = ?", recordWorkout.UserID, recordWorkout.PerformedDate).
+			First(&existingRecord).Error
 
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// 新規作成パス
 			return r.createRecordWithSets(tx, recordWorkout)
 		}
+		if err != nil {
+			return fmt.Errorf("failed to check existing record: %w", err)
+		}
 
-		// 更新パス
-		return r.updateRecordAndReplaceSets(tx, existingRecord, recordWorkout, partID)
+		// 更新パス：メタデータを更新し、新しいセットを追加
+		// 最初のセットから部位IDを取得（既存の同部位セットを削除するため）
+		var partID *int
+		if len(recordWorkout.Sets) > 0 {
+			var exercise WorkoutExercise
+			if err := tx.First(&exercise, recordWorkout.Sets[0].WorkoutExerciseID).Error; err == nil {
+				partID = exercise.WorkoutPartID
+			}
+		}
+
+		return r.updateRecordAndReplaceSets(tx, &existingRecord, recordWorkout, partID)
 	})
-}
-
-// getPartIDFromFirstSet は最初のセットから部位IDを取得
-func (r *workoutRepository) getPartIDFromFirstSet(ctx context.Context, sets []WorkoutSet) (*int, error) {
-	if len(sets) == 0 {
-		// セットが空の場合は部位を特定できない（全レコード検索になってしまう）
-		// エラーを返すか、新規作成を強制する
-		return nil, nil
-	}
-
-	var exercise WorkoutExercise
-	if err := r.db.WithContext(ctx).First(&exercise, sets[0].WorkoutExerciseID).Error; err != nil {
-		return nil, fmt.Errorf("failed to fetch exercise: %w", err)
-	}
-
-	// 部位IDがnullの場合も問題（曖昧な検索になる）
-	if exercise.WorkoutPartID == nil {
-		return nil, fmt.Errorf("exercise has no workout_part_id")
-	}
-
-	return exercise.WorkoutPartID, nil
-}
-
-// findExistingRecord は同日同部位のレコードを検索
-func (r *workoutRepository) findExistingRecord(tx *gorm.DB, userID string, performedDate time.Time, partID *int) (*WorkoutRecord, error) {
-	var existingRecord WorkoutRecord
-
-	query := tx.
-		Preload("Sets.Exercise").
-		Where("workout_records.user_id = ? AND workout_records.performed_date = ?", userID, performedDate)
-
-	// 部位IDが指定されている場合のみフィルタ
-	if partID != nil {
-		query = query.
-			Joins("JOIN workout_sets ON workout_sets.workout_record_id = workout_records.id").
-			Joins("JOIN workout_exercises ON workout_exercises.id = workout_sets.workout_exercise_id").
-			Where("workout_exercises.workout_part_id = ?", *partID)
-	}
-
-	err := query.First(&existingRecord).Error
-	if err != nil {
-		return nil, err
-	}
-
-	return &existingRecord, nil
 }
 
 // createRecordWithSets は新規レコードとセットを作成

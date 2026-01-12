@@ -3,6 +3,7 @@ package workout
 import (
 	"context"
 	"errors"
+	"gogym-api/internal/util"
 	"time"
 
 	dto "gogym-api/internal/adapter/dto"
@@ -22,28 +23,27 @@ func NewWorkoutInteractor(repo Repository, gymRepo gymUsecase.Repository) Workou
 	}
 }
 
-func (i *workoutInteractor) GetWorkoutRecords(ctx context.Context, userID string, dateParam string) (dto.WorkoutRecordDTO, error) {
-	// dateが空文字列の場合は今日のJST日付を使用
-	date := dateParam
-	if date == "" {
-		jst, _ := time.LoadLocation("Asia/Tokyo")
-		date = time.Now().In(jst).Format("2006-01-02")
-	}
-
-	records, err := i.repo.GetRecordsByDateAndPart(ctx, userID, date, nil)
+func (i *workoutInteractor) GetWorkoutRecords(ctx context.Context, userID string, date time.Time) (dto.WorkoutRecordDTO, error) {
+	// repositoryからドメインエンティティを取得
+	domainRecord, err := i.repo.GetRecordsByDate(ctx, userID, date)
 	if err != nil {
 		return dto.WorkoutRecordDTO{}, err
 	}
 
 	// レコードが空（IDがnil）の場合は、日付だけ設定したDTOを返す
-	if records.ID == nil {
+	if domainRecord.ID == nil {
 		return dto.WorkoutRecordDTO{
-			PerformedDate: date,
-			Exercises:     []dto.ExerciseDTO{},
+			PerformedDate: util.FormatJSTDate(date),
+			Parts:         []dto.WorkoutPartGroupDTO{},
 		}, nil
 	}
 
-	response := dto.WorkoutRecordToDTO(&records)
+	// ドメインエンティティをDTOに変換
+	response := dto.WorkoutDomainToDTO(&domainRecord)
+	if response == nil {
+		return dto.WorkoutRecordDTO{}, errors.New("failed to convert domain record to DTO")
+	}
+
 	return *response, nil
 }
 
