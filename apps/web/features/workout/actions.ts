@@ -5,7 +5,9 @@ import type {
   WorkoutFormDTO,
   WorkoutPartDTO,
   ExerciseDTO,
+  WorkoutRecordResponseDTO,
 } from "@/types/workout";
+import { convertResponseToFormDTO } from "@/types/workout";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL;
 
@@ -55,7 +57,8 @@ export const getWorkoutRecords = async (params?: {
       return { success: false, error: "Failed to fetch workout records" };
     }
 
-    const data = await res.json();
+    const response: WorkoutRecordResponseDTO = await res.json();
+    const data = convertResponseToFormDTO(response);
     return { success: true, data };
   } catch (error) {
     return {
