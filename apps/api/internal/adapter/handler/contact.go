@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"gogym-api/internal/usecase/contact"
+	"gogym-api/internal/application/contact"
 	"log/slog"
 
 	"github.com/labstack/echo/v4"

@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"gogym-api/internal/adapter/dto"
-	uu "gogym-api/internal/usecase/user"
+	uu "gogym-api/internal/application/user"
 
 	"github.com/labstack/echo/v4"
 )

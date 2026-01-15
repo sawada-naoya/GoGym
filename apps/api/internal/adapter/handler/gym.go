@@ -1,7 +1,7 @@
 package handler
 
 import (
-	gu "gogym-api/internal/usecase/gym"
+	gu "gogym-api/internal/application/gym"
 )
 
 type GymHandler struct {

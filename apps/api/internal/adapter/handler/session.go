@@ -2,7 +2,7 @@ package handler
 
 import (
 	"gogym-api/internal/adapter/dto"
-	su "gogym-api/internal/usecase/session"
+	su "gogym-api/internal/application/session"
 	"log/slog"
 	"net/http"
 

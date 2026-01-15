@@ -4,7 +4,6 @@ import (
 	dom "gogym-api/internal/domain/entities"
 )
 
-// ToEntity converts WorkoutRecord to domain entity
 func ToEntity(rec *WorkoutRecord) *dom.WorkoutRecord {
 	if rec == nil {
 		return nil
@@ -38,7 +37,6 @@ func ToEntity(rec *WorkoutRecord) *dom.WorkoutRecord {
 	return domainRecord
 }
 
-// WorkoutSetToDomain converts WorkoutSet to domain.WorkoutSet
 func WorkoutSetToDomain(s *WorkoutSet) dom.WorkoutSet {
 	exerciseRef := dom.WorkoutExerciseRef{
 		ID:     dom.ID(s.WorkoutExerciseID),
@@ -89,7 +87,6 @@ func FromEntity(domainRecord *dom.WorkoutRecord) *WorkoutRecord {
 	return rec
 }
 
-// WorkoutSetToRecord converts domain.WorkoutSet to WorkoutSet
 func WorkoutSetToRecord(domainSet *dom.WorkoutSet, workoutRecordID int) WorkoutSet {
 	recSet := WorkoutSet{
 		WorkoutRecordID:   workoutRecordID,

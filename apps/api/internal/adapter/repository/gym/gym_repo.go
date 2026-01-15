@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	dom "gogym-api/internal/domain/entities"
-	gymUsecase "gogym-api/internal/usecase/gym"
+	gu "gogym-api/internal/application/gym"
+	domain "gogym-api/internal/domain/entities"
 
 	"gorm.io/gorm"
 )
@@ -14,19 +14,19 @@ type gymRepository struct {
 	db *gorm.DB
 }
 
-func NewGymRepository(db *gorm.DB) gymUsecase.Repository {
+func NewGymRepository(db *gorm.DB) gu.Repository {
 	return &gymRepository{db: db}
 }
 
 // FindByNormalizedName finds a gym by normalized name and creator
-func (r *gymRepository) FindByNormalizedName(ctx context.Context, createdBy string, normalizedName string) (*dom.Gym, error) {
+func (r *gymRepository) FindByNormalizedName(ctx context.Context, createdBy string, normalizedName string) (*domain.Gym, error) {
 	var record GymRecord
 	err := r.db.WithContext(ctx).
 		Where("created_by = ? AND normalized_name = ? AND deleted_at IS NULL", createdBy, normalizedName).
 		First(&record).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, gymUsecase.ErrNotFound
+			return nil, gu.ErrNotFound
 		}
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func (r *gymRepository) FindByNormalizedName(ctx context.Context, createdBy stri
 }
 
 // CreateGym creates a new gym with duplicate key handling
-func (r *gymRepository) CreateGym(ctx context.Context, createdBy string, name string, normalizedName string) (*dom.Gym, error) {
+func (r *gymRepository) CreateGym(ctx context.Context, createdBy string, name string, normalizedName string) (*domain.Gym, error) {
 	record := &GymRecord{
 		Name:           name,
 		NormalizedName: normalizedName,
