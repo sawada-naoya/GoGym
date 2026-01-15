@@ -1,9 +1,13 @@
-package domain
+package workout
+
+import (
+	dom "gogym-api/internal/domain/entities"
+)
 
 // WorkoutExerciseRef represents a reference to a workout exercise
 type WorkoutExerciseRef struct {
-	ID     ID
+	ID     dom.ID
 	Name   string
-	PartID *ID
-	Owner  *ULID // nil ならプリセット、値があればユーザー作成
+	PartID *dom.ID
+	Owner  *dom.ULID // nil ならプリセット、値があればユーザー作成
 }

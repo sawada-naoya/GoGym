@@ -20,9 +20,8 @@ type WorkoutRecord struct {
 	UpdatedAt       time.Time      `gorm:"autoUpdateTime"`
 	DeletedAt       gorm.DeletedAt `gorm:"index"`
 
-
 	Sets []WorkoutSet `gorm:"foreignKey:WorkoutRecordID"`
-	Gym *GymRecord `gorm:"foreignKey:GymID"`
+	Gym  *GymRecord   `gorm:"foreignKey:GymID"`
 }
 
 type GymRecord struct {

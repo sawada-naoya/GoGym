@@ -1,10 +1,11 @@
 package workout
 
 import (
+	dw "gogym-api/internal/domain/entities/workout"
 	dom "gogym-api/internal/domain/entities"
 )
 
-func ToEntity(rec *WorkoutRecord) *dom.WorkoutRecord {
+func ToEntity(rec *WorkoutRecord) *dw.WorkoutRecord {
 	if rec == nil {
 		return nil
 	}
@@ -14,7 +15,7 @@ func ToEntity(rec *WorkoutRecord) *dom.WorkoutRecord {
 		gymName = &rec.Gym.Name
 	}
 
-	domainRecord := &dom.WorkoutRecord{
+	domainRecord := &dw.WorkoutRecord{
 		ID:            ptrInt64ToDomainID(int64(rec.ID)),
 		UserID:        dom.ULID(rec.UserID),
 		GymID:         int64PtrToDomainIDPtr(rec.GymID),
@@ -25,7 +26,7 @@ func ToEntity(rec *WorkoutRecord) *dom.WorkoutRecord {
 		Note:          rec.Note,
 		Condition:     intPtrToConditionLevel(rec.ConditionLevel),
 		DurationMin:   rec.DurationMinutes,
-		Sets:          make([]dom.WorkoutSet, 0, len(rec.Sets)),
+		Sets:          make([]dw.WorkoutSet, 0, len(rec.Sets)),
 		CreatedAt:     rec.CreatedAt,
 		UpdatedAt:     rec.UpdatedAt,
 	}
@@ -37,20 +38,20 @@ func ToEntity(rec *WorkoutRecord) *dom.WorkoutRecord {
 	return domainRecord
 }
 
-func WorkoutSetToDomain(s *WorkoutSet) dom.WorkoutSet {
-	exerciseRef := dom.WorkoutExerciseRef{
+func WorkoutSetToDomain(s *WorkoutSet) dw.WorkoutSet {
+	exerciseRef := dw.WorkoutExerciseRef{
 		ID:     dom.ID(s.WorkoutExerciseID),
 		Name:   s.Exercise.Name,
 		PartID: intPtrToDomainIDPtr(s.Exercise.WorkoutPartID),
 		Owner:  stringPtrToULIDPtr(s.Exercise.UserID),
 	}
 
-	return dom.WorkoutSet{
+	return dw.WorkoutSet{
 		ID:           ptrInt64ToDomainID(int64(s.ID)),
 		Exercise:     exerciseRef,
 		SetNumber:    s.SetNumber,
-		Weight:       dom.WeightKg(s.WeightKg),
-		Reps:         dom.Reps(s.Reps),
+		Weight:       dw.WeightKg(s.WeightKg),
+		Reps:         dw.Reps(s.Reps),
 		EstimatedMax: s.EstimatedMax,
 		Note:         s.Note,
 		CreatedAt:    s.CreatedAt,
@@ -58,8 +59,8 @@ func WorkoutSetToDomain(s *WorkoutSet) dom.WorkoutSet {
 	}
 }
 
-// FromEntity converts domain.WorkoutRecord to WorkoutRecord
-func FromEntity(domainRecord *dom.WorkoutRecord) *WorkoutRecord {
+// FromEntity converts dw.WorkoutRecord to WorkoutRecord
+func FromEntity(domainRecord *dw.WorkoutRecord) *WorkoutRecord {
 	if domainRecord == nil {
 		return nil
 	}
@@ -87,7 +88,7 @@ func FromEntity(domainRecord *dom.WorkoutRecord) *WorkoutRecord {
 	return rec
 }
 
-func WorkoutSetToRecord(domainSet *dom.WorkoutSet, workoutRecordID int) WorkoutSet {
+func WorkoutSetToRecord(domainSet *dw.WorkoutSet, workoutRecordID int) WorkoutSet {
 	recSet := WorkoutSet{
 		WorkoutRecordID:   workoutRecordID,
 		WorkoutExerciseID: int(domainSet.Exercise.ID),
@@ -105,16 +106,16 @@ func WorkoutSetToRecord(domainSet *dom.WorkoutSet, workoutRecordID int) WorkoutS
 	return recSet
 }
 
-// WorkoutPartToDomain converts WorkoutPart to domain.WorkoutPart
-func WorkoutPartToDomain(rec *WorkoutPart) *dom.WorkoutPart {
+// WorkoutPartToDomain converts WorkoutPart to dw.WorkoutPart
+func WorkoutPartToDomain(rec *WorkoutPart) *dw.WorkoutPart {
 	if rec == nil {
 		return nil
 	}
 
 	// Translationsを変換
-	translations := make([]dom.WorkoutPartTranslation, 0, len(rec.Translations))
+	translations := make([]dw.WorkoutPartTranslation, 0, len(rec.Translations))
 	for _, trans := range rec.Translations {
-		translations = append(translations, dom.WorkoutPartTranslation{
+		translations = append(translations, dw.WorkoutPartTranslation{
 			ID:            dom.ID(trans.ID),
 			WorkoutPartID: dom.ID(trans.WorkoutPartID),
 			Locale:        trans.Locale,
@@ -123,7 +124,7 @@ func WorkoutPartToDomain(rec *WorkoutPart) *dom.WorkoutPart {
 	}
 
 	// Exercisesを変換
-	exercises := make([]dom.WorkoutExerciseRef, 0, len(rec.Exercises))
+	exercises := make([]dw.WorkoutExerciseRef, 0, len(rec.Exercises))
 	for _, ex := range rec.Exercises {
 		var partIDPtr *dom.ID
 		if ex.WorkoutPartID != nil {
@@ -137,7 +138,7 @@ func WorkoutPartToDomain(rec *WorkoutPart) *dom.WorkoutPart {
 			ownerPtr = &owner
 		}
 
-		exercises = append(exercises, dom.WorkoutExerciseRef{
+		exercises = append(exercises, dw.WorkoutExerciseRef{
 			ID:     dom.ID(ex.ID),
 			Name:   ex.Name,
 			PartID: partIDPtr,
@@ -145,7 +146,7 @@ func WorkoutPartToDomain(rec *WorkoutPart) *dom.WorkoutPart {
 		})
 	}
 
-	return &dom.WorkoutPart{
+	return &dw.WorkoutPart{
 		ID:           dom.ID(rec.ID),
 		Key:          rec.Key,
 		Owner:        stringPtrToULIDPtr(rec.UserID),
@@ -154,9 +155,9 @@ func WorkoutPartToDomain(rec *WorkoutPart) *dom.WorkoutPart {
 	}
 }
 
-// WorkoutPartsToDomain converts slice of WorkoutPart to slice of domain.WorkoutPart
-func WorkoutPartsToDomain(recs []WorkoutPart) []dom.WorkoutPart {
-	result := make([]dom.WorkoutPart, len(recs))
+// WorkoutPartsToDomain converts slice of WorkoutPart to slice of dw.WorkoutPart
+func WorkoutPartsToDomain(recs []WorkoutPart) []dw.WorkoutPart {
+	result := make([]dw.WorkoutPart, len(recs))
 	for i, rec := range recs {
 		result[i] = *WorkoutPartToDomain(&rec)
 	}
@@ -205,28 +206,28 @@ func stringPtrToULIDPtr(s *string) *dom.ULID {
 	return &ulid
 }
 
-func intPtrToConditionLevel(i *int) dom.ConditionLevel {
+func intPtrToConditionLevel(i *int) dw.ConditionLevel {
 	if i == nil {
-		return dom.CondUnknown
+		return dw.CondUnknown
 	}
 	switch *i {
 	case 1:
-		return dom.Cond1
+		return dw.Cond1
 	case 2:
-		return dom.Cond2
+		return dw.Cond2
 	case 3:
-		return dom.Cond3
+		return dw.Cond3
 	case 4:
-		return dom.Cond4
+		return dw.Cond4
 	case 5:
-		return dom.Cond5
+		return dw.Cond5
 	default:
-		return dom.CondUnknown
+		return dw.CondUnknown
 	}
 }
 
-func conditionLevelToIntPtr(c dom.ConditionLevel) *int {
-	if c == dom.CondUnknown {
+func conditionLevelToIntPtr(c dw.ConditionLevel) *int {
+	if c == dw.CondUnknown {
 		return nil
 	}
 	i := int(c)

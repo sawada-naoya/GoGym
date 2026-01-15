@@ -7,6 +7,7 @@ import (
 	"time"
 
 	dom "gogym-api/internal/domain/entities"
+	"gogym-api/internal/domain/entities/workout"
 )
 
 type WorkoutPartListItemDTO struct {
@@ -78,7 +79,7 @@ type WorkoutExerciseListItemDTO struct {
 	WorkoutPartID *int64 `json:"workout_part_id,omitempty"`
 }
 
-func WorkoutDomainToDTO(record *dom.WorkoutRecord) *WorkoutRecordDTO {
+func WorkoutDomainToDTO(record *workout.WorkoutRecord) *WorkoutRecordDTO {
 	if record == nil {
 		return nil
 	}
@@ -108,7 +109,7 @@ func WorkoutDomainToDTO(record *dom.WorkoutRecord) *WorkoutRecordDTO {
 	}
 
 	var conditionLevel *int
-	if record.Condition != dom.CondUnknown {
+	if record.Condition != workout.CondUnknown {
 		cl := int(record.Condition)
 		conditionLevel = &cl
 	}
@@ -230,8 +231,8 @@ func stringPtrToString(s *string) string {
 	return *s
 }
 
-func conditionLevelToIntPtr(c dom.ConditionLevel) *int {
-	if c == dom.CondUnknown {
+func conditionLevelToIntPtr(c workout.ConditionLevel) *int {
+	if c == workout.CondUnknown {
 		return nil
 	}
 	i := int(c)
@@ -239,7 +240,7 @@ func conditionLevelToIntPtr(c dom.ConditionLevel) *int {
 }
 
 // WorkoutRecordDTOToDomain converts WorkoutRecordDTO to domain.WorkoutRecord
-func WorkoutRecordDTOToDomain(dto *WorkoutRecordDTO) (*dom.WorkoutRecord, error) {
+func WorkoutRecordDTOToDomain(dto *WorkoutRecordDTO) (*workout.WorkoutRecord, error) {
 	if dto == nil {
 		return nil, fmt.Errorf("dto is nil")
 	}
@@ -255,11 +256,11 @@ func WorkoutRecordDTOToDomain(dto *WorkoutRecordDTO) (*dom.WorkoutRecord, error)
 	performedDateUTC := time.Date(performedDate.Year(), performedDate.Month(), performedDate.Day(), 0, 0, 0, 0, time.UTC)
 
 	// Create WorkoutRecord with placeholder userID (will be set by handler/usecase)
-	record := &dom.WorkoutRecord{
+	record := &workout.WorkoutRecord{
 		UserID:        dom.ULID(""), // will be set by handler
 		PerformedDate: performedDateUTC,
-		Condition:     dom.CondUnknown,
-		Sets:          []dom.WorkoutSet{},
+		Condition:     workout.CondUnknown,
+		Sets:          []workout.WorkoutSet{},
 	}
 
 	// Set ID if exists
@@ -290,7 +291,7 @@ func WorkoutRecordDTOToDomain(dto *WorkoutRecordDTO) (*dom.WorkoutRecord, error)
 
 	record.Note = dto.Note
 	if dto.ConditionLevel != nil {
-		record.Condition = dom.ConditionLevel(*dto.ConditionLevel)
+		record.Condition = workout.ConditionLevel(*dto.ConditionLevel)
 	}
 	if dto.GymID != nil {
 		gymID := dom.ID(*dto.GymID)
@@ -298,7 +299,7 @@ func WorkoutRecordDTOToDomain(dto *WorkoutRecordDTO) (*dom.WorkoutRecord, error)
 	}
 
 	for _, exercise := range dto.Parts[0].Exercises {
-		exerciseRef := dom.WorkoutExerciseRef{
+		exerciseRef := workout.WorkoutExerciseRef{
 			Name: exercise.Name,
 		}
 		if exercise.ID != nil {
@@ -318,11 +319,11 @@ func WorkoutRecordDTOToDomain(dto *WorkoutRecordDTO) (*dom.WorkoutRecord, error)
 				continue
 			}
 
-			workoutSet := dom.WorkoutSet{
+			workoutSet := workout.WorkoutSet{
 				Exercise:  exerciseRef,
 				SetNumber: setDTO.SetNumber,
-				Weight:    dom.WeightKg(*setDTO.WeightKg),
-				Reps:      dom.Reps(*setDTO.Reps),
+				Weight:    workout.WeightKg(*setDTO.WeightKg),
+				Reps:      workout.Reps(*setDTO.Reps),
 				Note:      setDTO.Note,
 			}
 
@@ -356,7 +357,7 @@ func parseTimeWithDate(date time.Time, hhmmStr string) (time.Time, error) {
 }
 
 // WorkoutPartToDTO converts domain.WorkoutPart to WorkoutPartListItemDTO
-func WorkoutPartToDTO(part *dom.WorkoutPart) *WorkoutPartListItemDTO {
+func WorkoutPartToDTO(part *workout.WorkoutPart) *WorkoutPartListItemDTO {
 	if part == nil {
 		return nil
 	}
@@ -395,7 +396,7 @@ func WorkoutPartToDTO(part *dom.WorkoutPart) *WorkoutPartListItemDTO {
 }
 
 // WorkoutPartsToDTO converts slice of domain.WorkoutPart to slice of WorkoutPartListItemDTO
-func WorkoutPartsToDTO(parts []dom.WorkoutPart) []WorkoutPartListItemDTO {
+func WorkoutPartsToDTO(parts []workout.WorkoutPart) []WorkoutPartListItemDTO {
 	result := make([]WorkoutPartListItemDTO, len(parts))
 	for i, part := range parts {
 		result[i] = *WorkoutPartToDTO(&part)

@@ -2,18 +2,19 @@ package workout
 
 import (
 	"context"
-	dom "gogym-api/internal/domain/entities"
 	"time"
+
+	dw "gogym-api/internal/domain/entities/workout"
 )
 
 type Repository interface {
-	GetRecordsByDate(ctx context.Context, userID string, date time.Time) (dom.WorkoutRecord, error)
-	CreateWorkoutRecord(ctx context.Context, workout dom.WorkoutRecord) error
-	UpsertWorkoutRecord(ctx context.Context, workout dom.WorkoutRecord) error
-	GetWorkoutParts(ctx context.Context, userID string) ([]dom.WorkoutPart, error)
-	CreateWorkoutParts(ctx context.Context, userID string, parts []dom.WorkoutPart) error
+	GetRecordsByDate(ctx context.Context, userID string, date time.Time) (dw.WorkoutRecord, error)
+	CreateWorkoutRecord(ctx context.Context, workout dw.WorkoutRecord) error
+	UpsertWorkoutRecord(ctx context.Context, workout dw.WorkoutRecord) error
+	GetWorkoutParts(ctx context.Context, userID string) ([]dw.WorkoutPart, error)
+	CreateWorkoutParts(ctx context.Context, userID string, parts []dw.WorkoutPart) error
 	CountUserWorkoutParts(ctx context.Context, userID string) (int64, error)
-	UpsertWorkoutExercises(ctx context.Context, userID string, exercises []dom.WorkoutExerciseRef) error
+	UpsertWorkoutExercises(ctx context.Context, userID string, exercises []dw.WorkoutExerciseRef) error
 	DeleteWorkoutExercise(ctx context.Context, userID string, exerciseID int64) error
-	GetLastWorkoutRecord(ctx context.Context, userID string, exerciseID int64) (dom.WorkoutRecord, error)
+	GetLastWorkoutRecord(ctx context.Context, userID string, exerciseID int64) (dw.WorkoutRecord, error)
 }

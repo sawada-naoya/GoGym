@@ -1,4 +1,4 @@
-package domain
+package workout
 
 // WorkoutPart represents a workout body part (e.g., chest, back, legs)
 type WorkoutPart struct {
