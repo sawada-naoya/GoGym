@@ -36,6 +36,5 @@ func (h *UserHandler) SignUp(c echo.Context) error {
 		return c.JSON(http.StatusConflict, err.Error())
 	}
 
-	slog.InfoContext(ctx, "User signed up successfully")
 	return c.NoContent(http.StatusCreated)
 }
