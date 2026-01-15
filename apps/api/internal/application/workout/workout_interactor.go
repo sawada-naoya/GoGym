@@ -8,7 +8,7 @@ import (
 
 	dto "gogym-api/internal/adapter/dto"
 	dom "gogym-api/internal/domain/entities"
-	gymUsecase "gogym-api/internal/usecase/gym"
+	gymUsecase "gogym-api/internal/application/gym"
 )
 
 type workoutInteractor struct {

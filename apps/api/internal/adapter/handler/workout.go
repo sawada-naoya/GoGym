@@ -7,8 +7,8 @@ import (
 	"log/slog"
 	"net/http"
 
-	dom "gogym-api/internal/domain/entities"
 	wu "gogym-api/internal/application/workout"
+	dom "gogym-api/internal/domain/entities"
 
 	"github.com/labstack/echo/v4"
 )

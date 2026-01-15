@@ -1,10 +1,10 @@
 package handler
 
 import (
+	"gogym-api/internal/adapter/dto"
 	"log/slog"
 	"net/http"
 
-	"gogym-api/internal/adapter/dto"
 	uu "gogym-api/internal/application/user"
 
 	"github.com/labstack/echo/v4"

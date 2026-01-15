@@ -14,11 +14,11 @@ import (
 	userrepo "gogym-api/internal/adapter/repository/user"
 	workoutrepo "gogym-api/internal/adapter/repository/workout"
 
-	contactuc "gogym-api/internal/usecase/contact"
-	gymuc "gogym-api/internal/usecase/gym"
-	sessionuc "gogym-api/internal/usecase/session"
-	useruc "gogym-api/internal/usecase/user"
-	workoutuc "gogym-api/internal/usecase/workout"
+	contactuc "gogym-api/internal/application/contact"
+	gymuc "gogym-api/internal/application/gym"
+	sessionuc "gogym-api/internal/application/session"
+	useruc "gogym-api/internal/application/user"
+	workoutuc "gogym-api/internal/application/workout"
 )
 
 type Handlers struct {
