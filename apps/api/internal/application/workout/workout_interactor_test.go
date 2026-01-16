@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	dom "gogym-api/internal/domain/entities"
+	dw "gogym-api/internal/domain/entities/workout"
 )
 
 func TestWorkoutInteractor_SeedWorkoutParts(t *testing.T) {
@@ -32,7 +33,7 @@ func TestWorkoutInteractor_SeedWorkoutParts(t *testing.T) {
 
 		repo.EXPECT().
 			CreateWorkoutParts(gomock.Any(), userID, gomock.Any()).
-			DoAndReturn(func(ctx context.Context, _ string, parts []dom.WorkoutPart) error {
+			DoAndReturn(func(ctx context.Context, _ string, parts []dw.WorkoutPart) error {
 				require.Len(t, parts, 6)
 
 				keys := []string{parts[0].Key, parts[1].Key, parts[2].Key, parts[3].Key, parts[4].Key, parts[5].Key}
@@ -82,7 +83,7 @@ func TestWorkoutInteractor_GetLastWorkoutRecord(t *testing.T) {
 
 		repo.EXPECT().
 			GetLastWorkoutRecord(gomock.Any(), userID, exerciseID).
-			Return(dom.WorkoutRecord{}, nil)
+			Return(dw.WorkoutRecord{}, nil)
 
 		record, err := uc.GetLastWorkoutRecord(ctx, userID, exerciseID)
 		require.NoError(t, err)
@@ -95,7 +96,7 @@ func TestWorkoutInteractor_GetLastWorkoutRecord(t *testing.T) {
 		id := dom.ID(1)
 		repo.EXPECT().
 			GetLastWorkoutRecord(gomock.Any(), userID, exerciseID).
-			Return(dom.WorkoutRecord{
+			Return(dw.WorkoutRecord{
 				ID:   &id,
 				Sets: nil,
 			}, nil)
@@ -113,15 +114,15 @@ func TestWorkoutInteractor_GetLastWorkoutRecord(t *testing.T) {
 		setID100 := dom.ID(100)
 		setID101 := dom.ID(101)
 
-		domainRecord := dom.WorkoutRecord{
+		domainRecord := dw.WorkoutRecord{
 			ID: &recordID,
-			Sets: []dom.WorkoutSet{
+			Sets: []dw.WorkoutSet{
 				{
 					ID:        &setID100,
 					SetNumber: 1,
 					Weight:    80,
 					Reps:      10,
-					Exercise: dom.WorkoutExerciseRef{
+					Exercise: dw.WorkoutExerciseRef{
 						ID:     dom.ID(exerciseID),
 						Name:   "Bench Press",
 						PartID: &partID,
@@ -132,7 +133,7 @@ func TestWorkoutInteractor_GetLastWorkoutRecord(t *testing.T) {
 					SetNumber: 2,
 					Weight:    100,
 					Reps:      8,
-					Exercise: dom.WorkoutExerciseRef{
+					Exercise: dw.WorkoutExerciseRef{
 						ID:   dom.ID(999),
 						Name: "Squat",
 					},

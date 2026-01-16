@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"gogym-api/internal/adapter/dto"
-	dom "gogym-api/internal/domain/entities"
+	dom "gogym-api/internal/domain/entities/user"
 
 	"github.com/oklog/ulid/v2"
 )

@@ -1,7 +1,7 @@
 package gym
 
 import (
-	domain "gogym-api/internal/domain/entities"
+	domain "gogym-api/internal/domain/entities/gym"
 )
 
 // ToEntity converts GymRecord to domain entity

@@ -1,14 +1,13 @@
-package domain
+package workout
 
 import (
 	"errors"
 	"time"
 )
 
-type ULID string // users.id は ULID想定
-type ID int64
+// ConditionLevel represents the physical condition level (1-5)
+type ConditionLevel uint8
 
-type ConditionLevel uint8 // 1..5 を表す
 const (
 	CondUnknown ConditionLevel = 0
 	Cond1       ConditionLevel = 1
@@ -18,46 +17,7 @@ const (
 	Cond5       ConditionLevel = 5
 )
 
-type WeightKg float64
-type Reps int
-
-func (w WeightKg) Valid() bool { return w >= 0 }
-func (r Reps) Valid() bool     { return r >= 0 }
-
-type WorkoutPart struct {
-	ID           ID
-	Key          string
-	Owner        *ULID                     // nil ならプリセット、値があればユーザー作成
-	Translations []WorkoutPartTranslation  // 多言語対応
-	Exercises    []WorkoutExerciseRef      // この部位に紐づく種目
-}
-
-type WorkoutPartTranslation struct {
-	ID            ID
-	WorkoutPartID ID
-	Locale        string
-	Name          string
-}
-
-type WorkoutExerciseRef struct {
-	ID     ID
-	Name   string
-	PartID *ID
-	Owner  *ULID // nil ならプリセット、値があればユーザー作成
-}
-
-type WorkoutSet struct {
-	ID           *ID
-	Exercise     WorkoutExerciseRef
-	SetNumber    int
-	Weight       WeightKg
-	Reps         Reps
-	EstimatedMax *float64
-	Note         *string
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
-}
-
+// WorkoutRecord represents a complete workout session
 type WorkoutRecord struct {
 	ID            *ID
 	UserID        ULID
@@ -74,6 +34,7 @@ type WorkoutRecord struct {
 	UpdatedAt     time.Time
 }
 
+// NewWorkoutRecord creates a new workout record
 func NewWorkoutRecord(user ULID, performedDate time.Time) (*WorkoutRecord, error) {
 	if user == "" {
 		return nil, errors.New("user required")
@@ -88,6 +49,7 @@ func NewWorkoutRecord(user ULID, performedDate time.Time) (*WorkoutRecord, error
 	}, nil
 }
 
+// SetTimes sets the start and end times for the workout
 func (r *WorkoutRecord) SetTimes(start, end *time.Time) error {
 	if start != nil && end != nil && start.After(*end) {
 		return errors.New("start must be <= end")
@@ -109,6 +71,7 @@ func (r *WorkoutRecord) recalcDuration() {
 	}
 }
 
+// AddSet adds a workout set to the record
 func (r *WorkoutRecord) AddSet(s WorkoutSet) error {
 	if s.SetNumber <= 0 {
 		return errors.New("setNumber must be >= 1")
@@ -126,6 +89,7 @@ func (r *WorkoutRecord) AddSet(s WorkoutSet) error {
 	return nil
 }
 
+// ReorderSets reorders sets for a given exercise (1..N)
 func (r *WorkoutRecord) ReorderSets(exerciseID ID) {
 	// 同一 exercise の setNumber を 1..N に詰め直すユーティリティ（必要なら）
 }

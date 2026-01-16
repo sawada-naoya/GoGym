@@ -1,11 +1,11 @@
 package handler
 
 import (
+	"gogym-api/internal/adapter/dto"
 	"log/slog"
 	"net/http"
 
-	"gogym-api/internal/adapter/dto"
-	uu "gogym-api/internal/usecase/user"
+	uu "gogym-api/internal/application/user"
 
 	"github.com/labstack/echo/v4"
 )
@@ -36,6 +36,5 @@ func (h *UserHandler) SignUp(c echo.Context) error {
 		return c.JSON(http.StatusConflict, err.Error())
 	}
 
-	slog.InfoContext(ctx, "User signed up successfully")
 	return c.NoContent(http.StatusCreated)
 }

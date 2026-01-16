@@ -3,11 +3,13 @@ package workout
 import (
 	"context"
 	"errors"
+	"gogym-api/internal/util"
 	"time"
 
 	dto "gogym-api/internal/adapter/dto"
-	dom "gogym-api/internal/domain/entities"
-	gymUsecase "gogym-api/internal/usecase/gym"
+	gymUsecase "gogym-api/internal/application/gym"
+	dg "gogym-api/internal/domain/entities/gym"
+	dw "gogym-api/internal/domain/entities/workout"
 )
 
 type workoutInteractor struct {
@@ -22,32 +24,31 @@ func NewWorkoutInteractor(repo Repository, gymRepo gymUsecase.Repository) Workou
 	}
 }
 
-func (i *workoutInteractor) GetWorkoutRecords(ctx context.Context, userID string, dateParam string) (dto.WorkoutRecordDTO, error) {
-	// dateが空文字列の場合は今日のJST日付を使用
-	date := dateParam
-	if date == "" {
-		jst, _ := time.LoadLocation("Asia/Tokyo")
-		date = time.Now().In(jst).Format("2006-01-02")
-	}
-
-	records, err := i.repo.GetRecordsByDateAndPart(ctx, userID, date, nil)
+func (i *workoutInteractor) GetWorkoutRecords(ctx context.Context, userID string, date time.Time) (dto.WorkoutRecordDTO, error) {
+	// repositoryからドメインエンティティを取得
+	domainRecord, err := i.repo.GetRecordsByDate(ctx, userID, date)
 	if err != nil {
 		return dto.WorkoutRecordDTO{}, err
 	}
 
 	// レコードが空（IDがnil）の場合は、日付だけ設定したDTOを返す
-	if records.ID == nil {
+	if domainRecord.ID == nil {
 		return dto.WorkoutRecordDTO{
-			PerformedDate: date,
-			Exercises:     []dto.ExerciseDTO{},
+			PerformedDate: util.FormatJSTDate(date),
+			Parts:         []dto.WorkoutPartGroupDTO{},
 		}, nil
 	}
 
-	response := dto.WorkoutRecordToDTO(&records)
+	// ドメインエンティティをDTOに変換
+	response := dto.WorkoutDomainToDTO(&domainRecord)
+	if response == nil {
+		return dto.WorkoutRecordDTO{}, errors.New("failed to convert domain record to DTO")
+	}
+
 	return *response, nil
 }
 
-func (i *workoutInteractor) CreateWorkoutRecord(ctx context.Context, workout dom.WorkoutRecord) error {
+func (i *workoutInteractor) CreateWorkoutRecord(ctx context.Context, workout dw.WorkoutRecord) error {
 	// 同日同部位ならupsert、それ以外は新規作成
 	err := i.repo.UpsertWorkoutRecord(ctx, workout)
 	if err != nil {
@@ -56,7 +57,7 @@ func (i *workoutInteractor) CreateWorkoutRecord(ctx context.Context, workout dom
 	return nil
 }
 
-func (i *workoutInteractor) UpsertWorkoutRecord(ctx context.Context, workout dom.WorkoutRecord) error {
+func (i *workoutInteractor) UpsertWorkoutRecord(ctx context.Context, workout dw.WorkoutRecord) error {
 	// 同日同部位ならupsert、それ以外は新規作成
 	err := i.repo.UpsertWorkoutRecord(ctx, workout)
 	if err != nil {
@@ -86,14 +87,14 @@ func (i *workoutInteractor) SeedWorkoutParts(ctx context.Context, userID string)
 	}
 
 	// ULID型に変換
-	ownerULID := dom.ULID(userID)
+	ownerULID := dw.ULID(userID)
 
 	// 6部位のシードデータを作成（多言語対応）
-	defaultParts := []dom.WorkoutPart{
+	defaultParts := []dw.WorkoutPart{
 		{
 			Key:   "chest",
 			Owner: &ownerULID,
-			Translations: []dom.WorkoutPartTranslation{
+			Translations: []dw.WorkoutPartTranslation{
 				{Locale: "ja", Name: "胸"},
 				{Locale: "en", Name: "Chest"},
 			},
@@ -101,7 +102,7 @@ func (i *workoutInteractor) SeedWorkoutParts(ctx context.Context, userID string)
 		{
 			Key:   "shoulders",
 			Owner: &ownerULID,
-			Translations: []dom.WorkoutPartTranslation{
+			Translations: []dw.WorkoutPartTranslation{
 				{Locale: "ja", Name: "肩"},
 				{Locale: "en", Name: "Shoulders"},
 			},
@@ -109,7 +110,7 @@ func (i *workoutInteractor) SeedWorkoutParts(ctx context.Context, userID string)
 		{
 			Key:   "back",
 			Owner: &ownerULID,
-			Translations: []dom.WorkoutPartTranslation{
+			Translations: []dw.WorkoutPartTranslation{
 				{Locale: "ja", Name: "背中"},
 				{Locale: "en", Name: "Back"},
 			},
@@ -117,7 +118,7 @@ func (i *workoutInteractor) SeedWorkoutParts(ctx context.Context, userID string)
 		{
 			Key:   "arms",
 			Owner: &ownerULID,
-			Translations: []dom.WorkoutPartTranslation{
+			Translations: []dw.WorkoutPartTranslation{
 				{Locale: "ja", Name: "腕"},
 				{Locale: "en", Name: "Arms"},
 			},
@@ -125,7 +126,7 @@ func (i *workoutInteractor) SeedWorkoutParts(ctx context.Context, userID string)
 		{
 			Key:   "legs",
 			Owner: &ownerULID,
-			Translations: []dom.WorkoutPartTranslation{
+			Translations: []dw.WorkoutPartTranslation{
 				{Locale: "ja", Name: "脚"},
 				{Locale: "en", Name: "Legs"},
 			},
@@ -133,7 +134,7 @@ func (i *workoutInteractor) SeedWorkoutParts(ctx context.Context, userID string)
 		{
 			Key:   "others",
 			Owner: &ownerULID,
-			Translations: []dom.WorkoutPartTranslation{
+			Translations: []dw.WorkoutPartTranslation{
 				{Locale: "ja", Name: "その他"},
 				{Locale: "en", Name: "Others"},
 			},
@@ -144,13 +145,13 @@ func (i *workoutInteractor) SeedWorkoutParts(ctx context.Context, userID string)
 }
 
 func (i *workoutInteractor) CreateWorkoutExercise(ctx context.Context, userID string, exercises []dto.CreateWorkoutExerciseItem) error {
-	ownerULID := dom.ULID(userID)
+	ownerULID := dw.ULID(userID)
 
 	// DTOをドメインモデルに変換
-	domainExercises := make([]dom.WorkoutExerciseRef, 0, len(exercises))
+	domainExercises := make([]dw.WorkoutExerciseRef, 0, len(exercises))
 	for _, ex := range exercises {
-		partID := dom.ID(ex.WorkoutPartID)
-		exerciseRef := dom.WorkoutExerciseRef{
+		partID := dw.ID(ex.WorkoutPartID)
+		exerciseRef := dw.WorkoutExerciseRef{
 			Name:   ex.Name,
 			PartID: &partID,
 			Owner:  &ownerULID, // ユーザー作成の種目なのでOwnerを設定
@@ -158,7 +159,7 @@ func (i *workoutInteractor) CreateWorkoutExercise(ctx context.Context, userID st
 
 		// IDがある場合は設定（update対象）
 		if ex.ID != nil {
-			exerciseRef.ID = dom.ID(*ex.ID)
+			exerciseRef.ID = dw.ID(*ex.ID)
 		}
 
 		domainExercises = append(domainExercises, exerciseRef)
@@ -184,7 +185,7 @@ func (i *workoutInteractor) GetLastWorkoutRecord(ctx context.Context, userID str
 	}
 
 	// 該当するエクササイズIDのセットだけをフィルタリング
-	var exerciseSets []dom.WorkoutSet
+	var exerciseSets []dw.WorkoutSet
 	var exerciseName string
 	var workoutPartID *int64
 
@@ -238,9 +239,9 @@ func (i *workoutInteractor) GetLastWorkoutRecord(ctx context.Context, userID str
 }
 
 // ResolveGymIDFromName resolves gym_name to gym_id (finds or creates)
-func (i *workoutInteractor) ResolveGymIDFromName(ctx context.Context, userID string, gymName string) (dom.ID, error) {
+func (i *workoutInteractor) ResolveGymIDFromName(ctx context.Context, userID string, gymName string) (dw.ID, error) {
 	// Normalize gym name
-	normalizedName := dom.NormalizeName(gymName)
+	normalizedName := dg.NormalizeName(gymName)
 	if normalizedName == "" {
 		return 0, errors.New("gym name cannot be empty")
 	}
@@ -248,7 +249,7 @@ func (i *workoutInteractor) ResolveGymIDFromName(ctx context.Context, userID str
 	// Try to find existing gym
 	gym, err := i.gymRepo.FindByNormalizedName(ctx, userID, normalizedName)
 	if err == nil && gym != nil {
-		return dom.ID(gym.ID), nil
+		return dw.ID(gym.ID), nil
 	}
 
 	// If not found, create new gym
@@ -257,7 +258,7 @@ func (i *workoutInteractor) ResolveGymIDFromName(ctx context.Context, userID str
 		if err != nil {
 			return 0, err
 		}
-		return dom.ID(gym.ID), nil
+		return dw.ID(gym.ID), nil
 	}
 
 	return 0, err

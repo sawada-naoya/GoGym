@@ -12,13 +12,13 @@ import (
 	"gogym-api/internal/adapter/repository/gym"
 	"gogym-api/internal/adapter/repository/user"
 	"gogym-api/internal/adapter/repository/workout"
+	"gogym-api/internal/application/contact"
+	gym2 "gogym-api/internal/application/gym"
+	"gogym-api/internal/application/session"
+	user2 "gogym-api/internal/application/user"
+	workout2 "gogym-api/internal/application/workout"
 	"gogym-api/internal/infra/security"
 	"gogym-api/internal/infra/slack"
-	"gogym-api/internal/usecase/contact"
-	gym2 "gogym-api/internal/usecase/gym"
-	"gogym-api/internal/usecase/session"
-	user2 "gogym-api/internal/usecase/user"
-	workout2 "gogym-api/internal/usecase/workout"
 	"gorm.io/gorm"
 )
 

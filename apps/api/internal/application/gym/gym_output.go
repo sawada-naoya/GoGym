@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	dom "gogym-api/internal/domain/entities"
+	dom "gogym-api/internal/domain/entities/gym"
 )
 
 // ErrNotFound is returned when a gym is not found

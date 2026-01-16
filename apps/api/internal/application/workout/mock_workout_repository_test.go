@@ -6,8 +6,9 @@ package workout
 
 import (
 	context "context"
-	entities "gogym-api/internal/domain/entities"
+	dw "gogym-api/internal/domain/entities/workout"
 	reflect "reflect"
+	"time"
 
 	gomock "github.com/golang/mock/gomock"
 )
@@ -51,7 +52,7 @@ func (mr *MockRepositoryMockRecorder) CountUserWorkoutParts(ctx, userID interfac
 }
 
 // CreateWorkoutParts mocks base method.
-func (m *MockRepository) CreateWorkoutParts(ctx context.Context, userID string, parts []entities.WorkoutPart) error {
+func (m *MockRepository) CreateWorkoutParts(ctx context.Context, userID string, parts []dw.WorkoutPart) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateWorkoutParts", ctx, userID, parts)
 	ret0, _ := ret[0].(error)
@@ -65,7 +66,7 @@ func (mr *MockRepositoryMockRecorder) CreateWorkoutParts(ctx, userID, parts inte
 }
 
 // CreateWorkoutRecord mocks base method.
-func (m *MockRepository) CreateWorkoutRecord(ctx context.Context, workout entities.WorkoutRecord) error {
+func (m *MockRepository) CreateWorkoutRecord(ctx context.Context, workout dw.WorkoutRecord) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateWorkoutRecord", ctx, workout)
 	ret0, _ := ret[0].(error)
@@ -93,10 +94,10 @@ func (mr *MockRepositoryMockRecorder) DeleteWorkoutExercise(ctx, userID, exercis
 }
 
 // GetLastWorkoutRecord mocks base method.
-func (m *MockRepository) GetLastWorkoutRecord(ctx context.Context, userID string, exerciseID int64) (entities.WorkoutRecord, error) {
+func (m *MockRepository) GetLastWorkoutRecord(ctx context.Context, userID string, exerciseID int64) (dw.WorkoutRecord, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetLastWorkoutRecord", ctx, userID, exerciseID)
-	ret0, _ := ret[0].(entities.WorkoutRecord)
+	ret0, _ := ret[0].(dw.WorkoutRecord)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -108,10 +109,10 @@ func (mr *MockRepositoryMockRecorder) GetLastWorkoutRecord(ctx, userID, exercise
 }
 
 // GetRecordsByDate mocks base method.
-func (m *MockRepository) GetRecordsByDate(ctx context.Context, userID, date string) (entities.WorkoutRecord, error) {
+func (m *MockRepository) GetRecordsByDate(ctx context.Context, userID string, date time.Time) (dw.WorkoutRecord, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRecordsByDate", ctx, userID, date)
-	ret0, _ := ret[0].(entities.WorkoutRecord)
+	ret0, _ := ret[0].(dw.WorkoutRecord)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -122,26 +123,11 @@ func (mr *MockRepositoryMockRecorder) GetRecordsByDate(ctx, userID, date interfa
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRecordsByDate", reflect.TypeOf((*MockRepository)(nil).GetRecordsByDate), ctx, userID, date)
 }
 
-// GetRecordsByDateAndPart mocks base method.
-func (m *MockRepository) GetRecordsByDateAndPart(ctx context.Context, userID, date string, partID *int64) (entities.WorkoutRecord, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetRecordsByDateAndPart", ctx, userID, date, partID)
-	ret0, _ := ret[0].(entities.WorkoutRecord)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetRecordsByDateAndPart indicates an expected call of GetRecordsByDateAndPart.
-func (mr *MockRepositoryMockRecorder) GetRecordsByDateAndPart(ctx, userID, date, partID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRecordsByDateAndPart", reflect.TypeOf((*MockRepository)(nil).GetRecordsByDateAndPart), ctx, userID, date, partID)
-}
-
 // GetWorkoutParts mocks base method.
-func (m *MockRepository) GetWorkoutParts(ctx context.Context, userID string) ([]entities.WorkoutPart, error) {
+func (m *MockRepository) GetWorkoutParts(ctx context.Context, userID string) ([]dw.WorkoutPart, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetWorkoutParts", ctx, userID)
-	ret0, _ := ret[0].([]entities.WorkoutPart)
+	ret0, _ := ret[0].([]dw.WorkoutPart)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -153,7 +139,7 @@ func (mr *MockRepositoryMockRecorder) GetWorkoutParts(ctx, userID interface{}) *
 }
 
 // UpsertWorkoutExercises mocks base method.
-func (m *MockRepository) UpsertWorkoutExercises(ctx context.Context, userID string, exercises []entities.WorkoutExerciseRef) error {
+func (m *MockRepository) UpsertWorkoutExercises(ctx context.Context, userID string, exercises []dw.WorkoutExerciseRef) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpsertWorkoutExercises", ctx, userID, exercises)
 	ret0, _ := ret[0].(error)
@@ -167,7 +153,7 @@ func (mr *MockRepositoryMockRecorder) UpsertWorkoutExercises(ctx, userID, exerci
 }
 
 // UpsertWorkoutRecord mocks base method.
-func (m *MockRepository) UpsertWorkoutRecord(ctx context.Context, workout entities.WorkoutRecord) error {
+func (m *MockRepository) UpsertWorkoutRecord(ctx context.Context, workout dw.WorkoutRecord) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpsertWorkoutRecord", ctx, workout)
 	ret0, _ := ret[0].(error)
