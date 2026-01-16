@@ -1,4 +1,4 @@
-package domain
+package gym
 
 import (
 	"errors"

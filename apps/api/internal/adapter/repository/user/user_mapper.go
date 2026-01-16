@@ -1,7 +1,7 @@
 package user
 
 import (
-	domain "gogym-api/internal/domain/entities"
+	domain "gogym-api/internal/domain/entities/user"
 
 	"github.com/oklog/ulid/v2"
 )

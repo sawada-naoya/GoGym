@@ -2,7 +2,7 @@ package user
 
 import (
 	"context"
-	dom "gogym-api/internal/domain/entities"
+	dom "gogym-api/internal/domain/entities/user"
 )
 
 // Repository はユーザーデータの永続化を担当

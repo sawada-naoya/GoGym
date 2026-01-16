@@ -7,9 +7,9 @@ import (
 	"time"
 
 	dto "gogym-api/internal/adapter/dto"
-	dom "gogym-api/internal/domain/entities"
-	dw "gogym-api/internal/domain/entities/workout"
 	gymUsecase "gogym-api/internal/application/gym"
+	dg "gogym-api/internal/domain/entities/gym"
+	dw "gogym-api/internal/domain/entities/workout"
 )
 
 type workoutInteractor struct {
@@ -241,7 +241,7 @@ func (i *workoutInteractor) GetLastWorkoutRecord(ctx context.Context, userID str
 // ResolveGymIDFromName resolves gym_name to gym_id (finds or creates)
 func (i *workoutInteractor) ResolveGymIDFromName(ctx context.Context, userID string, gymName string) (dw.ID, error) {
 	// Normalize gym name
-	normalizedName := dom.NormalizeName(gymName)
+	normalizedName := dg.NormalizeName(gymName)
 	if normalizedName == "" {
 		return 0, errors.New("gym name cannot be empty")
 	}

@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	gu "gogym-api/internal/application/gym"
-	domain "gogym-api/internal/domain/entities"
+	domain "gogym-api/internal/domain/entities/gym"
 
 	"gorm.io/gorm"
 )

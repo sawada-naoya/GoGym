@@ -7,7 +7,7 @@ package session
 import (
 	"context"
 
-	dom "gogym-api/internal/domain/entities"
+	dom "gogym-api/internal/domain/entities/user"
 
 	"github.com/oklog/ulid/v2"
 )
