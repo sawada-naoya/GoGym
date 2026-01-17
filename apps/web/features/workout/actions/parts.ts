@@ -8,7 +8,9 @@ import type { WorkoutPartDTO } from "@/types/workout";
 /**
  * ワークアウト部位一覧を取得
  */
-export const getWorkoutParts = async (): Promise<ActionResult<WorkoutPartDTO[]>> => {
+export const getWorkoutParts = async (): Promise<
+  ActionResult<WorkoutPartDTO[]>
+> => {
   try {
     const res = await authorizedFetch("/api/v1/workouts/parts");
 

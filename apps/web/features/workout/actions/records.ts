@@ -9,13 +9,18 @@ import { convertResponseToFormDTO } from "@/types/workout";
 /**
  * ワークアウトレコードを取得
  */
-export const getWorkoutRecords = async (params?: { date?: string; partId?: number }): Promise<ActionResult<WorkoutFormDTO>> => {
+export const getWorkoutRecords = async (params?: {
+  date?: string;
+  partId?: number;
+}): Promise<ActionResult<WorkoutFormDTO>> => {
   try {
     const searchParams = new URLSearchParams();
     if (params?.date) searchParams.set("date", params.date);
     if (params?.partId) searchParams.set("part_id", String(params.partId));
 
-    const queryString = searchParams.toString() ? `?${searchParams.toString()}` : "";
+    const queryString = searchParams.toString()
+      ? `?${searchParams.toString()}`
+      : "";
 
     const res = await authorizedFetch(`/api/v1/workouts/records${queryString}`);
 
@@ -37,7 +42,9 @@ export const getWorkoutRecords = async (params?: { date?: string; partId?: numbe
 /**
  * ワークアウトレコードを新規作成
  */
-export const createWorkoutRecord = async (body: WorkoutFormDTO): Promise<ActionResult> => {
+export const createWorkoutRecord = async (
+  body: WorkoutFormDTO,
+): Promise<ActionResult> => {
   try {
     const res = await authorizedFetch("/api/v1/workouts/records", {
       method: "POST",
@@ -63,7 +70,10 @@ export const createWorkoutRecord = async (body: WorkoutFormDTO): Promise<ActionR
 /**
  * ワークアウトレコードを更新
  */
-export const updateWorkoutRecord = async (id: string, body: WorkoutFormDTO): Promise<ActionResult> => {
+export const updateWorkoutRecord = async (
+  id: string,
+  body: WorkoutFormDTO,
+): Promise<ActionResult> => {
   try {
     const res = await authorizedFetch(`/api/v1/workouts/records/${id}`, {
       method: "PUT",

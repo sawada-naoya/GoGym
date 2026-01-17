@@ -20,7 +20,10 @@ const validateApiConfig = () => {
  * @param options - fetch options
  * @throws {Error} トークンがない、またはAPI_BASEが未設定の場合
  */
-export const authorizedFetch = async (url: string, options?: RequestInit): Promise<Response> => {
+export const authorizedFetch = async (
+  url: string,
+  options?: RequestInit,
+): Promise<Response> => {
   const token = await getServerAccessToken();
   if (!token) {
     throw new Error("Unauthorized: No access token available");
@@ -47,7 +50,10 @@ export const authorizedFetch = async (url: string, options?: RequestInit): Promi
  * @param options - fetch options
  * @throws {Error} API_BASEが未設定の場合
  */
-export const apiFetch = async (url: string, options?: RequestInit): Promise<Response> => {
+export const apiFetch = async (
+  url: string,
+  options?: RequestInit,
+): Promise<Response> => {
   const apiBase = validateApiConfig();
 
   return fetch(`${apiBase}${url}`, {

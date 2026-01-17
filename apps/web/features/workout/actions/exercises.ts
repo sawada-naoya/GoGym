@@ -8,9 +8,13 @@ import type { ExerciseDTO } from "@/types/workout";
 /**
  * 特定の種目の前回記録を取得
  */
-export const getLastExerciseRecord = async (exerciseId: number): Promise<ActionResult<ExerciseDTO>> => {
+export const getLastExerciseRecord = async (
+  exerciseId: number,
+): Promise<ActionResult<ExerciseDTO>> => {
   try {
-    const res = await authorizedFetch(`/api/v1/workouts/exercises/${exerciseId}/last`);
+    const res = await authorizedFetch(
+      `/api/v1/workouts/exercises/${exerciseId}/last`,
+    );
 
     if (!res.ok || res.status === 204) {
       return { success: false, error: "No previous record found" };
@@ -61,7 +65,9 @@ export const upsertWorkoutExercises = async (body: {
 /**
  * ワークアウト種目を削除
  */
-export const deleteWorkoutExercise = async (id: number): Promise<ActionResult> => {
+export const deleteWorkoutExercise = async (
+  id: number,
+): Promise<ActionResult> => {
   try {
     const res = await authorizedFetch(`/api/v1/workouts/exercises/${id}`, {
       method: "DELETE",

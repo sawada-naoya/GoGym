@@ -1,10 +1,11 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useForm, FormProvider, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useBanner } from "@/components/Banner";
-import { WorkoutFormDTO, WorkoutPartDTO, ExerciseDTO } from "@/types/workout";
+import { ExerciseDTO, WorkoutFormDTO, WorkoutPartDTO } from "@/types/workout";
 import { transformFormDataForSubmit } from "@/features/workout/lib/utils";
+import { useWorkoutForm } from "@/features/workout/hooks/useWorkoutForm"; // 🆕
+import { useEffect, useState } from "react";
+import { FormProvider, useWatch } from "react-hook-form";
 import {
   getLastExerciseRecord,
   createWorkoutRecord,
@@ -45,9 +46,34 @@ const WorkoutContent = ({
     initialPartId,
   );
 
-  const form = useForm<WorkoutFormDTO>({
+  const { form, handleSubmit, isSubmitting } = useWorkoutForm({
     defaultValues,
-    mode: "onBlur",
+    onSubmit: async (data) => {
+      const body = transformFormDataForSubmit(
+        data,
+        selectedYear,
+        selectedMonth,
+        selectedDay,
+      ) as WorkoutFormDTO;
+
+      try {
+        if (data.id) {
+          const result = await updateWorkoutRecord(String(data.id), body);
+          if (!result.success) {
+            return error(t("workout.exercises.errorUpdateFailed"));
+          }
+          success(t("workout.exercises.successUpdate"));
+        } else {
+          const result = await createWorkoutRecord(body);
+          if (!result.success) {
+            return error(t("workout.exercises.errorSaveFailed"));
+          }
+          success(t("workout.exercises.successSave"));
+        }
+      } catch {
+        error(t("workout.exercises.errorNetworkError"));
+      }
+    },
   });
 
   const allExercises = useWatch({ control: form.control, name: "exercises" });
@@ -89,44 +115,6 @@ const WorkoutContent = ({
     const newPartId = defaultValues.exercises?.[0]?.workout_part_id ?? null;
     setSelectedPartId(newPartId);
   }, [defaultValues]);
-
-  const handleSubmit = async (data: WorkoutFormDTO) => {
-    const body = transformFormDataForSubmit(
-      data,
-      selectedYear,
-      selectedMonth,
-      selectedDay,
-    ) as WorkoutFormDTO;
-
-    try {
-      // data.idの存在だけで新規作成/更新を判定
-      if (data.id) {
-        const result = await updateWorkoutRecord(String(data.id), body);
-        if (!result.success) {
-          return error(t("workout.exercises.errorUpdateFailed"));
-        }
-        success(t("workout.exercises.successUpdate"));
-      } else {
-        const result = await createWorkoutRecord(body);
-        if (!result.success) {
-          return error(t("workout.exercises.errorSaveFailed"));
-        }
-        success(t("workout.exercises.successSave"));
-      }
-
-      // 成功したら手動でリフェッチ
-      const dateStr = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}-${String(selectedDay).padStart(2, "0")}`;
-      const refreshResult = await getWorkoutRecords({ date: dateStr });
-      if (refreshResult.success && refreshResult.data) {
-        form.reset(refreshResult.data);
-        const newPartId =
-          refreshResult.data.exercises?.[0]?.workout_part_id ?? null;
-        setSelectedPartId(newPartId);
-      }
-    } catch {
-      error(t("workout.exercises.errorNetworkError"));
-    }
-  };
 
   const refetchWorkoutParts = async () => {
     try {
@@ -200,6 +188,11 @@ const WorkoutContent = ({
           />
         </div>
       </div>
+      <button onClick={handleSubmit} disabled={isSubmitting}>
+        {isUpdate
+          ? t("workout.exercises.updateButton")
+          : t("workout.exercises.registerButton")}
+      </button>
     </FormProvider>
   );
 };
