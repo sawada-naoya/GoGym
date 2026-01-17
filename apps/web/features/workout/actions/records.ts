@@ -44,7 +44,11 @@ export const getWorkoutRecords = async (params?: {
     }
 
     const response: WorkoutRecordResponseDTO = await res.json();
+    console.log("=== API Response ===");
+    console.log(JSON.stringify(response, null, 2));
     const data = convertResponseToFormDTO(response);
+    console.log("=== Converted Form Data ===");
+    console.log(JSON.stringify(data, null, 2));
     return { success: true, data };
   } catch (error) {
     return {

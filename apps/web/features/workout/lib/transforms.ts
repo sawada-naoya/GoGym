@@ -33,7 +33,8 @@ export const toISO = (
 
 /**
  * フォームデータを送信用に変換
- * 空のセット（weight_kg と reps が両方とも空）は除外
+ * - 空のセット（weight_kg と reps が両方とも空）は除外
+ * - 空の種目（name が空 または sets が空）は除外
  *
  * @returns 送信用に変換されたデータ（weight_kg/repsはnumberまたはnull）
  */
@@ -48,20 +49,22 @@ export const transformFormDataForSubmit = (
   started_at: data.started_at || null,
   ended_at: data.ended_at || null,
   gym_name: data.gym_name?.trim() || null,
-  exercises: data.exercises.map((ex) => ({
-    ...ex,
-    sets: ex.sets
-      .map((s) => ({
-        ...s,
-        id: null, // 新規作成時はIDをnullにする（upsert時にバックエンドで処理）
-        weight_kg:
-          s.weight_kg === "" || s.weight_kg === null
-            ? null
-            : Number(s.weight_kg),
-        reps: s.reps === "" || s.reps === null ? null : Number(s.reps),
-      }))
-      .filter((s) => s.weight_kg !== null || s.reps !== null),
-  })),
+  exercises: data.exercises
+    .map((ex) => ({
+      ...ex,
+      sets: ex.sets
+        .map((s) => ({
+          ...s,
+          id: null, // 新規作成時はIDをnullにする（upsert時にバックエンドで処理）
+          weight_kg:
+            s.weight_kg === "" || s.weight_kg === null
+              ? null
+              : Number(s.weight_kg),
+          reps: s.reps === "" || s.reps === null ? null : Number(s.reps),
+        }))
+        .filter((s) => s.weight_kg !== null || s.reps !== null),
+    }))
+    .filter((ex) => ex.name.trim() !== "" && ex.sets.length > 0),
 });
 
 /**
