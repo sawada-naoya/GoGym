@@ -35,7 +35,7 @@ export const useWorkoutForm = ({
   // defaultValuesが変わったらフォームをリセット（1箇所のみ）
   useEffect(() => {
     form.reset(defaultValues);
-  }, [defaultValues, form]);
+  }, [defaultValues]); // form は安定した参照なので依存配列から除外
 
   const handleSubmit = async () => {
     await form.handleSubmit(onSubmit)();

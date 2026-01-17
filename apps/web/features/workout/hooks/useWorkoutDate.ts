@@ -41,28 +41,28 @@ export const useWorkoutDate = () => {
 
       router.push(`/workout?date=${newDateStr}`, { scroll: false });
     },
-    [router, dateStr]
+    [router, dateStr],
   );
 
   const setYear = useCallback(
     (newYear: number) => {
       setDate(newYear, month, day);
     },
-    [setDate, month, day]
+    [setDate, month, day],
   );
 
   const setMonth = useCallback(
     (newMonth: number) => {
       setDate(year, newMonth, day);
     },
-    [setDate, year, day]
+    [setDate, year, day],
   );
 
   const setDay = useCallback(
     (newDay: number) => {
       setDate(year, month, newDay);
     },
-    [setDate, year, month]
+    [setDate, year, month],
   );
 
   return {

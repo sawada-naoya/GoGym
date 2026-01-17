@@ -6,6 +6,21 @@ import type { ActionResult } from "@/lib/api/types";
 import type { WorkoutFormDTO, WorkoutRecordResponseDTO } from "@/types/workout";
 import { convertResponseToFormDTO } from "@/features/workout/lib/transforms";
 
+type WorkoutSubmitDTO = Omit<WorkoutFormDTO, "exercises"> & {
+  exercises: Array<{
+    id?: number | null;
+    name: string;
+    workout_part_id: number | null;
+    sets: Array<{
+      id?: number | null;
+      set_number: number;
+      weight_kg: number | null;
+      reps: number | null;
+      note: string | null;
+    }>;
+  }>;
+};
+
 /**
  * ワークアウトレコードを取得
  */
@@ -43,7 +58,7 @@ export const getWorkoutRecords = async (params?: {
  * ワークアウトレコードを新規作成
  */
 export const createWorkoutRecord = async (
-  body: WorkoutFormDTO,
+  body: WorkoutSubmitDTO,
 ): Promise<ActionResult> => {
   try {
     const res = await authorizedFetch("/api/v1/workouts/records", {
@@ -72,7 +87,7 @@ export const createWorkoutRecord = async (
  */
 export const updateWorkoutRecord = async (
   id: string,
-  body: WorkoutFormDTO,
+  body: WorkoutSubmitDTO,
 ): Promise<ActionResult> => {
   try {
     const res = await authorizedFetch(`/api/v1/workouts/records/${id}`, {

@@ -1,7 +1,14 @@
 import WorkoutContent from "./content";
-import { type WorkoutFormDTO, type WorkoutPartDTO, type WorkoutRecordResponseDTO } from "@/types/workout";
+import {
+  type WorkoutFormDTO,
+  type WorkoutPartDTO,
+  type WorkoutRecordResponseDTO,
+} from "@/types/workout";
 import { getServerAccessToken } from "@/features/auth/server";
-import { convertResponseToFormDTO, buildEmptyDTO } from "@/features/workout/lib/transforms";
+import {
+  convertResponseToFormDTO,
+  buildEmptyDTO,
+} from "@/features/workout/lib/transforms";
 
 export const dynamic = "force-dynamic";
 
@@ -54,7 +61,13 @@ const Page = async ({ searchParams }: Props) => {
 
   const parts: WorkoutPartDTO[] = partsRes.ok ? await partsRes.json() : [];
 
-  return <WorkoutContent defaultValues={dto} availableParts={parts} isUpdate={!!dto.id} />;
+  return (
+    <WorkoutContent
+      defaultValues={dto}
+      availableParts={parts}
+      isUpdate={!!dto.id}
+    />
+  );
 };
 
 export default Page;
