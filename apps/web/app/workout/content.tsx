@@ -6,55 +6,33 @@ import { transformFormDataForSubmit } from "@/features/workout/lib/transforms"; 
 import { useWorkoutForm } from "@/features/workout/hooks/useWorkoutForm"; // 🆕
 import { useEffect, useState } from "react";
 import { FormProvider, useWatch } from "react-hook-form";
-import {
-  getLastExerciseRecord,
-  createWorkoutRecord,
-  updateWorkoutRecord,
-  getWorkoutRecords,
-} from "@/features/workout/actions";
+import { getLastExerciseRecord, createWorkoutRecord, updateWorkoutRecord, getWorkoutRecords } from "@/features/workout/actions";
 import WorkoutMetadataEditor from "@/features/workout/components/WorkoutMetadataEditor";
 import WorkoutExercisesEditor from "@/features/workout/components/WorkoutExercisesEditor";
+import { useWorkoutDate } from "@/features/workout/hooks/useWorkoutDate";
 
 type Props = {
-  Year: number;
-  Month: number;
-  Day: number;
   defaultValues: WorkoutFormDTO;
   availableParts: WorkoutPartDTO[];
   isUpdate: boolean;
 };
 
-const WorkoutContent = ({
-  Year,
-  Month,
-  Day,
-  defaultValues,
-  availableParts: initialParts,
-  isUpdate,
-}: Props) => {
+const WorkoutContent = ({ defaultValues, availableParts: initialParts, isUpdate }: Props) => {
   const { t } = useTranslation("common");
   const { success, error } = useBanner();
-  const [selectedDay, setSelectedDay] = useState(Day);
-  const [selectedYear, setSelectedYear] = useState(Year);
-  const [selectedMonth, setSelectedMonth] = useState(Month);
-  const [availableParts, setAvailableParts] =
-    useState<WorkoutPartDTO[]>(initialParts);
+
+  const { year, month, day, setYear, setMonth, setDay } = useWorkoutDate();
+
+  const [availableParts, setAvailableParts] = useState<WorkoutPartDTO[]>(initialParts);
 
   // 既存データがある場合、最初のexerciseの部位を初期選択
   const initialPartId = defaultValues.exercises?.[0]?.workout_part_id ?? null;
-  const [selectedPartId, setSelectedPartId] = useState<number | null>(
-    initialPartId,
-  );
+  const [selectedPartId, setSelectedPartId] = useState<number | null>(initialPartId);
 
   const { form, handleSubmit, isSubmitting } = useWorkoutForm({
     defaultValues,
     onSubmit: async (data) => {
-      const body = transformFormDataForSubmit(
-        data,
-        selectedYear,
-        selectedMonth,
-        selectedDay,
-      ) as WorkoutFormDTO;
+      const body = transformFormDataForSubmit(data, year, month, day) as WorkoutFormDTO;
 
       try {
         if (data.id) {
@@ -78,17 +56,10 @@ const WorkoutContent = ({
 
   const allExercises = useWatch({ control: form.control, name: "exercises" });
 
-  // Props の Year, Month, Day が変わったら state を同期
-  useEffect(() => {
-    setSelectedYear(Year);
-    setSelectedMonth(Month);
-    setSelectedDay(Day);
-  }, [Year, Month, Day]);
-
   // 選択された日付が変わったら、その日のデータをリフェッチしてフォームをリセット
   useEffect(() => {
     const fetchRecordsForDate = async () => {
-      const dateStr = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}-${String(selectedDay).padStart(2, "0")}`;
+      const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
       // 元のdefaultValuesの日付と違う場合のみフェッチ
       if (dateStr !== defaultValues.performed_date) {
@@ -96,8 +67,7 @@ const WorkoutContent = ({
           const result = await getWorkoutRecords({ date: dateStr });
           if (result.success && result.data) {
             form.reset(result.data);
-            const newPartId =
-              result.data.exercises?.[0]?.workout_part_id ?? null;
+            const newPartId = result.data.exercises?.[0]?.workout_part_id ?? null;
             setSelectedPartId(newPartId);
           }
         } catch (err) {
@@ -107,7 +77,7 @@ const WorkoutContent = ({
     };
 
     fetchRecordsForDate();
-  }, [selectedYear, selectedMonth, selectedDay]);
+  }, [year, month, day]);
 
   useEffect(() => {
     form.reset(defaultValues);
@@ -128,7 +98,7 @@ const WorkoutContent = ({
     }
 
     // ワークアウトレコードも再取得して最新の状態に同期
-    const dateStr = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}-${String(selectedDay).padStart(2, "0")}`;
+    const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
     const result = await getWorkoutRecords({ date: dateStr });
     if (result.success && result.data) {
       form.reset(result.data);
@@ -137,9 +107,7 @@ const WorkoutContent = ({
     }
   };
 
-  const fetchLastExerciseRecord = async (
-    exerciseID: number,
-  ): Promise<ExerciseDTO | null> => {
+  const fetchLastExerciseRecord = async (exerciseID: number): Promise<ExerciseDTO | null> => {
     if (!exerciseID) {
       return null;
     }
@@ -161,37 +129,25 @@ const WorkoutContent = ({
           </div>
 
           {/* メタデータエディター（日付・時間・場所・コンディション） */}
-          <WorkoutMetadataEditor
-            form={form}
-            selectedYear={selectedYear}
-            selectedMonth={selectedMonth}
-            selectedDay={selectedDay}
-            onYearChange={setSelectedYear}
-            onMonthChange={setSelectedMonth}
-            onDayChange={setSelectedDay}
-          />
+          <WorkoutMetadataEditor/>
 
           {/* 種目エディター（部位選択・種目・セット） */}
           <WorkoutExercisesEditor
             allExercises={allExercises ?? defaultValues.exercises}
-            onChangeExercises={(next) =>
-              form.setValue("exercises", next, { shouldDirty: true })
-            }
+            onChangeExercises={(next) => form.setValue("exercises", next, { shouldDirty: true })}
             workoutParts={availableParts}
             selectedPartId={selectedPartId}
             onPartChange={setSelectedPartId}
             isUpdate={isUpdate}
             onSubmit={form.handleSubmit(handleSubmit)}
             onRefetchParts={refetchWorkoutParts}
-            dataKey={`${selectedYear}-${selectedMonth}-${selectedDay}`}
+            dataKey={`${year}-${month}-${day}`}
             onFetchLastRecord={fetchLastExerciseRecord}
           />
         </div>
       </div>
       <button onClick={handleSubmit} disabled={isSubmitting}>
-        {isUpdate
-          ? t("workout.exercises.updateButton")
-          : t("workout.exercises.registerButton")}
+        {isUpdate ? t("workout.exercises.updateButton") : t("workout.exercises.registerButton")}
       </button>
     </FormProvider>
   );
