@@ -1,33 +1,16 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { UseFormReturn } from "react-hook-form";
 import MonthlyStrip from "./MonthlyStrip";
 import { WorkoutFormDTO, GymDTO } from "@/types/workout";
-import { formatDate, validateDay } from "@/utils/time";
+import { useFormContext } from "react-hook-form";
+import { useWorkoutDate } from "@/features/workout/hooks/useWorkoutDate";
 
-type Props = {
-  form: UseFormReturn<WorkoutFormDTO>;
-  selectedYear: number;
-  selectedMonth: number;
-  selectedDay: number;
-  onYearChange: (year: number) => void;
-  onMonthChange: (month: number) => void;
-  onDayChange: (day: number) => void;
-};
-
-const WorkoutMetadataEditor = ({
-  form,
-  selectedYear,
-  selectedMonth,
-  selectedDay,
-  onYearChange,
-  onMonthChange,
-  onDayChange,
-}: Props) => {
+const WorkoutMetadataEditor = () => {
   const { t } = useTranslation("common");
-  const router = useRouter();
+  const form = useFormContext<WorkoutFormDTO>();
+  const { year, month, day, setYear, setMonth, setDay } = useWorkoutDate();
+
   const [isMetadataOpen, setIsMetadataOpen] = useState(false);
   const [gyms, setGyms] = useState<GymDTO[]>([]);
   const [gymInputValue, setGymInputValue] = useState("");
@@ -70,16 +53,8 @@ const WorkoutMetadataEditor = ({
     }
   }, [gymInputValue, gyms]);
 
-  const handleYearMonthChange = (year: number, month: number) => {
-    const validDay = validateDay(year, month, selectedDay);
-    const formattedDate = formatDate(year, month, validDay);
-    router.push(`/workout?date=${formattedDate}`);
-  };
-
   const handleDayChange = (day: number) => {
-    onDayChange(day);
-    const formattedDate = formatDate(selectedYear, selectedMonth, day);
-    router.push(`/workout?date=${formattedDate}`);
+    setDay(day);
   };
 
   return (
@@ -87,11 +62,9 @@ const WorkoutMetadataEditor = ({
       {/* 年月選択 */}
       <div className="flex items-center justify-center gap-2 md:gap-4 mb-3 md:mb-6">
         <select
-          value={selectedYear}
+          value={year}
           onChange={(e) => {
-            const year = Number(e.target.value);
-            onYearChange(year);
-            handleYearMonthChange(year, selectedMonth);
+            setYear(Number(e.target.value));
           }}
           className="w-20 md:w-28 text-center border border-gray-300 rounded-md px-2 md:px-3 py-1.5 md:py-2 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-booking-500 bg-white"
         >
@@ -109,11 +82,9 @@ const WorkoutMetadataEditor = ({
         </span>
 
         <select
-          value={selectedMonth}
+          value={month}
           onChange={(e) => {
-            const month = Number(e.target.value);
-            onMonthChange(month);
-            handleYearMonthChange(selectedYear, month);
+            setMonth(Number(e.target.value));
           }}
           className="w-16 md:w-20 text-center border border-gray-300 rounded-md px-2 md:px-3 py-1.5 md:py-2 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-booking-500 bg-white"
         >
@@ -133,9 +104,9 @@ const WorkoutMetadataEditor = ({
 
       {/* 日付選択 */}
       <MonthlyStrip
-        year={selectedYear}
-        month={selectedMonth}
-        selectedDay={selectedDay}
+        year={year}
+        month={month}
+        selectedDay={day}
         onSelectDay={handleDayChange}
       />
 

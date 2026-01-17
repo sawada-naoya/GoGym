@@ -1,26 +1,14 @@
 "use server";
 
+import { apiFetch } from "@/lib/api/client";
+import type { ActionResult } from "@/lib/api/types";
 import type { SignUpPayload } from "./schemas";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL;
-
-type ActionResult<T = void> =
-  | { success: true; data?: T }
-  | { success: false; error: string };
 
 export const signup = async (payload: SignUpPayload): Promise<ActionResult> => {
   try {
-    if (!API_BASE) {
-      return { success: false, error: "API base URL not configured" };
-    }
-
-    const res = await fetch(`${API_BASE}/api/v1/users`, {
+    const res = await apiFetch("/api/v1/users", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(payload),
-      cache: "no-store",
     });
 
     if (!res.ok) {
