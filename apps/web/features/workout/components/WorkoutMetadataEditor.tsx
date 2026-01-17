@@ -1,10 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import MonthlyStrip from "./MonthlyStrip";
 import { WorkoutFormDTO, GymDTO } from "@/types/workout";
-import { formatDate } from "@/utils/time";
 import { useFormContext } from "react-hook-form";
 import { useWorkoutDate } from "@/features/workout/hooks/useWorkoutDate";
 
@@ -13,7 +11,6 @@ const WorkoutMetadataEditor = () => {
   const form = useFormContext<WorkoutFormDTO>();
   const { year, month, day, setYear, setMonth, setDay } = useWorkoutDate();
 
-  const router = useRouter();
   const [isMetadataOpen, setIsMetadataOpen] = useState(false);
   const [gyms, setGyms] = useState<GymDTO[]>([]);
   const [gymInputValue, setGymInputValue] = useState("");
@@ -58,8 +55,6 @@ const WorkoutMetadataEditor = () => {
 
   const handleDayChange = (day: number) => {
     setDay(day);
-    const formattedDate = formatDate(year, month, day);
-    router.push(`/workout?date=${formattedDate}`);
   };
 
   return (

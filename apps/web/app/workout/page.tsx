@@ -1,18 +1,13 @@
-import WorkoutContent from "./content";
+import WorkoutContainer from "./_containers/WorkoutContainer";
+import type { WorkoutFormDTO, WorkoutPartDTO } from "@/types/workout";
 import {
-  type WorkoutFormDTO,
-  type WorkoutPartDTO,
-  type WorkoutRecordResponseDTO,
-} from "@/types/workout";
-import { getServerAccessToken } from "@/features/auth/server";
-import {
-  convertResponseToFormDTO,
-  buildEmptyDTO,
-} from "@/features/workout/lib/transforms";
+  seedWorkoutParts,
+  getWorkoutRecords,
+  getWorkoutParts,
+} from "@/features/workout/actions";
+import { buildEmptyDTO } from "@/features/workout/lib/transforms";
 
 export const dynamic = "force-dynamic";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL;
 
 type Props = {
   params: { user_id: string };
@@ -21,53 +16,24 @@ type Props = {
 
 const Page = async ({ searchParams }: Props) => {
   const sp = await searchParams;
-  const token = await getServerAccessToken();
-
-  if (!token || !API_BASE) {
-    return <div>認証エラー</div>;
-  }
 
   // 部位データをシード（初回のみ作成、idempotent）
-  await fetch(`${API_BASE}/api/v1/workouts/seed`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
-    cache: "no-store",
-  });
+  await seedWorkoutParts();
 
   // SSRで並列取得
-  const query = new URLSearchParams();
-  if (sp?.date) query.set("date", sp.date);
-  const queryString = query.toString() ? `?${query.toString()}` : "";
-
-  const [recordsRes, partsRes] = await Promise.all([
-    fetch(`${API_BASE}/api/v1/workouts/records${queryString}`, {
-      headers: { Authorization: `Bearer ${token}` },
-      cache: "no-store",
-    }),
-    fetch(`${API_BASE}/api/v1/workouts/parts`, {
-      headers: { Authorization: `Bearer ${token}` },
-      cache: "no-store",
-    }),
+  const dateStr = sp?.date;
+  const [recordsResult, partsResult] = await Promise.all([
+    getWorkoutRecords(dateStr ? { date: dateStr } : undefined),
+    getWorkoutParts(),
   ]);
+  const dto: WorkoutFormDTO =
+    recordsResult.success && recordsResult.data
+      ? recordsResult.data
+      : buildEmptyDTO();
+  const parts: WorkoutPartDTO[] =
+    partsResult.success && partsResult.data ? partsResult.data : [];
 
-  // バックエンドから返ってきたレスポンスを変換
-  let dto: WorkoutFormDTO;
-  if (recordsRes.ok) {
-    const response: WorkoutRecordResponseDTO = await recordsRes.json();
-    dto = convertResponseToFormDTO(response);
-  } else {
-    dto = buildEmptyDTO();
-  }
-
-  const parts: WorkoutPartDTO[] = partsRes.ok ? await partsRes.json() : [];
-
-  return (
-    <WorkoutContent
-      defaultValues={dto}
-      availableParts={parts}
-      isUpdate={!!dto.id}
-    />
-  );
+  return <WorkoutContainer defaultValues={dto} availableParts={parts} />;
 };
 
 export default Page;
