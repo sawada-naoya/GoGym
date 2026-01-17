@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { authorizedFetch } from "@/lib/api/client";
 import type { ActionResult } from "@/lib/api/types";
 import type { WorkoutFormDTO, WorkoutRecordResponseDTO } from "@/types/workout";
-import { convertResponseToFormDTO } from "@/types/workout";
+import { convertResponseToFormDTO } from "@/features/workout/lib/transforms";
 
 /**
  * ワークアウトレコードを取得

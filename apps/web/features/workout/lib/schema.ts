@@ -37,6 +37,7 @@ export const workoutFormSchema = z.object({
 
 // 型チェック: ZodスキーマがWorkoutFormDTOと一致することを保証
 import type { WorkoutFormDTO } from "@/types/workout";
+
 type _Check =
   WorkoutFormDTO extends z.infer<typeof workoutFormSchema>
     ? z.infer<typeof workoutFormSchema> extends WorkoutFormDTO

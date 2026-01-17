@@ -2,7 +2,7 @@
 import { useTranslation } from "react-i18next";
 import { useBanner } from "@/components/Banner";
 import { ExerciseDTO, WorkoutFormDTO, WorkoutPartDTO } from "@/types/workout";
-import { transformFormDataForSubmit } from "@/features/workout/lib/utils";
+import { transformFormDataForSubmit } from "@/features/workout/lib/transforms"; // 🆕
 import { useWorkoutForm } from "@/features/workout/hooks/useWorkoutForm"; // 🆕
 import { useEffect, useState } from "react";
 import { FormProvider, useWatch } from "react-hook-form";
